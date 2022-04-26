@@ -1,2 +1,5 @@
 /build/
 /.gradle/
+/.idea/
+/src/main/resources/README.md
+/src/main/resources/application-dev.yaml

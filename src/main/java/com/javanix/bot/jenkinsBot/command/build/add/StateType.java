@@ -1,8 +1,8 @@
 package com.javanix.bot.jenkinsBot.command.build.add;
 
 
-import com.javanix.bot.jenkinsBot.database.BuildRepository;
-import com.javanix.bot.jenkinsBot.database.DatabaseSource;
+import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
+import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 
 public enum StateType {
     COMPLETED(
@@ -19,27 +19,27 @@ public enum StateType {
             PUBLIC,
             "Please enter Jenkins job name (e.g. 'Insight')",
             (database, value) -> !value.contains(" "),
-            BuildRepository::setJobName),
+            (repo, value) -> repo.getJenkinsInfo().setJobName(value)),
     PASSWORD(
             JOB_NAME,
-            "Please enter Jenkins password. Leave empty value if no credentials required",
+            "Please enter Jenkins password. Enter '!' value if no credentials required",
             (database, value) -> !value.contains(" "),
-            BuildRepository::setJenkinsPassword),
+            (repo, value) -> repo.getJenkinsInfo().setPassword(value)),
     USER(
             PASSWORD,
-            "Please enter Jenkins user (e.g. 'admin'). Leave empty value if no credentials required",
+            "Please enter Jenkins user (e.g. 'admin'). Enter '!' value if no credentials required",
             (database, value) -> !value.contains(" "),
-            BuildRepository::setJenkinsUser),
+            (repo, value) -> repo.getJenkinsInfo().setUser(value)),
     DOMAIN(
             USER,
             "Please enter Jenkins domain name (e.g. 'dev-rim-chf01')",
             (database, value) -> !value.contains(" "),
-            BuildRepository::setJenkinsDomain),
+            (repo, value) -> repo.getJenkinsInfo().setDomain(value)),
     REPO_NAME(
             DOMAIN,
             "Please enter repository name (unique, without spaces)",
-            (database, value) -> !value.contains(" ") && database.getRepositoryByNameIgnoreCase(value) == null,
-            BuildRepository::setRepoName),
+            (database, value) -> !value.contains(" ") && !database.hasRepository(value),
+            BuildInfoDto::setRepoName),
     INITIAL(
             REPO_NAME,
             "",
@@ -66,22 +66,22 @@ public enum StateType {
         return message;
     }
 
-    public boolean isValid(DatabaseSource database, String value) {
+    public boolean isValid(BuildInfoService database, String value) {
         return validator.isValid(database, value);
     }
 
-    public void performUpdate(BuildRepository repo, String value) {
+    public void performUpdate(BuildInfoDto repo, String value) {
         updateAction.updateEntity(repo, value);
     }
 
     @FunctionalInterface
     private interface Validator {
-        boolean isValid(DatabaseSource database, String value);
+        boolean isValid(BuildInfoService database, String value);
     }
 
     @FunctionalInterface
     private interface EntityUpdateAction {
-        void updateEntity(BuildRepository repo, String value);
+        void updateEntity(BuildInfoDto repo, String value);
     }
 
 }

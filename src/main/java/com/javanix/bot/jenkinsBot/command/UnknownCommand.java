@@ -14,6 +14,6 @@ public class UnknownCommand implements TelegramCommand {
 
     @Override
     public String getCommandName() {
-        return "/unknown";
+        return null;
     }
 }

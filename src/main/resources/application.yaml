@@ -1,0 +1,6 @@
+bot:
+  token: ${BOT_TOKEN:foo}
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost/jenkinsbot?authSource=admin

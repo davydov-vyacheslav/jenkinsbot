@@ -1,6 +1,6 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
-import com.javanix.bot.jenkinsBot.database.BuildRepository;
+import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
@@ -14,7 +14,7 @@ public interface BuildSubCommand {
 
     BuildType getBuildType();
 
-    default InlineKeyboardMarkup generateKeyboard(List<BuildRepository> availableRepositories) {
+    default InlineKeyboardMarkup generateKeyboard(List<BuildInfoDto> availableRepositories) {
         InlineKeyboardButton[][] buttons = new InlineKeyboardButton[(int)Math.ceil(availableRepositories.size() / 2.0)][2];
         for (int i = 0; i < availableRepositories.size(); i++) {
             String repoName = availableRepositories.get(i).getRepoName();

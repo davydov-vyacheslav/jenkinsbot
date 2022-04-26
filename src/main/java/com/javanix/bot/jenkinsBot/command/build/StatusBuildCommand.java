@@ -1,8 +1,9 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.cli.CliProcessor;
-import com.javanix.bot.jenkinsBot.database.BuildRepository;
-import com.javanix.bot.jenkinsBot.database.DatabaseSource;
+import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
+import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
+import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
@@ -22,40 +23,42 @@ import java.util.regex.Pattern;
 public class StatusBuildCommand implements BuildSubCommand {
 
     private final CliProcessor cliProcessor;
-    private final DatabaseSource database;
+    private final BuildInfoService database;
     private static final int failedTestsCount = 20;
     private static final Pattern failedTestsPattern = Pattern.compile(".*\\[junit\\] TEST (.*)\\.(.*Test) FAILED");
 
     public void process(TelegramBot bot, Message message, String buildCommandArguments) {
-        BuildRepository repository = database.getRepositoryByNameIgnoreCase(buildCommandArguments.trim().split(" ")[0]);
+        BuildInfoDto repository = database.getAvailableRepository(buildCommandArguments.trim().split(" ")[0], message.from().id());
 
         if (repository == null) {
-            List<BuildRepository> availableRepositories = database.getAvailableRepositories(message.from().id());
+            List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(message.from().id());
             InlineKeyboardMarkup inlineKeyboard = generateKeyboard(availableRepositories);
-            bot.execute(new SendMessage(message.chat().id(), "Wrong team. Browse list of all team in /help").replyMarkup(inlineKeyboard));
+            // TODO: ? buttons instead of  keyboard?
+            bot.execute(new SendMessage(message.chat().id(), "Wrong team. Please choose correct one").replyMarkup(inlineKeyboard));
             return;
         }
 
         log.info("Getting status build for team: " + repository.getRepoName());
+        JenkinsInfoDto jenkinsInfo = repository.getJenkinsInfo();
 
         String statusFormatString = "Build status for %s team:\n" +
                 "Run tests: %d (of approximately %d)\n" +
                 "Top %d Failed tests (of %d): \n" +
                 "%s";
 
-        String failedTestsOutput = cliProcessor.getFailedTests(repository, failedTestsCount);
+        String failedTestsOutput = cliProcessor.getFailedTests(repository.getJenkinsInfo(), failedTestsCount);
         if (failedTestsOutput.trim().isEmpty()) {
             failedTestsOutput = "N/A";
         }
 
-        String failedTestsOutputWithLinks = convertFailedTestsOutputToLinks(failedTestsOutput, repository);
+        String failedTestsOutputWithLinks = convertFailedTestsOutputToLinks(failedTestsOutput, jenkinsInfo);
 
         bot.execute(new SendMessage(message.chat().id(),
                 String.format(statusFormatString, repository.getRepoName(),
-                        cliProcessor.getCurrentRunTestsCount(repository),
-                        cliProcessor.getLastRunTestsCount(repository),
+                        cliProcessor.getCurrentRunTestsCount(jenkinsInfo),
+                        cliProcessor.getLastRunTestsCount(jenkinsInfo),
                         failedTestsCount,
-                        cliProcessor.getFailedTestsCount(repository),
+                        cliProcessor.getFailedTestsCount(jenkinsInfo),
                         failedTestsOutputWithLinks))
                 .parseMode(ParseMode.Markdown));
     }
@@ -64,13 +67,13 @@ public class StatusBuildCommand implements BuildSubCommand {
     // [junit] TEST com.liquent.insight.manager.assembly.test.AssemblyExportTest FAILED
     // to
     // - [%s](http://%s:7331/job/%s/ws/output/reports/TEST-%s.xml/*view*/)
-    private String convertFailedTestsOutputToLinks(String origin, BuildRepository repository) {
+    private String convertFailedTestsOutputToLinks(String origin, JenkinsInfoDto jenkinsInfo) {
         String result = origin;
         Matcher m = failedTestsPattern.matcher(origin);
         if (m.find()) {
             result = m.replaceAll(
                     String.format("- [%s](http://%s:7331/job/%s/ws/output/reports/TEST-%s.xml/*view*/)",
-                            "$2", repository.getJenkinsDomain(), repository.getJobName(), "$1.$2"));
+                            "$2", jenkinsInfo.getDomain(), jenkinsInfo.getJobName(), "$1.$2"));
         }
 
         return result;

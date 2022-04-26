@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.javanix.bot'
-version = '0.0.2-SNAPSHOT'
+version = '0.0.3-SNAPSHOT'
 sourceCompatibility = '8'
 
 repositories {
@@ -15,7 +15,12 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+    implementation 'commons-io:commons-io:2.11.0'
     implementation 'com.github.pengrad:java-telegram-bot-api:5.7.0'
+
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
@@ -23,3 +28,10 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+task copyReadMe(type: Copy, description: "Copy README.md file to resources") {
+    from project.projectDir
+    into 'src/main/resources'
+    include 'README.md'
+}
+
+processResources.dependsOn(copyReadMe)

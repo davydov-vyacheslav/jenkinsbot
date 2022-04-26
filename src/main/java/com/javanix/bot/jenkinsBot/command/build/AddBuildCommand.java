@@ -1,26 +1,28 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
+import com.javanix.bot.jenkinsBot.command.ProgressableCommand;
 import com.javanix.bot.jenkinsBot.command.build.add.RepoAddInformation;
 import com.javanix.bot.jenkinsBot.command.build.add.StateType;
-import com.javanix.bot.jenkinsBot.database.BuildRepository;
-import com.javanix.bot.jenkinsBot.database.DatabaseSource;
+import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
+import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
+import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class AddBuildCommand implements BuildSubCommand {
+public class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
     private final Map<Long, RepoAddInformation> userAddBuildStates = new HashMap<>();
 
-    private final DatabaseSource database;
+    private final BuildInfoService database;
 
     @Override
     public void process(TelegramBot bot, Message message, String buildCommandArguments) {
@@ -28,21 +30,22 @@ public class AddBuildCommand implements BuildSubCommand {
 
         if (!userAddBuildStates.containsKey(currentId)) {
             userAddBuildStates.put(currentId, new RepoAddInformation(StateType.INITIAL,
-                    BuildRepository.builder()
+                    BuildInfoDto.builder()
+                            .jenkinsInfo(JenkinsInfoDto.builder().build())
                             .creatorId(currentId)
                             .creatorFullName(message.from().username())
                         .build()));
-            bot.execute(new SendMessage(message.chat().id(), "Okay. Lets create new repository. Note: Storage - memory. Please follow instructions.")); // TODO: correct when sql storage implemented
+            bot.execute(new SendMessage(message.chat().id(), "Okay. Lets create new repository. Please follow instructions."));
         }
 
 
-        if (buildCommandArguments.equalsIgnoreCase("/cancel")) {
-            bot.execute(new SendMessage(message.chat().id(), "Ok. you cancelled. Buy"));
+        if (buildCommandArguments.equalsIgnoreCase("!cancel")) {
+            bot.execute(new SendMessage(message.chat().id(), "Ok. you cancelled. Bye"));
             userAddBuildStates.remove(currentId);
             return;
         }
 
-        BuildRepository repo = userAddBuildStates.get(currentId).getRepo();
+        BuildInfoDto repo = userAddBuildStates.get(currentId).getRepo();
         StateType currentState = userAddBuildStates.get(currentId).getState();
         StateType nextState = currentState.getNextState();
 
@@ -56,31 +59,38 @@ public class AddBuildCommand implements BuildSubCommand {
 
         SendMessage sendMessage = new SendMessage(message.chat().id(), "Current repository info:" +
                 "\n- repoName: " + repo.getRepoName() +
-                "\n- jenkinsDomain: " + repo.getJenkinsDomain() +
-                "\n- jenkinsUser: " + repo.getJenkinsUser() +
-                "\n- jenkinsPassword: " + repo.getJenkinsPassword() +
-                "\n- jobName: " + repo.getJobName() +
+                "\n- jenkinsDomain: " + repo.getJenkinsInfo().getDomain() +
+                "\n- jenkinsUser: " + repo.getJenkinsInfo().getUser() +
+                "\n- jenkinsPassword: " + repo.getJenkinsInfo().getPassword() +
+                "\n- jobName: " + repo.getJenkinsInfo().getJobName() +
                 "\n- isPublic: " + repo.getIsPublic());
 
 
         if (userAddBuildStates.get(currentId).getState() == StateType.COMPLETED) {
             database.addRepository(repo);
             userAddBuildStates.remove(currentId);
-            bot.execute(new SendMessage(message.chat().id(), String.format("Use `/build status %s` to get build status", repo.getRepoName())));
+
+            // TODO: ? buttons instead keyboard?
+            List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(message.from().id());
+            InlineKeyboardMarkup inlineKeyboard = generateKeyboard(availableRepositories);
+            bot.execute(new SendMessage(message.chat().id(), "Select build to get build status").replyMarkup(inlineKeyboard));
+
         } else {
-
-            bot.execute(new SendMessage(message.chat().id(), "P.S. Press cancel button to cancel creation any time"));
-
-            // TODO: do we need this?
-            InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(
-                    new InlineKeyboardButton("Continue").switchInlineQueryCurrentChat("/build add "),
-                    new InlineKeyboardButton("Cancel").switchInlineQueryCurrentChat("/build add /cancel")
-            );
-            sendMessage = sendMessage.replyMarkup(inlineKeyboard);
+            bot.execute(new SendMessage(message.chat().id(), "P.S. Press `!cancel` to cancel creation any time"));
         }
 
         bot.execute(sendMessage);
 
+    }
+
+    @Override
+    public boolean isInProgress(Long userId) {
+        return userAddBuildStates.containsKey(userId);
+    }
+
+    @Override
+    public void process(TelegramBot bot, Message message) {
+        process(bot, message, message.text());
     }
 
     public BuildType getBuildType() {

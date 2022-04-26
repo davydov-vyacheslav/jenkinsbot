@@ -10,15 +10,23 @@ import java.util.Set;
 public class CommandFactory {
 
     private final Set<TelegramCommand> commands;
-    private final UnknownCommand defaultCommand;
+    private final UnknownCommand unknownCommand;
+    private final UnhandledTextCommand unhandledTextCommand;
 
     public TelegramCommand getCommand(String name) {
-        return commands.stream().filter(command ->
-                name.contains(command.getCommandName())).findAny().orElse(defaultCommand);
+        return commands.stream()
+                .filter(command -> command.getCommandName() != null)
+                // not starts with because it can be like `@jenkins_test1_bot /build STATUS`
+                .filter(command -> name.contains(command.getCommandName()))
+                .findAny().orElseGet(() -> {
+                    if (name.startsWith("/")) {
+                        return unknownCommand;
+                    } else {
+                        return unhandledTextCommand;
+                    }
+                });
     }
 
     // TODO: support emoji aliases
-
-    // TODO: bypass this chain when AddBuildCommand in progress
 
 }

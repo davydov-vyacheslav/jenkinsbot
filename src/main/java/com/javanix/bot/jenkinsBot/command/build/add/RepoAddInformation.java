@@ -1,6 +1,6 @@
 package com.javanix.bot.jenkinsBot.command.build.add;
 
-import com.javanix.bot.jenkinsBot.database.BuildRepository;
+import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RepoAddInformation {
     private StateType state;
-    private BuildRepository repo;
+    private BuildInfoDto repo;
 }

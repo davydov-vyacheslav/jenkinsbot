@@ -33,7 +33,11 @@ public class Main implements CommandLineRunner {
                 Message message = update.message();
                 if (message != null) {
                     try {
-                        commandFactory.getCommand(message.text()).process(bot, message);
+                        String text = message.text();
+                        if (text == null) {
+                            text = "";
+                        }
+                        commandFactory.getCommand(text).process(bot, message);
                     } catch (Exception e) {
                         bot.execute(new SendMessage(message.chat().id(), e.getMessage()));
                         e.printStackTrace();

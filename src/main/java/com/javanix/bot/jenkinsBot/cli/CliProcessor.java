@@ -1,6 +1,6 @@
 package com.javanix.bot.jenkinsBot.cli;
 
-import com.javanix.bot.jenkinsBot.database.BuildRepository;
+import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -25,25 +25,25 @@ public class CliProcessor {
     private final String failedTestsCountUrlTemplate = failedTestsUrlTemplate + " | wc -l";
     private final String runTestsUrlTemplate = baseUrlTemplate + "/%s/consoleText | grep \"Tests run\" | wc -l";
 
-    public Integer getFailedTestsCount(BuildRepository team) {
+    public Integer getFailedTestsCount(JenkinsInfoDto jenkins) {
         return Integer.valueOf(executeCommand(String.format(failedTestsCountUrlTemplate,
-                team.getJenkinsUser(), team.getJenkinsPassword(), team.getJenkinsDomain(), team.getJobName())));
+                jenkins.getUser(), jenkins.getPassword(), jenkins.getDomain(), jenkins.getJobName())));
     }
 
-    public String getFailedTests(BuildRepository team, int count) {
+    public String getFailedTests(JenkinsInfoDto jenkins, int count) {
         return executeCommand(String.format(failedTestsTopNUrlTemplate,
-                team.getJenkinsUser(), team.getJenkinsPassword(), team.getJenkinsDomain(), team.getJobName(), count));
+                jenkins.getUser(), jenkins.getPassword(), jenkins.getDomain(), jenkins.getJobName(), count));
     }
 
-    public Integer getCurrentRunTestsCount(BuildRepository team) {
+    public Integer getCurrentRunTestsCount(JenkinsInfoDto jenkins) {
         return Integer.valueOf(executeCommand(String.format(runTestsUrlTemplate,
-                team.getJenkinsUser(), team.getJenkinsPassword(), team.getJenkinsDomain(), team.getJobName(),
+                jenkins.getUser(), jenkins.getPassword(), jenkins.getDomain(), jenkins.getJobName(),
                 "lastBuild")));
     }
 
-    public Integer getLastRunTestsCount(BuildRepository team) {
+    public Integer getLastRunTestsCount(JenkinsInfoDto jenkins) {
         return Integer.valueOf(executeCommand(String.format(runTestsUrlTemplate,
-                team.getJenkinsUser(), team.getJenkinsPassword(), team.getJenkinsDomain(), team.getJobName(),
+                jenkins.getUser(), jenkins.getPassword(), jenkins.getDomain(), jenkins.getJobName(),
                 "lastCompletedBuild")));
     }
 
