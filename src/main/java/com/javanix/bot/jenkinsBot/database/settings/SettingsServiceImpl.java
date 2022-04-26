@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class SettingsServiceImpl implements SettingsService {
+class SettingsServiceImpl implements SettingsService {
 
 	private final SettingsRepository repository;
 

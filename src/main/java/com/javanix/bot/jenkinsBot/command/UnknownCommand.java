@@ -6,7 +6,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UnknownCommand implements TelegramCommand {
+class UnknownCommand implements TelegramCommand {
     @Override
     public void process(TelegramBot bot, Message message) {
         bot.execute(new SendMessage(message.chat().id(), "Unknown command. Press /help to see list of all commands"));

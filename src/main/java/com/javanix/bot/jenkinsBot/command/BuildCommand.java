@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class BuildCommand implements TelegramCommand {
+class BuildCommand implements TelegramCommand {
 
     private final BuildCommandFactory buildCommandFactory;
 

@@ -3,7 +3,7 @@ package com.javanix.bot.jenkinsBot.cli;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OsProcessor {
+class OsProcessor {
 
     private static Os os = null;
 

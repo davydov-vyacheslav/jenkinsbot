@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
+class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
     private final Map<Long, RepoAddInformation> userAddBuildStates = new HashMap<>();
 
     private final BuildInfoService database;
@@ -70,7 +70,7 @@ public class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
             database.addRepository(repo);
             userAddBuildStates.remove(currentId);
 
-            // TODO: ? buttons instead keyboard?
+            //  TODO: ? buttons instead keyboard?
             List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(message.from().id());
             InlineKeyboardMarkup inlineKeyboard = generateKeyboard(availableRepositories);
             bot.execute(new SendMessage(message.chat().id(), "Select build to get build status").replyMarkup(inlineKeyboard));

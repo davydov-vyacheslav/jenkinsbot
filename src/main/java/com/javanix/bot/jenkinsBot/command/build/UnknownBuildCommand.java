@@ -8,7 +8,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UnknownBuildCommand implements BuildSubCommand {
+class UnknownBuildCommand implements BuildSubCommand {
     @Override
     public void process(TelegramBot bot, Message message, String buildCommandArguments) {
         InlineKeyboardButton[] buttons = new InlineKeyboardButton[BuildType.values().length];

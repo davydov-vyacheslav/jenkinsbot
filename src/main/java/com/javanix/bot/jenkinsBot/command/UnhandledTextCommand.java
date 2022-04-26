@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class UnhandledTextCommand implements TelegramCommand {
+class UnhandledTextCommand implements TelegramCommand {
 
     private final Set<ProgressableCommand> progressableCommands;
     private final DefaultInProgressCommand defaultInProgressCommand;

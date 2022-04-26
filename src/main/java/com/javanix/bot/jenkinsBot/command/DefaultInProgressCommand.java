@@ -6,7 +6,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DefaultInProgressCommand implements ProgressableCommand {
+class DefaultInProgressCommand implements ProgressableCommand {
 	@Override
 	public boolean isInProgress(Long userId) {
 		return false;

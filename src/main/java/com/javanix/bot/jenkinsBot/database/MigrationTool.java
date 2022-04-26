@@ -16,7 +16,7 @@ import static com.javanix.bot.jenkinsBot.core.service.SettingsService.KEY_DB_VER
 @Component
 @RequiredArgsConstructor
 @Log4j2
-public class MigrationTool {
+final class MigrationTool {
 
 	private final BuildInfoService service;
 	private final SettingsService settingsService;

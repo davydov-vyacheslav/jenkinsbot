@@ -7,7 +7,7 @@ import com.pengrad.telegrambot.request.SetMyCommands;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StartCommand implements TelegramCommand {
+class StartCommand implements TelegramCommand {
 
 	@Override
 	public void process(TelegramBot bot, Message message) {

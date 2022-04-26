@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface BuildInfoRepository extends MongoRepository<BuildInfoEntity, String> {
+interface BuildInfoRepository extends MongoRepository<BuildInfoEntity, String> {
 
 	List<BuildInfoEntity> getByCreatorIdOrIsPublicTrue(@Param("ownerId") Long ownerId);
 

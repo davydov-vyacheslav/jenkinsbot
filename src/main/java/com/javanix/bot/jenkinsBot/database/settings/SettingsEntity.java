@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @AllArgsConstructor
 @Document(collection = "Settings")
-public class SettingsEntity {
+class SettingsEntity {
 
 	@Id
 	private String id;

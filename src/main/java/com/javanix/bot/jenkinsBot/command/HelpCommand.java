@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @Component
-public class HelpCommand implements TelegramCommand {
+class HelpCommand implements TelegramCommand {
 
 	@Override
 	public void process(TelegramBot bot, Message message) {

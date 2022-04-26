@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class BuildInfoServiceImpl implements BuildInfoService {
+class BuildInfoServiceImpl implements BuildInfoService {
 
 	private final BuildInfoRepository repository;
 

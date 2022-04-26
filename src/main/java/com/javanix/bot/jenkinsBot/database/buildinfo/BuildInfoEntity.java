@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Builder
 @Document(collection = "BuildInfo")
-public class BuildInfoEntity {
+class BuildInfoEntity {
 
 	@Id
 	private String id;

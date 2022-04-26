@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 @Component
 @RequiredArgsConstructor
 @Log4j2
-public class StatusBuildCommand implements BuildSubCommand {
+class StatusBuildCommand implements BuildSubCommand {
 
     private final CliProcessor cliProcessor;
     private final BuildInfoService database;
@@ -38,7 +38,7 @@ public class StatusBuildCommand implements BuildSubCommand {
             return;
         }
 
-        log.info("Getting status build for team: " + repository.getRepoName());
+        log.info("Getting status build for team: " + repository.getRepoName()); // TODO: who gets status?
         JenkinsInfoDto jenkinsInfo = repository.getJenkinsInfo();
 
         String statusFormatString = "Build status for %s team:\n" +

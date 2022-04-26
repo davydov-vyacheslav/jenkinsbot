@@ -13,7 +13,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class DeleteBuildCommand implements BuildSubCommand {
+class DeleteBuildCommand implements BuildSubCommand {
 
     private final BuildInfoService database;
 
