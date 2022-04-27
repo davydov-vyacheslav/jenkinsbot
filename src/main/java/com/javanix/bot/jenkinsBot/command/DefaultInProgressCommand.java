@@ -1,7 +1,8 @@
 package com.javanix.bot.jenkinsBot.command;
 
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,7 @@ class DefaultInProgressCommand implements ProgressableCommand {
 	}
 
 	@Override
-	public void process(TelegramBot bot, Message message) {
-		bot.execute(new SendMessage(message.chat().id(), String.format("Okay, what does `%s` mean?", message.text())));
+	public void process(TelegramBot bot, Chat chat, User from, String message) {
+		bot.execute(new SendMessage(chat.id(), String.format("Okay, what does `%s` mean?", message)));
 	}
 }

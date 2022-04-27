@@ -6,7 +6,8 @@ import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
@@ -28,18 +29,17 @@ class StatusBuildCommand implements BuildSubCommand {
     private static final int failedTestsCount = 20;
     private static final Pattern failedTestsPattern = Pattern.compile(".*\\[junit\\] TEST (.*)\\.(.*Test) FAILED");
 
-    public void process(TelegramBot bot, Message message, String buildCommandArguments) {
-        BuildInfoDto repository = database.getAvailableRepository(buildCommandArguments.trim().split(" ")[0], message.from().id());
+    public void process(TelegramBot bot, Chat chat, User from, String buildCommandArguments) {
+        BuildInfoDto repository = database.getAvailableRepository(buildCommandArguments.trim().split(" ")[0], from.id());
 
         if (repository == null) {
-            List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(message.from().id());
+            List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(from.id());
             InlineKeyboardMarkup inlineKeyboard = generateBuildStatusKeyboard(availableRepositories);
-            // TODO: ? buttons instead of  keyboard?
-            bot.execute(new SendMessage(message.chat().id(), "Wrong team. Please choose correct one").replyMarkup(inlineKeyboard));
+            bot.execute(new SendMessage(chat.id(), "Wrong team. Please choose correct one").replyMarkup(inlineKeyboard));
             return;
         }
 
-        log.info(message.from().username() + " is getting status build for team: " + repository.getRepoName());
+        log.info(from.username() + " is getting status build for team: " + repository.getRepoName());
         JenkinsInfoDto jenkinsInfo = repository.getJenkinsInfo();
 
         String statusFormatString = "Build status for `%s` team:\n" +
@@ -55,7 +55,7 @@ class StatusBuildCommand implements BuildSubCommand {
             failedTestsOutputWithLinks = "N/A";
         }
 
-        bot.execute(new SendMessage(message.chat().id(),
+        bot.execute(new SendMessage(chat.id(),
                 String.format(statusFormatString, repository.getRepoName(),
                         currentBuildDetails.getRunTestsCount(),
                         lastBuildDetails.getRunTestsCount(),

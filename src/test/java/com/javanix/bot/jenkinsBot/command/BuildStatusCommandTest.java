@@ -7,7 +7,6 @@ import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
-import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.request.SendMessage;
@@ -22,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static com.javanix.bot.jenkinsBot.command.build.BuildSubCommand.ICON_PRIVATE;
+import static com.javanix.bot.jenkinsBot.command.build.BuildSubCommand.ICON_PUBLIC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,7 +39,7 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 	private TelegramBot bot;
 
 	@MockBean
-	private Message message;
+	private Chat chat;
 
 	@MockBean
 	private BuildInfoService databaseService;
@@ -48,27 +49,28 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 
 	@Test
 	public void status_noParams() {
+		String commandText = "/build status";
+		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
 		Mockito.when(databaseService.getAvailableRepository("", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(null);
 		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Arrays.asList(
 				BuildInfoDto.builder()
 						.repoName("repo1")
+						.isPublic(true)
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.build(),
 				BuildInfoDto.builder()
 						.repoName("repo2")
+						.isPublic(false)
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.build()));
 
-		Mockito.when(message.text()).thenReturn("/build status");
-		Mockito.when(message.chat()).thenReturn(new Chat());
-		Mockito.when(message.from()).thenReturn(new User(BuildInfoService.DEFAULT_CREATOR_ID));
 		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
 			assertEquals("Wrong team. Please choose correct one", getText(invocation));
 
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton("repo1").switchInlineQueryCurrentChat("/build status repo1"),
-					new InlineKeyboardButton("repo2").switchInlineQueryCurrentChat("/build status repo2")
+					new InlineKeyboardButton(ICON_PUBLIC + "repo1").callbackData("/build status repo1"),
+					new InlineKeyboardButton(ICON_PRIVATE + "repo2").callbackData("/build status repo2")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -76,34 +78,36 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 			return null;
 		});
 
-		TelegramCommand command = factory.getCommand(message.text());
+		TelegramCommand command = factory.getCommand(commandText);
 		assertTrue(command instanceof BuildCommand);
-		command.process(bot, message);
+		command.process(bot, chat, from, commandText);
 		Mockito.verify(bot).execute(any(SendMessage.class));
 	}
 
 	@Test
 	public void status_wrongRepo() {
+		String commandText = "/build status xmen";
+		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
+
 		Mockito.when(databaseService.getAvailableRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(null);
 		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Arrays.asList(
 				BuildInfoDto.builder()
 						.repoName("repo1")
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
+						.isPublic(true)
 						.build(),
 				BuildInfoDto.builder()
 						.repoName("repo2")
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
+						.isPublic(false)
 						.build()));
 
-		Mockito.when(message.text()).thenReturn("/build status xmen");
-		Mockito.when(message.chat()).thenReturn(new Chat());
-		Mockito.when(message.from()).thenReturn(new User(BuildInfoService.DEFAULT_CREATOR_ID));
 		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
 			assertEquals("Wrong team. Please choose correct one", getText(invocation));
 
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton("repo1").switchInlineQueryCurrentChat("/build status repo1"),
-					new InlineKeyboardButton("repo2").switchInlineQueryCurrentChat("/build status repo2")
+					new InlineKeyboardButton(ICON_PUBLIC + "repo1").callbackData("/build status repo1"),
+					new InlineKeyboardButton(ICON_PRIVATE + "repo2").callbackData("/build status repo2")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -111,9 +115,9 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 			return null;
 		});
 
-		TelegramCommand command = factory.getCommand(message.text());
+		TelegramCommand command = factory.getCommand(commandText);
 		assertTrue(command instanceof BuildCommand);
-		command.process(bot, message);
+		command.process(bot, chat, from, commandText);
 		Mockito.verify(bot).execute(any(SendMessage.class));
 	}
 
@@ -146,9 +150,9 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 						))
 						.build());
 
-		Mockito.when(message.text()).thenReturn("/build status xmen");
-		Mockito.when(message.chat()).thenReturn(new Chat());
-		Mockito.when(message.from()).thenReturn(new User(BuildInfoService.DEFAULT_CREATOR_ID));
+		String commandText = "/build status xmen";
+		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
+
 		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
 			assertEquals("Build status for `xmen` team:\n" +
 							"Run tests: 500 (of approximately 1000)\n" +
@@ -164,9 +168,9 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 			return null;
 		});
 
-		TelegramCommand command = factory.getCommand(message.text());
+		TelegramCommand command = factory.getCommand(commandText);
 		assertTrue(command instanceof BuildCommand);
-		command.process(bot, message);
+		command.process(bot, chat, from, commandText);
 		Mockito.verify(bot).execute(any(SendMessage.class));
 	}
 

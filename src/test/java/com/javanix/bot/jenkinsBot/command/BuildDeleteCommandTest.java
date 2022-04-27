@@ -4,7 +4,6 @@ import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
-import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.request.SendMessage;
@@ -34,17 +33,16 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 	private TelegramBot bot;
 
 	@MockBean
-	private Message message;
+	private Chat chat;
 
 	@MockBean
 	private BuildInfoService databaseService;
 
 	@Test
 	public void delete_noParams() {
+		String commandText = "/build delete";
+		User from = new User(123L);
 
-		Mockito.when(message.text()).thenReturn("/build delete");
-		Mockito.when(message.chat()).thenReturn(new Chat());
-		Mockito.when(message.from()).thenReturn(new User(123L));
 		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
 			assertEquals("Wrong repo. You can delete only owned repository.", getText(invocation));
 
@@ -55,19 +53,18 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 			return null;
 		});
 
-		TelegramCommand command = factory.getCommand(message.text());
+		TelegramCommand command = factory.getCommand(commandText);
 		assertTrue(command instanceof BuildCommand);
-		command.process(bot, message);
+		command.process(bot, chat, from, commandText);
 		Mockito.verify(bot).execute(any(SendMessage.class));
 	}
 
 	@Test
 	public void delete_wrongRepo() {
-		Mockito.when(databaseService.getOwnedRepository("xmen", 123L)).thenReturn(null);
+		String commandText = "/build delete xmen";
+		User from = new User(123L);
 
-		Mockito.when(message.text()).thenReturn("/build delete xmen");
-		Mockito.when(message.chat()).thenReturn(new Chat());
-		Mockito.when(message.from()).thenReturn(new User(123L));
+		Mockito.when(databaseService.getOwnedRepository("xmen", 123L)).thenReturn(null);
 		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
 			assertEquals("Wrong repo. You can delete only owned repository.", getText(invocation));
 
@@ -78,17 +75,16 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 			return null;
 		});
 
-		TelegramCommand command = factory.getCommand(message.text());
+		TelegramCommand command = factory.getCommand(commandText);
 		assertTrue(command instanceof BuildCommand);
-		command.process(bot, message);
+		command.process(bot, chat, from, commandText);
 		Mockito.verify(bot).execute(any(SendMessage.class));
 	}
 
 	@Test
 	public void delete_okParams() {
-		Mockito.when(message.text()).thenReturn("/build delete xmen");
-		Mockito.when(message.chat()).thenReturn(new Chat());
-		Mockito.when(message.from()).thenReturn(new User(BuildInfoService.DEFAULT_CREATOR_ID));
+		String commandText = "/build delete xmen";
+		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
 		Mockito.when(databaseService.getOwnedRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(
 				BuildInfoDto.builder()
@@ -106,9 +102,9 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 			return null;
 		});
 
-		TelegramCommand command = factory.getCommand(message.text());
+		TelegramCommand command = factory.getCommand(commandText);
 		assertTrue(command instanceof BuildCommand);
-		command.process(bot, message);
+		command.process(bot, chat, from, commandText);
 		Mockito.verify(bot).execute(any(SendMessage.class));
 	}
 

@@ -3,7 +3,8 @@ package com.javanix.bot.jenkinsBot.command;
 import com.javanix.bot.jenkinsBot.command.build.BuildCommandFactory;
 import com.javanix.bot.jenkinsBot.command.build.BuildType;
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,14 +15,12 @@ class BuildCommand implements TelegramCommand {
     private final BuildCommandFactory buildCommandFactory;
 
     @Override
-    public void process(TelegramBot bot, Message message) {
+    public void process(TelegramBot bot, Chat chat, User from, String message) {
 
         // assuming income message is '@botname /build status teamname'
 
-        String messageString = message.text();
-
         // assuming to have 'status teamname'
-        String buildTypeAndArguments = messageString.substring(messageString.lastIndexOf(getCommandName()) + getCommandName().length()).trim();
+        String buildTypeAndArguments = message.substring(message.lastIndexOf(getCommandName()) + getCommandName().length()).trim();
         BuildType buildType = getBuildType(buildTypeAndArguments);
 
         // assuming to have 'teamname'
@@ -30,7 +29,7 @@ class BuildCommand implements TelegramCommand {
             buildArguments = buildTypeAndArguments.substring(buildTypeAndArguments.toUpperCase().indexOf(buildType.toString()) + buildType.toString().length()).trim();
         }
 
-        buildCommandFactory.getCommand(buildType).process(bot, message, buildArguments);
+        buildCommandFactory.getCommand(buildType).process(bot, chat, from, buildArguments);
     }
 
 

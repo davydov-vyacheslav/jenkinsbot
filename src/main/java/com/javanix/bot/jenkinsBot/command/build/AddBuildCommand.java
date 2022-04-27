@@ -7,7 +7,8 @@ import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
@@ -25,22 +26,22 @@ class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
     private final BuildInfoService database;
 
     @Override
-    public void process(TelegramBot bot, Message message, String buildCommandArguments) {
-        Long currentId = message.from().id();
+    public void process(TelegramBot bot, Chat chat, User from, String buildCommandArguments) {
+        Long currentId = from.id();
 
         if (!userAddBuildStates.containsKey(currentId)) {
             userAddBuildStates.put(currentId, new RepoAddInformation(StateType.INITIAL,
                     BuildInfoDto.builder()
                             .jenkinsInfo(JenkinsInfoDto.builder().build())
                             .creatorId(currentId)
-                            .creatorFullName(message.from().username())
+                            .creatorFullName(from.username())
                         .build()));
-            bot.execute(new SendMessage(message.chat().id(), "Okay. Lets create new repository. Please follow instructions."));
+            bot.execute(new SendMessage(chat.id(), "Okay. Lets create new repository. Please follow instructions."));
         }
 
 
         if (buildCommandArguments.equalsIgnoreCase("!cancel")) {
-            bot.execute(new SendMessage(message.chat().id(), "Ok. you cancelled. Bye"));
+            bot.execute(new SendMessage(chat.id(), "Ok. you cancelled. Bye"));
             userAddBuildStates.remove(currentId);
             return;
         }
@@ -51,13 +52,13 @@ class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
 
         if (currentState.isValid(database, buildCommandArguments)) {
             currentState.performUpdate(repo, buildCommandArguments);
-            bot.execute(new SendMessage(message.chat().id(), nextState.getMessage()));
+            bot.execute(new SendMessage(chat.id(), nextState.getMessage()));
             userAddBuildStates.get(currentId).setState(nextState);
         } else {
-            bot.execute(new SendMessage(message.chat().id(), "Wrong value. Try again"));
+            bot.execute(new SendMessage(chat.id(), "Wrong value. Try again"));
         }
 
-        SendMessage sendMessage = new SendMessage(message.chat().id(), "Current repository info:" +
+        SendMessage sendMessage = new SendMessage(chat.id(), "Current repository info:" +
                 "\n- repoName: " + repo.getRepoName() +
                 "\n- jenkinsDomain: " + repo.getJenkinsInfo().getDomain() +
                 "\n- jenkinsUser: " + repo.getJenkinsInfo().getUser() +
@@ -70,13 +71,12 @@ class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
             database.addRepository(repo);
             userAddBuildStates.remove(currentId);
 
-            //  TODO: ? buttons instead keyboard?
-            List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(message.from().id());
+            List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(from.id());
             InlineKeyboardMarkup inlineKeyboard = generateBuildStatusKeyboard(availableRepositories);
-            bot.execute(new SendMessage(message.chat().id(), "Select build to get build status").replyMarkup(inlineKeyboard));
+            bot.execute(new SendMessage(chat.id(), "Select build to get build status").replyMarkup(inlineKeyboard));
 
         } else {
-            bot.execute(new SendMessage(message.chat().id(), "P.S. Press `!cancel` to cancel creation any time"));
+            bot.execute(new SendMessage(chat.id(), "P.S. Press `!cancel` to cancel creation any time"));
         }
 
         bot.execute(sendMessage);
@@ -89,10 +89,6 @@ class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
     }
 
     @Override
-    public void process(TelegramBot bot, Message message) {
-        process(bot, message, message.text());
-    }
-
     public BuildType getBuildType() {
         return BuildType.ADD;
     }
