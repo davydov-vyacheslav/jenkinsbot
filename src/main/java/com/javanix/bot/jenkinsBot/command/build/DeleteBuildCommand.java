@@ -24,7 +24,7 @@ class DeleteBuildCommand implements BuildSubCommand {
 
         if (repository == null) {
             List<BuildInfoDto> availableRepositories = database.getOwnedRepositories(from.id());
-            InlineKeyboardMarkup inlineKeyboard = generateBuildStatusKeyboard(availableRepositories);
+            InlineKeyboardMarkup inlineKeyboard = buildMyRepoListMarkup(availableRepositories);
             bot.execute(new SendMessage(chat.id(), "Wrong repo. You can delete only owned repository.").replyMarkup(inlineKeyboard));
             return;
         }

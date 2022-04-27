@@ -10,7 +10,7 @@ import java.util.Set;
 public class BuildCommandFactory {
 
     private final Set<BuildSubCommand> commands;
-    private final UnknownBuildCommand defaultCommand;
+    private final DefaultBuildCommand defaultCommand;
 
     public BuildSubCommand getCommand(BuildType buildType) {
         return commands.stream().filter(command ->

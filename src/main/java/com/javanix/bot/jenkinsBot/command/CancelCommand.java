@@ -21,7 +21,7 @@ class CancelCommand implements TelegramCommand {
 				.filter(progressableCommand -> progressableCommand.isInProgress(from.id()))
 				.findFirst()
 				.orElse(defaultCommand)
-				.stopProgress(bot, chat, from);
+				.cancelProgress(bot, chat, from);
 	}
 
 	@Override

@@ -14,6 +14,7 @@ class StartCommand implements TelegramCommand {
 	public void process(TelegramBot bot, Chat chat, User from, String message) {
 		bot.execute(new SetMyCommands(
 				new BotCommand("/help", "Show help message"),
+				new BotCommand("/cancel", "Cancel any in-progress action (e.g. creation)"),
 				new BotCommand("/start", "You already did that ;)"),
 				new BotCommand("/build", "Build processing"))
 		);

@@ -34,7 +34,7 @@ class StatusBuildCommand implements BuildSubCommand {
 
         if (repository == null) {
             List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(from.id());
-            InlineKeyboardMarkup inlineKeyboard = generateBuildStatusKeyboard(availableRepositories);
+            InlineKeyboardMarkup inlineKeyboard = buildMainMenuMarkup(availableRepositories);
             bot.execute(new SendMessage(chat.id(), "Wrong team. Please choose correct one").replyMarkup(inlineKeyboard));
             return;
         }

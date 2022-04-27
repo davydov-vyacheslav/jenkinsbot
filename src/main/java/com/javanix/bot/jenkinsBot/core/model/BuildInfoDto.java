@@ -11,4 +11,16 @@ public class BuildInfoDto {
 	private Boolean isPublic;
 	private Long creatorId;
 	private String creatorFullName;
+
+	public static BuildInfoDto.BuildInfoDtoBuilder emptyEntityBuilder() {
+		return BuildInfoDto.builder()
+				.repoName("")
+				.jenkinsInfo(JenkinsInfoDto.builder()
+						.jobName("")
+						.domain("")
+						.password("")
+						.user("")
+						.build())
+				.isPublic(false);
+	}
 }

@@ -19,7 +19,7 @@ class BuildCommand implements TelegramCommand {
 
     private final BuildCommandFactory buildCommandFactory;
 
-    private static final Pattern buildCommandPattern = Pattern.compile(".*/build.?(add|edit|status|delete).?(.*)", CASE_INSENSITIVE);
+    private static final Pattern buildCommandPattern = Pattern.compile(".*/build.?(add|edit|status|delete|my_list).?(.*)", CASE_INSENSITIVE);
 
     @Override
     public void process(TelegramBot bot, Chat chat, User from, String message) {

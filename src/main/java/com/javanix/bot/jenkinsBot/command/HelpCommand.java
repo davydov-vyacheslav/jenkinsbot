@@ -20,7 +20,7 @@ class HelpCommand implements TelegramCommand {
 
 		try {
 			bot.execute(new SendMessage(chat.id(),
-							String.join("\n", IOUtils.readLines(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("README.md")), StandardCharsets.UTF_8)))
+							String.join("\n", IOUtils.readLines(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("README.md")), StandardCharsets.UTF_8)).substring(0, 2000))
 					.parseMode(ParseMode.Markdown));
 		} catch (IOException e) {
 			throw new RuntimeException(e);

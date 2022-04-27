@@ -9,5 +9,7 @@ public interface ProgressableCommand extends Processable {
 
 	boolean isInProgress(Long userId);
 
-	void stopProgress(TelegramBot bot, Chat chat, User from);
+	void cancelProgress(TelegramBot bot, Chat chat, User from);
+
+	void progress(TelegramBot bot, Chat chat, User from, String message);
 }

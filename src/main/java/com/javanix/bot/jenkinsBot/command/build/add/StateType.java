@@ -2,81 +2,47 @@ package com.javanix.bot.jenkinsBot.command.build.add;
 
 
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
-import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 
 public enum StateType {
-    COMPLETED(
-            null,
-            "You are done. Congratulations",
-            (database, value) -> true,
-            (repo, value) -> {}),
     PUBLIC(
-            COMPLETED,
-            "Please enter whether this repository is public ('true' / 'false')",
-            (database, value) -> true,
+            "Set repo.isPublic field",
             (repo, value) -> repo.setIsPublic(Boolean.parseBoolean(value))),
     JOB_NAME(
-            PUBLIC,
-            "Please enter Jenkins job name (e.g. 'Insight')",
-            (database, value) -> !value.contains(" "),
+            "Set jobName field",
             (repo, value) -> repo.getJenkinsInfo().setJobName(value)),
     PASSWORD(
-            JOB_NAME,
-            "Please enter Jenkins password. Enter '!' value if no credentials required",
-            (database, value) -> !value.contains(" "),
+            "Set password field",
             (repo, value) -> repo.getJenkinsInfo().setPassword(value)),
     USER(
-            PASSWORD,
-            "Please enter Jenkins user (e.g. 'admin'). Enter '!' value if no credentials required",
-            (database, value) -> !value.contains(" "),
+            "Set user field",
             (repo, value) -> repo.getJenkinsInfo().setUser(value)),
     DOMAIN(
-            USER,
-            "Please enter Jenkins domain name (e.g. 'dev-rim-chf01')",
-            (database, value) -> !value.contains(" "),
+            "Set domain field",
             (repo, value) -> repo.getJenkinsInfo().setDomain(value)),
     REPO_NAME(
-            DOMAIN,
-            "Please enter repository name (unique, without spaces)",
-            (database, value) -> !value.contains(" ") && !database.hasRepository(value),
+            "Set repoName field",
             BuildInfoDto::setRepoName),
-    INITIAL(
-            REPO_NAME,
-            "",
-            (database, value) -> true,
+    NA_ADD(
+            "Adding the entity",
+            (repo, value) -> {}),
+    NA_EDIT(
+            "Modifying the entity",
             (repo, value) -> {});
 
-    private final StateType nextState;
-    private final String message;
-    private final Validator validator;
     private final EntityUpdateAction updateAction;
+    private final String info;
 
-    StateType(StateType nextState, String message, Validator validator, EntityUpdateAction updateAction) {
-        this.nextState = nextState;
-        this.message = message;
-        this.validator = validator;
+    StateType(String info, EntityUpdateAction updateAction) {
+        this.info = info;
         this.updateAction = updateAction;
     }
 
-    public StateType getNextState() {
-        return nextState;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public boolean isValid(BuildInfoService database, String value) {
-        return validator.isValid(database, value);
-    }
-
-    public void performUpdate(BuildInfoDto repo, String value) {
+    public void updateField(BuildInfoDto repo, String value) {
         updateAction.updateEntity(repo, value);
     }
 
-    @FunctionalInterface
-    private interface Validator {
-        boolean isValid(BuildInfoService database, String value);
+    public String getInfo() {
+        return info;
     }
 
     @FunctionalInterface

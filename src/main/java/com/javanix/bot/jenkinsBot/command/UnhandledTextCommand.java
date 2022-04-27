@@ -21,7 +21,7 @@ class UnhandledTextCommand implements TelegramCommand {
                 .filter(progressableCommand -> progressableCommand.isInProgress(from.id()))
                 .findFirst()
                 .orElse(defaultInProgressCommand)
-                .process(bot, chat, from, message);
+                .progress(bot, chat, from, message);
     }
 
     @Override

@@ -14,8 +14,13 @@ class DefaultInProgressCommand implements ProgressableCommand {
 	}
 
 	@Override
-	public void stopProgress(TelegramBot bot, Chat chat, User from) {
+	public void cancelProgress(TelegramBot bot, Chat chat, User from) {
 		bot.execute(new SendMessage(chat.id(), "No active command to cancel. I wasn't doing anything anyway. Zzzzz... (c)"));
+	}
+
+	@Override
+	public void progress(TelegramBot bot, Chat chat, User from, String message) {
+
 	}
 
 	@Override
