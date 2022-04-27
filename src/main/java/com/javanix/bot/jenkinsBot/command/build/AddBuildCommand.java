@@ -39,13 +39,6 @@ class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
             bot.execute(new SendMessage(chat.id(), "Okay. Lets create new repository. Please follow instructions."));
         }
 
-
-        if (buildCommandArguments.equalsIgnoreCase("!cancel")) {
-            bot.execute(new SendMessage(chat.id(), "Ok. you cancelled. Bye"));
-            userAddBuildStates.remove(currentId);
-            return;
-        }
-
         BuildInfoDto repo = userAddBuildStates.get(currentId).getRepo();
         StateType currentState = userAddBuildStates.get(currentId).getState();
         StateType nextState = currentState.getNextState();
@@ -76,7 +69,7 @@ class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
             bot.execute(new SendMessage(chat.id(), "Select build to get build status").replyMarkup(inlineKeyboard));
 
         } else {
-            bot.execute(new SendMessage(chat.id(), "P.S. Press `!cancel` to cancel creation any time"));
+            bot.execute(new SendMessage(chat.id(), "P.S. Press `/cancel` to cancel creation any time"));
         }
 
         bot.execute(sendMessage);
@@ -86,6 +79,12 @@ class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
     @Override
     public boolean isInProgress(Long userId) {
         return userAddBuildStates.containsKey(userId);
+    }
+
+    @Override
+    public void stopProgress(TelegramBot bot, Chat chat, User from) {
+        bot.execute(new SendMessage(chat.id(), "Ok. you cancelled adding new repository. Bye"));
+        userAddBuildStates.remove(from.id());
     }
 
     @Override
