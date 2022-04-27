@@ -72,7 +72,7 @@ class AddBuildCommand implements BuildSubCommand, ProgressableCommand {
 
             //  TODO: ? buttons instead keyboard?
             List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(message.from().id());
-            InlineKeyboardMarkup inlineKeyboard = generateKeyboard(availableRepositories);
+            InlineKeyboardMarkup inlineKeyboard = generateBuildStatusKeyboard(availableRepositories);
             bot.execute(new SendMessage(message.chat().id(), "Select build to get build status").replyMarkup(inlineKeyboard));
 
         } else {

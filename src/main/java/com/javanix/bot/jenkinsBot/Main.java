@@ -39,7 +39,7 @@ public class Main implements CommandLineRunner {
                         }
                         commandFactory.getCommand(text).process(bot, message);
                     } catch (Exception e) {
-                        bot.execute(new SendMessage(message.chat().id(), e.getMessage()));
+                        bot.execute(new SendMessage(message.chat().id(), "Error: " + e.getMessage()));
                         e.printStackTrace();
                     }
                 }

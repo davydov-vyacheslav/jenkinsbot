@@ -1,6 +1,7 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.cli.CliProcessor;
+import com.javanix.bot.jenkinsBot.cli.JenkinsBuildDetails;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
@@ -32,33 +33,34 @@ class StatusBuildCommand implements BuildSubCommand {
 
         if (repository == null) {
             List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(message.from().id());
-            InlineKeyboardMarkup inlineKeyboard = generateKeyboard(availableRepositories);
+            InlineKeyboardMarkup inlineKeyboard = generateBuildStatusKeyboard(availableRepositories);
             // TODO: ? buttons instead of  keyboard?
             bot.execute(new SendMessage(message.chat().id(), "Wrong team. Please choose correct one").replyMarkup(inlineKeyboard));
             return;
         }
 
-        log.info("Getting status build for team: " + repository.getRepoName()); // TODO: who gets status?
+        log.info(message.from().username() + " is getting status build for team: " + repository.getRepoName());
         JenkinsInfoDto jenkinsInfo = repository.getJenkinsInfo();
 
-        String statusFormatString = "Build status for %s team:\n" +
+        String statusFormatString = "Build status for `%s` team:\n" +
                 "Run tests: %d (of approximately %d)\n" +
                 "Top %d Failed tests (of %d): \n" +
                 "%s";
 
-        String failedTestsOutput = cliProcessor.getFailedTests(repository.getJenkinsInfo(), failedTestsCount);
-        if (failedTestsOutput.trim().isEmpty()) {
-            failedTestsOutput = "N/A";
-        }
+        JenkinsBuildDetails currentBuildDetails = cliProcessor.getCurrentBuildJenkinsBuildDetails(repository.getJenkinsInfo(), failedTestsCount);
+        JenkinsBuildDetails lastBuildDetails = cliProcessor.getPreviousBuildJenkinsBuildDetails(repository.getJenkinsInfo());
 
-        String failedTestsOutputWithLinks = convertFailedTestsOutputToLinks(failedTestsOutput, jenkinsInfo);
+        String failedTestsOutputWithLinks = convertFailedTestsOutputToLinks(currentBuildDetails.getTopFailedTests(), jenkinsInfo);
+        if (failedTestsOutputWithLinks.trim().isEmpty()) {
+            failedTestsOutputWithLinks = "N/A";
+        }
 
         bot.execute(new SendMessage(message.chat().id(),
                 String.format(statusFormatString, repository.getRepoName(),
-                        cliProcessor.getCurrentRunTestsCount(jenkinsInfo),
-                        cliProcessor.getLastRunTestsCount(jenkinsInfo),
-                        failedTestsCount,
-                        cliProcessor.getFailedTestsCount(jenkinsInfo),
+                        currentBuildDetails.getRunTestsCount(),
+                        lastBuildDetails.getRunTestsCount(),
+                        currentBuildDetails.getFailedTestsCapacity(),
+                        currentBuildDetails.getFailedTestsCount(),
                         failedTestsOutputWithLinks))
                 .parseMode(ParseMode.Markdown));
     }
@@ -67,9 +69,9 @@ class StatusBuildCommand implements BuildSubCommand {
     // [junit] TEST com.liquent.insight.manager.assembly.test.AssemblyExportTest FAILED
     // to
     // - [%s](http://%s:7331/job/%s/ws/output/reports/TEST-%s.xml/*view*/)
-    private String convertFailedTestsOutputToLinks(String origin, JenkinsInfoDto jenkinsInfo) {
-        String result = origin;
-        Matcher m = failedTestsPattern.matcher(origin);
+    private String convertFailedTestsOutputToLinks(List<String> origin, JenkinsInfoDto jenkinsInfo) {
+        String result = String.join("\n", origin);
+        Matcher m = failedTestsPattern.matcher(result);
         if (m.find()) {
             result = m.replaceAll(
                     String.format("- [%s](http://%s:7331/job/%s/ws/output/reports/TEST-%s.xml/*view*/)",

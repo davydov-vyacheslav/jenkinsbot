@@ -14,11 +14,11 @@ public interface BuildSubCommand {
 
     BuildType getBuildType();
 
-    default InlineKeyboardMarkup generateKeyboard(List<BuildInfoDto> availableRepositories) {
+    default InlineKeyboardMarkup generateBuildStatusKeyboard(List<BuildInfoDto> availableRepositories) {
         InlineKeyboardButton[][] buttons = new InlineKeyboardButton[(int)Math.ceil(availableRepositories.size() / 2.0)][2];
         for (int i = 0; i < availableRepositories.size(); i++) {
             String repoName = availableRepositories.get(i).getRepoName();
-            buttons[i/2][i%2] = new InlineKeyboardButton("Team: " + repoName).switchInlineQueryCurrentChat("/build status " + repoName);
+            buttons[i/2][i%2] = new InlineKeyboardButton(repoName).switchInlineQueryCurrentChat("/build status " + repoName);
         }
         if (availableRepositories.size() % 2 == 1) {
             buttons[availableRepositories.size() / 2][1] = new InlineKeyboardButton("").switchInlineQueryCurrentChat("");

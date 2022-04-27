@@ -3,86 +3,114 @@ package com.javanix.bot.jenkinsBot.cli;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Component
 @Data
 @RequiredArgsConstructor
+@Log4j2
 public class CliProcessor {
 
-    private final OsProcessor osProcessor;
+	private final OsProcessor osProcessor;
 
-    private final String baseUrlTemplate = "curl -s --user %s:%s http://%s:7331/job/%s";
-    private final String failedTestsUrlTemplate = baseUrlTemplate + "/lastBuild/consoleText | grep \"Test FAILED\"";
-    private final String failedTestsTopNUrlTemplate = failedTestsUrlTemplate + " | head -n %d";
-    private final String failedTestsCountUrlTemplate = failedTestsUrlTemplate + " | wc -l";
-    private final String runTestsUrlTemplate = baseUrlTemplate + "/%s/consoleText | grep \"Tests run\" | wc -l";
+	private static final String baseUrlTemplate = "curl -s --user %s:%s http://%s:7331/job/%s/%s/consoleText -o %s";
 
-    public Integer getFailedTestsCount(JenkinsInfoDto jenkins) {
-        return Integer.valueOf(executeCommand(String.format(failedTestsCountUrlTemplate,
-                jenkins.getUser(), jenkins.getPassword(), jenkins.getDomain(), jenkins.getJobName())));
-    }
+	public JenkinsBuildDetails getCurrentBuildJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo, int count) {
+		return getJenkinsBuildDetails(jenkinsInfo, "lastBuild", count);
+	}
 
-    public String getFailedTests(JenkinsInfoDto jenkins, int count) {
-        return executeCommand(String.format(failedTestsTopNUrlTemplate,
-                jenkins.getUser(), jenkins.getPassword(), jenkins.getDomain(), jenkins.getJobName(), count));
-    }
+	public JenkinsBuildDetails getPreviousBuildJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo) {
+		return getJenkinsBuildDetails(jenkinsInfo, "lastCompletedBuild", 0);
+	}
 
-    public Integer getCurrentRunTestsCount(JenkinsInfoDto jenkins) {
-        return Integer.valueOf(executeCommand(String.format(runTestsUrlTemplate,
-                jenkins.getUser(), jenkins.getPassword(), jenkins.getDomain(), jenkins.getJobName(),
-                "lastBuild")));
-    }
+	// TODO: cache buildinfo results <info, File>
+	@SneakyThrows
+	private JenkinsBuildDetails getJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo, String buildType, int count) {
+		File tempFile = File.createTempFile("jenkinsbot-", ".log");
+		tempFile.deleteOnExit();
 
-    public Integer getLastRunTestsCount(JenkinsInfoDto jenkins) {
-        return Integer.valueOf(executeCommand(String.format(runTestsUrlTemplate,
-                jenkins.getUser(), jenkins.getPassword(), jenkins.getDomain(), jenkins.getJobName(),
-                "lastCompletedBuild")));
-    }
+		log.info("Saving data to: " + tempFile.getAbsoluteFile());
 
-    private String executeCommand(String params) {
+		executeCommand(String.format(baseUrlTemplate,
+				jenkinsInfo.getUser(), jenkinsInfo.getPassword(), jenkinsInfo.getDomain(), jenkinsInfo.getJobName(),
+				buildType, tempFile.getAbsolutePath()));
 
-        List<String> osCommands = getLaunchCommandList();
-        List<String> processBuilderCommands = new ArrayList<>(osCommands);
-        processBuilderCommands.add(params);
+		JenkinsBuildDetails details = JenkinsBuildDetails.builder()
+				.failedTestsCapacity(count)
+				.failedTestsCount(0L)
+				.runTestsCount(0L)
+				.topFailedTests(new ArrayList<>())
+				.build();
 
-        ProcessBuilder processBuilder = new ProcessBuilder(processBuilderCommands);
-        processBuilder.redirectErrorStream(true);
-        StringBuilder processOutput = new StringBuilder();
+		// FIXME: encoding wtf'ka
+		try(Stream<String> lines = Files.lines(tempFile.toPath(), Charset.forName("windows-1252"))) {
+			lines.forEach(s -> {
+				if (s.contains("Test FAILED")) {
+					details.addFailedTest(s);
+				} else if (s.contains("Tests run")) {
+					details.incrementRunTestCount();
+				}
+			});
+		}
 
-        try {
-            Process process = processBuilder.start();
+// TODO: use this instead of curl. Beware of authentification
+//        ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(FILE_URL).openStream());
+//        try (FileOutputStream fileOutputStream = new FileOutputStream(tempFile)) {
+//            fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+//        }
 
-            try (BufferedReader processOutputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String readLine;
+		return details;
+	}
 
-                while ((readLine = processOutputReader.readLine()) != null) {
-                    processOutput.append(readLine).append(System.lineSeparator());
-                }
+	private String executeCommand(String params) {
 
-                process.waitFor();
-            }
-        } catch (InterruptedException | IOException ex) {
-            processOutput.append(ex.getMessage());
-            processOutput.append(Arrays.toString(ex.getStackTrace()));
-        }
-        return processOutput.toString().trim();
-    }
+		List<String> osCommands = getLaunchCommandList();
+		List<String> processBuilderCommands = new ArrayList<>(osCommands);
+		processBuilderCommands.add(params);
 
-    private List<String> getLaunchCommandList() {
-        List<String> osCommands = Arrays.asList("/bin/sh", "-c");
+		ProcessBuilder processBuilder = new ProcessBuilder(processBuilderCommands);
+		processBuilder.redirectErrorStream(true);
+		StringBuilder processOutput = new StringBuilder();
 
-        if (osProcessor.getOS() == Os.WINDOWS) {
-            osCommands = Arrays.asList("CMD", "/C");
-        }
-        return osCommands;
-    }
+		try {
+			Process process = processBuilder.start();
+
+			try (BufferedReader processOutputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String readLine;
+
+				while ((readLine = processOutputReader.readLine()) != null) {
+					processOutput.append(readLine).append(System.lineSeparator());
+				}
+
+				process.waitFor();
+			}
+		} catch (InterruptedException | IOException ex) {
+			processOutput.append(ex.getMessage());
+			processOutput.append(Arrays.toString(ex.getStackTrace()));
+		}
+		return processOutput.toString().trim();
+	}
+
+	private List<String> getLaunchCommandList() {
+		List<String> osCommands = Arrays.asList("/bin/sh", "-c");
+
+		if (osProcessor.getOS() == Os.WINDOWS) {
+			osCommands = Arrays.asList("CMD", "/C");
+		}
+		return osCommands;
+	}
 
 }

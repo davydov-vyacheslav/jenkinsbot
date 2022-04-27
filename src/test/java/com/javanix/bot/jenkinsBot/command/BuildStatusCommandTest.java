@@ -1,6 +1,7 @@
 package com.javanix.bot.jenkinsBot.command;
 
 import com.javanix.bot.jenkinsBot.cli.CliProcessor;
+import com.javanix.bot.jenkinsBot.cli.JenkinsBuildDetails;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
@@ -66,8 +67,8 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 			assertEquals("Wrong team. Please choose correct one", getText(invocation));
 
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton("Team: repo1").switchInlineQueryCurrentChat("/build status repo1"),
-					new InlineKeyboardButton("Team: repo2").switchInlineQueryCurrentChat("/build status repo2")
+					new InlineKeyboardButton("repo1").switchInlineQueryCurrentChat("/build status repo1"),
+					new InlineKeyboardButton("repo2").switchInlineQueryCurrentChat("/build status repo2")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -101,8 +102,8 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 			assertEquals("Wrong team. Please choose correct one", getText(invocation));
 
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton("Team: repo1").switchInlineQueryCurrentChat("/build status repo1"),
-					new InlineKeyboardButton("Team: repo2").switchInlineQueryCurrentChat("/build status repo2")
+					new InlineKeyboardButton("repo1").switchInlineQueryCurrentChat("/build status repo1"),
+					new InlineKeyboardButton("repo2").switchInlineQueryCurrentChat("/build status repo2")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -130,19 +131,26 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 				.build();
 		Mockito.when(databaseService.getAvailableRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(team);
 
-		Mockito.when(cliProcessor.getFailedTestsCount(jenkinsInfo)).thenReturn(2);
-		Mockito.when(cliProcessor.getFailedTests(jenkinsInfo, 20)).thenReturn(
-				" [junit] TEST com.liquent.insight.manager.assembly.test.AssemblyExportTest FAILED\n" +
-						" [junit] TEST com.liquent.insight.manager.assembly.test2.AnotherFailedTest FAILED"
-		);
-		Mockito.when(cliProcessor.getCurrentRunTestsCount(jenkinsInfo)).thenReturn(500);
-		Mockito.when(cliProcessor.getLastRunTestsCount(jenkinsInfo)).thenReturn(1000);
+		Mockito.when(cliProcessor.getPreviousBuildJenkinsBuildDetails(jenkinsInfo)).thenReturn(
+				JenkinsBuildDetails.builder()
+						.runTestsCount(1000L)
+						.build());
+		Mockito.when(cliProcessor.getCurrentBuildJenkinsBuildDetails(jenkinsInfo, 20)).thenReturn(
+				JenkinsBuildDetails.builder()
+						.runTestsCount(500L)
+						.failedTestsCount(2L)
+						.failedTestsCapacity(20)
+						.topFailedTests(Arrays.asList(
+								" [junit] TEST com.liquent.insight.manager.assembly.test.AssemblyExportTest FAILED",
+								" [junit] TEST com.liquent.insight.manager.assembly.test2.AnotherFailedTest FAILED"
+						))
+						.build());
 
 		Mockito.when(message.text()).thenReturn("/build status xmen");
 		Mockito.when(message.chat()).thenReturn(new Chat());
 		Mockito.when(message.from()).thenReturn(new User(BuildInfoService.DEFAULT_CREATOR_ID));
 		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("Build status for xmen team:\n" +
+			assertEquals("Build status for `xmen` team:\n" +
 							"Run tests: 500 (of approximately 1000)\n" +
 							"Top 20 Failed tests (of 2): \n" +
 							"- [AssemblyExportTest](http://domain:7331/job/Insight/ws/output/reports/TEST-com.liquent.insight.manager.assembly.test.AssemblyExportTest.xml/*view*/)\n" +
