@@ -8,25 +8,29 @@ import com.pengrad.telegrambot.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+
 @Component
 @RequiredArgsConstructor
 class BuildCommand implements TelegramCommand {
 
     private final BuildCommandFactory buildCommandFactory;
 
+    private static final Pattern buildCommandPattern = Pattern.compile(".*/build.?(add|edit|status|delete).?(.*)", CASE_INSENSITIVE);
+
     @Override
     public void process(TelegramBot bot, Chat chat, User from, String message) {
 
         // assuming income message is '@botname /build status teamname'
-
-        // assuming to have 'status teamname'
-        String buildTypeAndArguments = message.substring(message.lastIndexOf(getCommandName()) + getCommandName().length()).trim();
-        BuildType buildType = getBuildType(buildTypeAndArguments);
-
-        // assuming to have 'teamname'
+        Matcher m = buildCommandPattern.matcher(message);
+        BuildType buildType = null;
         String buildArguments = "";
-        if (buildType != null) {
-            buildArguments = buildTypeAndArguments.substring(buildTypeAndArguments.toUpperCase().indexOf(buildType.toString()) + buildType.toString().length()).trim();
+        if (m.find()) {
+            buildType = getBuildType(m.group(1));
+            buildArguments = m.group(2);
         }
 
         buildCommandFactory.getCommand(buildType).process(bot, chat, from, buildArguments);
