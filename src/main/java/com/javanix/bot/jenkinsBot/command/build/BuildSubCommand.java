@@ -10,6 +10,9 @@ import java.util.List;
 
 public interface BuildSubCommand {
 
+    String ICON_PUBLIC = "\uD83C\uDF0E ";
+    String ICON_PRIVATE = "\uD83D\uDD12 ";
+
     void process(TelegramBot bot, Message message, String buildCommandArguments);
 
     BuildType getBuildType();
@@ -17,7 +20,8 @@ public interface BuildSubCommand {
     default InlineKeyboardMarkup generateBuildStatusKeyboard(List<BuildInfoDto> availableRepositories) {
         InlineKeyboardButton[][] buttons = new InlineKeyboardButton[(int)Math.ceil(availableRepositories.size() / 2.0)][2];
         for (int i = 0; i < availableRepositories.size(); i++) {
-            String repoName = availableRepositories.get(i).getRepoName();
+            BuildInfoDto buildInfoDto = availableRepositories.get(i);
+            String repoName = (buildInfoDto.getIsPublic() ? ICON_PUBLIC : ICON_PRIVATE) +  buildInfoDto.getRepoName();
             buttons[i/2][i%2] = new InlineKeyboardButton(repoName).switchInlineQueryCurrentChat("/build status " + repoName);
         }
         if (availableRepositories.size() % 2 == 1) {
