@@ -1,4 +1,4 @@
-package com.javanix.bot.jenkinsBot.command.build;
+package com.javanix.bot.jenkinsBot.command.build.model;
 
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;

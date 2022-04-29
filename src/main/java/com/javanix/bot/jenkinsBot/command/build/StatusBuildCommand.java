@@ -2,13 +2,13 @@ package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.cli.CliProcessor;
 import com.javanix.bot.jenkinsBot.cli.JenkinsBuildDetails;
+import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 @Log4j2
 class StatusBuildCommand implements BuildSubCommand {
 
+    private final DefaultBuildCommand defaultBuildCommand;
     private final CliProcessor cliProcessor;
     private final BuildInfoService database;
     private static final int failedTestsCount = 20;
@@ -33,9 +34,7 @@ class StatusBuildCommand implements BuildSubCommand {
         BuildInfoDto repository = database.getAvailableRepository(buildCommandArguments.trim().split(" ")[0], from.id());
 
         if (repository == null) {
-            List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(from.id());
-            InlineKeyboardMarkup inlineKeyboard = buildMainMenuMarkup(availableRepositories);
-            bot.execute(new SendMessage(chat.id(), "Wrong team. Please choose correct one").replyMarkup(inlineKeyboard));
+            defaultBuildCommand.process(bot, chat, from, "Wrong team. Please choose correct one");
             return;
         }
 
@@ -55,14 +54,17 @@ class StatusBuildCommand implements BuildSubCommand {
             failedTestsOutputWithLinks = "N/A";
         }
 
-        bot.execute(new SendMessage(chat.id(),
-                String.format(statusFormatString, repository.getRepoName(),
-                        currentBuildDetails.getRunTestsCount(),
-                        lastBuildDetails.getRunTestsCount(),
-                        currentBuildDetails.getFailedTestsCapacity(),
-                        currentBuildDetails.getFailedTestsCount(),
-                        failedTestsOutputWithLinks))
-                .parseMode(ParseMode.Markdown));
+        String buildStatus = String.format(statusFormatString, repository.getRepoName(),
+                currentBuildDetails.getRunTestsCount(),
+                lastBuildDetails.getRunTestsCount(),
+                currentBuildDetails.getFailedTestsCapacity(),
+                currentBuildDetails.getFailedTestsCount(),
+                failedTestsOutputWithLinks);
+
+        log.info(buildStatus);
+
+        bot.execute(new SendMessage(chat.id(), buildStatus).parseMode(ParseMode.Markdown));
+        defaultBuildCommand.process(bot, chat, from, "");
     }
 
     // convert

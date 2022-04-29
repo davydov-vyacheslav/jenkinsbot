@@ -1,5 +1,6 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
+import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
