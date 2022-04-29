@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.javanix.bot'
-version = '0.0.3-SNAPSHOT'
+version = '0.0.4-SNAPSHOT'
 sourceCompatibility = '8'
 
 repositories {
@@ -31,7 +31,7 @@ tasks.named('test') {
 task copyReadMe(type: Copy, description: "Copy README.md file to resources") {
     from project.projectDir
     into 'src/main/resources'
-    include 'README.md'
+    include 'README.md', 'whats.new'
 }
 
 processResources.dependsOn(copyReadMe)
