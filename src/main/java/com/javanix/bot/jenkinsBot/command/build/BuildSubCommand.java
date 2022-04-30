@@ -7,6 +7,8 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public interface BuildSubCommand extends Processable {
 
@@ -15,54 +17,20 @@ public interface BuildSubCommand extends Processable {
 
 	BuildType getBuildType();
 
-	// TODO: merge buildMainMenuMarkup, MyReposBuildCommand
-
-	// TODO: belong to DefaultBuildCommand
-	default InlineKeyboardMarkup buildMainMenuMarkup(List<BuildInfoDto> availableRepositories) {
-		InlineKeyboardButton[][] buttons = new InlineKeyboardButton[(int) Math.ceil(availableRepositories.size() / 2.0)][2];
-		for (int i = 0; i < availableRepositories.size(); i++) {
-			BuildInfoDto buildInfoDto = availableRepositories.get(i);
-			String repoName = (buildInfoDto.getIsPublic() ? ICON_PUBLIC : ICON_PRIVATE) + buildInfoDto.getRepoName();
-			buttons[i / 2][i % 2] = new InlineKeyboardButton(repoName).callbackData("/build status " + buildInfoDto.getRepoName());
-		}
-		if (availableRepositories.size() % 2 == 1) {
-			buttons[availableRepositories.size() / 2][1] = new InlineKeyboardButton("").switchInlineQueryCurrentChat("");
-		}
-
-		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(buttons);
-
-		inlineKeyboardMarkup.addRow(
-				new InlineKeyboardButton("Modify My Items ➡️").callbackData("/build my_list")
-		);
-
-		return inlineKeyboardMarkup;
-
-//		buttons[buttons.length - 1][0] = ;
-//		buttons[buttons.length - 1][1] = new InlineKeyboardButton("").switchInlineQueryCurrentChat("");
-//		return new InlineKeyboardMarkup(buttons);
+	default <T> Stream<List<T>> splitListByNElements(int pageSize, List<T> fields) {
+		return IntStream.range(0, (fields.size() + pageSize - 1) / pageSize)
+				.mapToObj(i -> fields.subList(i * pageSize, Math.min(pageSize * (i + 1), fields.size())));
 	}
 
-	// TODO: belong to MyReposBuildCommand
-	default InlineKeyboardMarkup buildMyRepoListMarkup(List<BuildInfoDto> availableRepositories) {
-		InlineKeyboardButton[][] buttons = new InlineKeyboardButton[(int) Math.ceil(availableRepositories.size() / 2.0)][2];
-		for (int i = 0; i < availableRepositories.size(); i++) {
-			BuildInfoDto buildInfoDto = availableRepositories.get(i);
-			String repoName = (buildInfoDto.getIsPublic() ? ICON_PUBLIC : ICON_PRIVATE) + buildInfoDto.getRepoName();
-			buttons[i / 2][i % 2] = new InlineKeyboardButton(repoName).callbackData("/build edit " + buildInfoDto.getRepoName());
-		}
-		if (availableRepositories.size() % 2 == 1) {
-			buttons[availableRepositories.size() / 2][1] = new InlineKeyboardButton("").switchInlineQueryCurrentChat("");
-		}
-
-		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(buttons);
-
-		inlineKeyboardMarkup.addRow(
-				new InlineKeyboardButton("⬅️ Back to action list️").callbackData("/build"),
-				new InlineKeyboardButton("Add New ✅").callbackData("/build add"),
-				new InlineKeyboardButton("Delete ❌️").switchInlineQueryCurrentChat("/build delete ")
-		);
-
-		return inlineKeyboardMarkup;
+	default void groupRepositoriesBy(List<BuildInfoDto> repositories, int pageSize, InlineKeyboardMarkup inlineKeyboardMarkup, String callbackPrefix) {
+		splitListByNElements(pageSize, repositories)
+				.forEach(buildInfoDtos -> inlineKeyboardMarkup.addRow(
+						buildInfoDtos.stream()
+								.map(buildInfoDto -> {
+									String repoName = (buildInfoDto.getIsPublic() ? ICON_PUBLIC : ICON_PRIVATE) + buildInfoDto.getRepoName();
+									return new InlineKeyboardButton(repoName).callbackData(callbackPrefix + buildInfoDto.getRepoName());
+								})
+								.toArray(InlineKeyboardButton[]::new)));
 	}
 
 }

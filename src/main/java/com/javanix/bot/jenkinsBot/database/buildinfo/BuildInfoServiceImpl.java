@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,9 +54,9 @@ class BuildInfoServiceImpl implements BuildInfoService {
 	}
 
 	@Override
-	public BuildInfoDto getOwnedRepository(String name, Long ownerId) {
+	public Optional<BuildInfoDto> getOwnedRepository(String name, Long ownerId) {
 		return repository.getByRepoNameIgnoreCaseAndCreatorId(name, ownerId)
-				.map(this::convertEntityToDto).orElse(null);
+				.map(this::convertEntityToDto);
 	}
 
 	@Override

@@ -27,6 +27,4 @@ public class CommandFactory {
                 });
     }
 
-    // TODO: support emoji aliases
-
 }

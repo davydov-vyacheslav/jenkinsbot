@@ -7,6 +7,8 @@ import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -31,5 +33,16 @@ class DefaultBuildCommand implements BuildSubCommand {
 	@Override
 	public BuildType getBuildType() {
 		return null;
+	}
+
+	private InlineKeyboardMarkup buildMainMenuMarkup(List<BuildInfoDto> availableRepositories) {
+
+		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+		groupRepositoriesBy(availableRepositories, 2, inlineKeyboardMarkup, "/build status ");
+		inlineKeyboardMarkup.addRow(
+				new InlineKeyboardButton("Modify My Items ➡️").callbackData("/build my_list")
+		);
+
+		return inlineKeyboardMarkup;
 	}
 }
