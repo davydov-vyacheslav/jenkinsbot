@@ -7,15 +7,17 @@ import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Base64;
 import java.util.stream.Stream;
 
 @Component
@@ -24,9 +26,7 @@ import java.util.stream.Stream;
 @Log4j2
 public class CliProcessor {
 
-	private final OsProcessor osProcessor;
-
-	private static final String baseUrlTemplate = "curl -s --user %s:%s http://%s:7331/job/%s/%s/consoleText -o %s";
+	private static final String urlTemplate = "http://%s:7331/job/%s/%s/consoleText";
 
 	public JenkinsBuildDetails getCurrentBuildJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo, int count) {
 		return getJenkinsBuildDetails(jenkinsInfo, "lastBuild", count);
@@ -42,11 +42,21 @@ public class CliProcessor {
 		File tempFile = File.createTempFile("jenkinsbot-", ".log");
 		tempFile.deleteOnExit();
 
-		log.info("Saving data to: " + tempFile.getAbsoluteFile());
+		String url = String.format(urlTemplate, jenkinsInfo.getDomain(), jenkinsInfo.getJobName(), buildType);
 
-		executeCommand(String.format(baseUrlTemplate,
-				jenkinsInfo.getUser(), jenkinsInfo.getPassword(), jenkinsInfo.getDomain(), jenkinsInfo.getJobName(),
-				buildType, tempFile.getAbsolutePath()));
+		log.info(String.format("Saving `%s` data to file: `%s`", url, tempFile.getAbsoluteFile()));
+
+		HttpURLConnection httpcon = (HttpURLConnection) new URL(url).openConnection();
+		String userCredentials = jenkinsInfo.getUser() + ":" + jenkinsInfo.getPassword();
+		String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
+		httpcon.setRequestProperty ("Authorization", basicAuth);
+		InputStream in = httpcon.getInputStream();
+
+		ReadableByteChannel readableByteChannel = Channels.newChannel(in);
+		try (FileOutputStream fileOutputStream = new FileOutputStream(tempFile)) {
+			fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+		}
+		readableByteChannel.close();
 
 		JenkinsBuildDetails details = JenkinsBuildDetails.builder()
 				.failedTestsCapacity(count)
@@ -66,51 +76,7 @@ public class CliProcessor {
 			});
 		}
 
-// TODO: use this instead of curl. Beware of authentification
-//        ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(FILE_URL).openStream());
-//        try (FileOutputStream fileOutputStream = new FileOutputStream(tempFile)) {
-//            fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-//        }
-
 		return details;
-	}
-
-	private String executeCommand(String params) {
-
-		List<String> osCommands = getLaunchCommandList();
-		List<String> processBuilderCommands = new ArrayList<>(osCommands);
-		processBuilderCommands.add(params);
-
-		ProcessBuilder processBuilder = new ProcessBuilder(processBuilderCommands);
-		processBuilder.redirectErrorStream(true);
-		StringBuilder processOutput = new StringBuilder();
-
-		try {
-			Process process = processBuilder.start();
-
-			try (BufferedReader processOutputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-				String readLine;
-
-				while ((readLine = processOutputReader.readLine()) != null) {
-					processOutput.append(readLine).append(System.lineSeparator());
-				}
-
-				process.waitFor();
-			}
-		} catch (InterruptedException | IOException ex) {
-			processOutput.append(ex.getMessage());
-			processOutput.append(Arrays.toString(ex.getStackTrace()));
-		}
-		return processOutput.toString().trim();
-	}
-
-	private List<String> getLaunchCommandList() {
-		List<String> osCommands = Arrays.asList("/bin/sh", "-c");
-
-		if (osProcessor.getOS() == Os.WINDOWS) {
-			osCommands = Arrays.asList("CMD", "/C");
-		}
-		return osCommands;
 	}
 
 }
