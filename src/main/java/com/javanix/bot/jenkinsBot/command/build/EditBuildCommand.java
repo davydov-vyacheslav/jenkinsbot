@@ -33,7 +33,7 @@ class EditBuildCommand extends AbstractModifyBuildCommand {
 					RepoBuildInformation repoBuildInformation = new RepoBuildInformation(getDefaultInProgressState(), repo);
 					userInProgressBuilds.put(from.id(), repoBuildInformation);
 					showMenu(bot, chat, from, String.format("Okay. Lets modify `%s` repository. Press `/cancel` to cancel creation any time \n%s", repo.getRepoName(), repoBuildInformation.getRepositoryDetails()));
-					return null;
+					return repo;
 				})
 				.orElseGet(() -> {
 					myReposBuildCommand.process(bot, chat, from, "Wrong repo. You can edit only owned repository.");

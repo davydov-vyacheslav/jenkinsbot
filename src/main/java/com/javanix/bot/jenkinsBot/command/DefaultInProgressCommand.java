@@ -20,7 +20,7 @@ class DefaultInProgressCommand implements ProgressableCommand {
 
 	@Override
 	public void progress(TelegramBot bot, Chat chat, User from, String message) {
-
+		bot.execute(new SendMessage(chat.id(), String.format("Okay, what does `%s` mean?", message)));
 	}
 
 	@Override

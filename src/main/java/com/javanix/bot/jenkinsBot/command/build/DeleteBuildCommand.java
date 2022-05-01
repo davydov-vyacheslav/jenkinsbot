@@ -28,7 +28,7 @@ class DeleteBuildCommand implements BuildSubCommand {
 					userContext.executeCommandAndSaveMessageId(bot, chat, from,
 							new SendMessage(chat.id(), String.format("Repository %s has been removed", repository.getRepoName())));
 					defaultBuildCommand.process(bot, chat, from, "");
-					return null;
+					return repository;
 				})
 				.orElseGet(() -> {
 					myReposBuildCommand.process(bot, chat, from, "Wrong repo. You can delete only owned repository.");
