@@ -12,6 +12,7 @@ public class JenkinsBuildDetails {
 	private Long failedTestsCount;
 	private List<String> topFailedTests;
 	private Integer failedTestsCapacity;
+	private BuildStatus buildStatus;
 
 	public void incrementRunTestCount() {
 		runTestsCount++;

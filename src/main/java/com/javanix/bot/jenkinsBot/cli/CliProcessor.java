@@ -62,6 +62,7 @@ public class CliProcessor {
 				.failedTestsCapacity(count)
 				.failedTestsCount(0L)
 				.runTestsCount(0L)
+				.buildStatus(BuildStatus.IN_PROGRESS)
 				.topFailedTests(new ArrayList<>())
 				.build();
 
@@ -73,6 +74,7 @@ public class CliProcessor {
 				} else if (s.contains("Tests run")) {
 					details.incrementRunTestCount();
 				}
+				details.setBuildStatus(BuildStatus.of(s)); // TODO: use lastLine
 			});
 		}
 

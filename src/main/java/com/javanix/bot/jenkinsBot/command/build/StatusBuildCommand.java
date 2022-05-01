@@ -41,7 +41,7 @@ class StatusBuildCommand implements BuildSubCommand {
         log.info(from.username() + " is getting status build for team: " + repository.getRepoName());
         JenkinsInfoDto jenkinsInfo = repository.getJenkinsInfo();
 
-        String statusFormatString = "Build status for `%s` team:\n" +
+        String statusFormatString = "Build status for `%s` team (`%s`):\n" +
                 "Run tests: %d (of approximately %d)\n" +
                 "Top %d Failed tests (of %d): \n" +
                 "%s";
@@ -55,6 +55,7 @@ class StatusBuildCommand implements BuildSubCommand {
         }
 
         String buildStatus = String.format(statusFormatString, repository.getRepoName(),
+                currentBuildDetails.getBuildStatus(),
                 currentBuildDetails.getRunTestsCount(),
                 lastBuildDetails.getRunTestsCount(),
                 currentBuildDetails.getFailedTestsCapacity(),
