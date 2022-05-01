@@ -33,4 +33,6 @@ public interface BuildInfoService {
 	BuildInfoDto getAvailableRepository(String name, Long ownerId);
 
 	boolean hasRepository(String name);
+
+	List<BuildInfoDto> allRepositories();
 }

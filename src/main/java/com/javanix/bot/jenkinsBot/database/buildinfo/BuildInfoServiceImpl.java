@@ -73,6 +73,14 @@ class BuildInfoServiceImpl implements BuildInfoService {
 		return repository.getByRepoNameIgnoreCase(name).isPresent();
 	}
 
+	@Override
+	public List<BuildInfoDto> allRepositories() {
+		return repository.findAll()
+				.stream()
+				.map(this::convertEntityToDto)
+				.collect(Collectors.toList());
+	}
+
 	private BuildInfoDto convertEntityToDto(BuildInfoEntity buildInfoEntity) {
 		return BuildInfoDto.builder()
 				.repoName(buildInfoEntity.getRepoName())

@@ -24,6 +24,7 @@ final class MigrationTool {
 	@PostConstruct
 	public void init() {
 		createOotbData();
+		fixDomainNames();
 	}
 
 	// add OTB data if they are absent
@@ -108,6 +109,19 @@ final class MigrationTool {
 							.build())
 					.build());
 			settingsService.saveSettings(KEY_DB_VERSION, "1");
+		}
+	}
+
+	public void fixDomainNames() {
+		if ("1".equals(settingsService.getSetting(KEY_DB_VERSION))) {
+			log.info("Fixing domain names to be `.perceptive.cloud` ... ");
+			service.allRepositories()
+					.stream()
+					.filter(buildInfoDto -> !buildInfoDto.getJenkinsInfo().getDomain().contains("."))
+					.peek(buildInfoDto -> buildInfoDto.getJenkinsInfo().setDomain(buildInfoDto.getJenkinsInfo().getDomain() + ".perceptive.cloud"))
+					.peek(buildInfoDto -> log.info("Fixed: " + buildInfoDto.getJenkinsInfo().getDomain()))
+					.forEach(service::updateRepository);
+			settingsService.saveSettings(KEY_DB_VERSION, "2");
 		}
 	}
 }
