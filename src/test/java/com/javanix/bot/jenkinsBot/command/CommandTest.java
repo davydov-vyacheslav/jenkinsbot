@@ -1,14 +1,12 @@
 package com.javanix.bot.jenkinsBot.command;
 
-import com.javanix.bot.jenkinsBot.command.build.BuildType;
+import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
-import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.request.SendMessage;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,21 +37,30 @@ public class CommandTest extends AbstractCommandTestCase {
 	@MockBean
 	private Chat chat;
 
-	// TODO: fixme
 	@Test
 	public void helpCommandTest() {
 		String commandText = "/help";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
 		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("List of commands: \n" +
-					"* /help - This help message\n" +
-					"* /build {add,delete,status} - build management and getting actual info", getText(invocation));
+			assertEquals("JenkinsBot. Основная задача - получение статуса билдов от Дженкиса (состояние билда и кол-во упавших тестов). \n" +
+					"Текущая версия заточена на работу с Java/jUnit проектами. \n" +
+					"\n" +
+					"Смежные команды:\n* /history - Показ содержимого файла с изменениями\n" +
+					"\n" +
+					"Остальные команды доступны в меню ;)\n" +
+					"\n" +
+					"Авторы:\n" +
+					"* Viacheslav Davydov <davs@javanix.com>\n" +
+					"\n" +
+					"Со-авторы:\n" +
+					"* N/A\n" +
+					"\n", getText(invocation));
 			return null;
 		});
 
 		TelegramCommand command = factory.getCommand(commandText);
-		assertTrue(command instanceof HelpCommand);
+		assertThat(command).isInstanceOf(HelpCommand.class);
 		command.process(bot, chat, from, commandText);
 		Mockito.verify(bot).execute(any(SendMessage.class));
 	}
@@ -120,6 +127,22 @@ public class CommandTest extends AbstractCommandTestCase {
 
 		TelegramCommand command = factory.getCommand(commandText);
 		assertTrue(command instanceof BuildCommand);
+		command.process(bot, chat, from, commandText);
+		Mockito.verify(bot).execute(any(SendMessage.class));
+	}
+
+	@Test
+	public void historyCommandTest() {
+		String commandText = "/history";
+		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
+
+		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
+			assertThat(getText(invocation)).contains("What's new / Changelog");
+			return null;
+		});
+
+		TelegramCommand command = factory.getCommand(commandText);
+		assertThat(command).isInstanceOf(HistoryCommand.class);
 		command.process(bot, chat, from, commandText);
 		Mockito.verify(bot).execute(any(SendMessage.class));
 	}

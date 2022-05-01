@@ -31,7 +31,7 @@ tasks.named('test') {
 task copyReadMe(type: Copy, description: "Copy README.md file to resources") {
     from project.projectDir
     into 'src/main/resources'
-    include 'README.md', 'whats.new'
+    include 'README.md', 'CHANGELOG'
 }
 
 processResources.dependsOn(copyReadMe)

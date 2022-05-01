@@ -3,14 +3,8 @@ package com.javanix.bot.jenkinsBot.command;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
-import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
-import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
 @Component
 class HelpCommand implements TelegramCommand {
@@ -18,13 +12,17 @@ class HelpCommand implements TelegramCommand {
 	@Override
 	public void process(TelegramBot bot, Chat chat, User from, String message) {
 
-		try {
-			bot.execute(new SendMessage(chat.id(),
-							String.join("\n", IOUtils.readLines(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("README.md")), StandardCharsets.UTF_8)).substring(0, 2000))
-					.parseMode(ParseMode.Markdown));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		bot.execute(new SendMessage(chat.id(),
+				"JenkinsBot. Основная задача - получение статуса билдов от Дженкиса (состояние билда и кол-во упавших тестов). \n" +
+						"Текущая версия заточена на работу с Java/jUnit проектами. \n\n" +
+						"Смежные команды:\n" +
+						"* /history - Показ содержимого файла с изменениями\n\n" +
+						"Остальные команды доступны в меню ;)\n\n" +
+						"Авторы:\n" +
+						"* Viacheslav Davydov <davs@javanix.com>\n\n" +
+						"Со-авторы:\n" +
+						"* N/A\n\n"
+				));
 	}
 
 	@Override

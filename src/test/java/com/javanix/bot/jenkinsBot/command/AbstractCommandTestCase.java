@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractCommandTestCase {
 
-	protected Object getText(InvocationOnMock invocation) {
-		return ((SendMessage) invocation.getArgument(0)).getParameters().get("text");
+	protected String getText(InvocationOnMock invocation) {
+		return (String) ((SendMessage) invocation.getArgument(0)).getParameters().get("text");
 	}
 
 	protected List<InlineKeyboardButton> getInlineKeyboardButtons(InvocationOnMock invocation) {
