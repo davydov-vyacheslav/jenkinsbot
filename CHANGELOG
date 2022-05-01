@@ -2,6 +2,13 @@ What's new / Changelog
 ~~~~~~~~~~~~~~~~~~~~~~
 
 
+- 0.0.5
+  - Cli processor: get rid of external utilities (usage: curl)
+  - added build completion status info
+  - fixed Link representation issue for short-typed domain names by adding `.perceptive.cloud` during migration
+  - Added Project files (https://github.com/kmindi/special-files-in-repository-root/blob/master/README.md):
+    - CHANGELOG, AUTHORS, LICENSE
+  - Remaster /history, /help; help should refer to other informative links
 - 0.0.4
   - BotFather: added Bot icon
   - updated CliProcessor to process one logs single time; get rid of cmd utilities: cat, grep, head, wc

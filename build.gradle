@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.javanix.bot'
-version = '0.0.4-SNAPSHOT'
+version = '0.0.5'
 sourceCompatibility = '8'
 
 repositories {
