@@ -15,10 +15,6 @@ public enum BuildStatus {
 		this.finalMessage = finalMessage;
 	}
 
-	public String getFinalMessage() {
-		return finalMessage;
-	}
-
 	public static BuildStatus of(String message) {
 		return Arrays.stream(values()).filter(buildStatus -> buildStatus.finalMessage.equals(message)).findAny().orElse(IN_PROGRESS);
 	}

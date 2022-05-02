@@ -4,6 +4,8 @@ import com.javanix.bot.jenkinsBot.core.service.SettingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 class SettingsServiceImpl implements SettingsService {
@@ -12,21 +14,17 @@ class SettingsServiceImpl implements SettingsService {
 
 	@Override
 	public String getSetting(String key) {
-		return findByKey(key).getValue();
+		return findByKey(key).orElse(new SettingsEntity()).getValue();
 	}
 
 	@Override
 	public void saveSettings(String key, String value) {
-		SettingsEntity entity = findByKey(key);
-		if (entity == null) {
-			entity = new SettingsEntity(null, key, value);
-		} else {
-			entity.setValue(value);
-		}
+		SettingsEntity entity = findByKey(key).orElse(new SettingsEntity(null, key, value));
+		entity.setValue(value);
 		repository.save(entity);
 	}
 
-	private SettingsEntity findByKey(String key) {
+	private Optional<SettingsEntity> findByKey(String key) {
 		return repository.findByKeyIgnoreCase(key);
 	}
 
