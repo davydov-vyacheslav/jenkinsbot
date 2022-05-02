@@ -1,16 +1,20 @@
 package com.javanix.bot.jenkinsBot.command;
 
-import com.pengrad.telegrambot.TelegramBot;
+import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
-import com.pengrad.telegrambot.request.SendMessage;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 class UnknownCommand implements TelegramCommand {
+
+    private final TelegramBotWrapper bot;
+
     @Override
-    public void process(TelegramBot bot, Chat chat, User from, String message) {
-        bot.execute(new SendMessage(chat.id(), "Unknown command. Press /help to see list of all commands"));
+    public void process(Chat chat, User from, String message) {
+        bot.sendI18nMessage(chat, "message.command.unknown");
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.javanix.bot.jenkinsBot.command;
 
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +15,12 @@ class CancelCommand implements TelegramCommand {
 	private final DefaultInProgressCommand defaultCommand;
 
 	@Override
-	public void process(TelegramBot bot, Chat chat, User from, String message) {
+	public void process(Chat chat, User from, String message) {
 		progressableCommands.stream()
 				.filter(progressableCommand -> progressableCommand.isInProgress(from.id()))
 				.findFirst()
 				.orElse(defaultCommand)
-				.cancelProgress(bot, chat, from);
+				.cancelProgress(chat, from);
 	}
 
 	@Override

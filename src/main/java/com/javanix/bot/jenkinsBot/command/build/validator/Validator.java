@@ -11,16 +11,18 @@ public interface Validator {
 	default boolean validate(BuildInfoDto target, List<String> errors) {
 		JenkinsInfoDto jenkinsInfo = target.getJenkinsInfo();
 
+		// TODO: error.command.build.validation.{required,invalid}. + field.getFieldKey
+
 		// required fields check
-		validateEmptiness(target.getRepoName(), errors, "Repo Name is required");
-		validateEmptiness(jenkinsInfo.getJobName(), errors, "Jenkins Job Name is required");
-		validateEmptiness(jenkinsInfo.getDomain(), errors, "Jenkins Domain Name is required");
+		validateEmptiness(target.getRepoName(), errors, "error.command.build.validation.required.repo.name");
+		validateEmptiness(jenkinsInfo.getJobName(), errors, "error.command.build.validation.required.jenkins.job");
+		validateEmptiness(jenkinsInfo.getDomain(), errors, "error.command.build.validation.required.domain");
 
 		// other checks
-		validateSpaces(jenkinsInfo.getJobName(), errors, "Jenkins Job Name is invalid");
-		validateSpaces(jenkinsInfo.getUser(), errors, "Jenkins User Name is invalid");
-		validateSpaces(jenkinsInfo.getPassword(), errors, "Jenkins Password is invalid");
-		validateSpaces(jenkinsInfo.getDomain(), errors, "Jenkins Domain Name is invalid");
+		validateSpaces(jenkinsInfo.getJobName(), errors, "error.command.build.validation.invalid.jenkins.job");
+		validateSpaces(jenkinsInfo.getUser(), errors, "error.command.build.validation.invalid.jenkins.user");
+		validateSpaces(jenkinsInfo.getPassword(), errors, "error.command.build.validation.invalid.jenkins.password");
+		validateSpaces(jenkinsInfo.getDomain(), errors, "error.command.build.validation.invalid.jenkins.domain");
 
 		return errors.isEmpty();
 	}
@@ -32,7 +34,7 @@ public interface Validator {
 	}
 
 	default void validateSpaces(String fieldValue, List<String> errors, String validationMessage) {
-		if (fieldValue.contains(" ")) {
+		if (fieldValue != null && fieldValue.contains(" ")) {
 			errors.add(validationMessage);
 		}
 	}

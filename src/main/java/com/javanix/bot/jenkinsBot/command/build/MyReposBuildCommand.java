@@ -1,15 +1,14 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
+import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
 import com.javanix.bot.jenkinsBot.command.build.model.UserBuildContext;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,13 +20,16 @@ class MyReposBuildCommand implements BuildSubCommand {
 
 	private final BuildInfoService database;
 	private final UserBuildContext userContext;
+	private final TelegramBotWrapper bot;
 
 	@Override
-	public void process(TelegramBot bot, Chat chat, User from, String defaultMessage) {
+	public void process(Chat chat, User from, String defaultMessage) {
 		List<BuildInfoDto> availableRepositories = database.getOwnedRepositories(from.id());
 		InlineKeyboardMarkup inlineKeyboard = buildMyRepoListMarkup(availableRepositories);
-		userContext.executeCommandAndSaveMessageId(bot, chat, from,
-				new SendMessage(chat.id(), defaultMessage.isEmpty() ? "My Repositories" : defaultMessage).replyMarkup(inlineKeyboard));
+		userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
+				.messageKey(defaultMessage.isEmpty() ? "message.command.build.myRepos.title" : defaultMessage)
+				.keyboard(inlineKeyboard)
+				.build());
 	}
 
 
@@ -40,9 +42,9 @@ class MyReposBuildCommand implements BuildSubCommand {
 		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 		groupRepositoriesBy(availableRepositories, 2, inlineKeyboardMarkup, "/build edit ");
 		inlineKeyboardMarkup.addRow(
-				new InlineKeyboardButton("⬅️ Back to action list️").callbackData("/build"),
-				new InlineKeyboardButton("Add New ✅").callbackData("/build add"),
-				new InlineKeyboardButton("Delete ❌️").switchInlineQueryCurrentChat("/build delete ")
+				new InlineKeyboardButton(bot.getI18nMessage("button.build.backToActionList")).callbackData("/build"),
+				new InlineKeyboardButton(bot.getI18nMessage("button.build.repo.add")).callbackData("/build add"),
+				new InlineKeyboardButton(bot.getI18nMessage("button.build.repo.delete")).switchInlineQueryCurrentChat("/build delete ")
 		);
 
 		return inlineKeyboardMarkup;

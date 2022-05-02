@@ -1,15 +1,14 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
+import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
 import com.javanix.bot.jenkinsBot.command.build.model.UserBuildContext;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,13 +20,16 @@ class DefaultBuildCommand implements BuildSubCommand {
 
 	private final BuildInfoService database;
 	private final UserBuildContext userContext;
+	private final TelegramBotWrapper bot;
 
 	@Override
-	public void process(TelegramBot bot, Chat chat, User from, String defaultMessage) {
+	public void process(Chat chat, User from, String defaultMessageKey) {
 		List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(from.id());
 
-		userContext.executeCommandAndSaveMessageId(bot, chat, from,
-				new SendMessage(chat.id(), defaultMessage.isEmpty() ? "Build info main list" : defaultMessage).replyMarkup(buildMainMenuMarkup(availableRepositories)));
+		userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
+				.messageKey(defaultMessageKey.isEmpty() ? "message.command.build.default.mainList" : defaultMessageKey)
+				.keyboard(buildMainMenuMarkup(availableRepositories))
+				.build());
 	}
 
 	@Override
@@ -40,7 +42,7 @@ class DefaultBuildCommand implements BuildSubCommand {
 		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 		groupRepositoriesBy(availableRepositories, 2, inlineKeyboardMarkup, "/build status ");
 		inlineKeyboardMarkup.addRow(
-				new InlineKeyboardButton("Modify My Items ➡️").callbackData("/build my_list")
+				new InlineKeyboardButton(bot.getI18nMessage("button.build.modifyMyItems")).callbackData("/build my_list")
 		);
 
 		return inlineKeyboardMarkup;

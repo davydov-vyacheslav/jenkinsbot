@@ -1,14 +1,13 @@
 package com.javanix.bot.jenkinsBot.command;
 
+import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,10 +19,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -38,8 +39,8 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 	@MockBean
 	private BuildInfoService databaseService;
 
-	@MockBean
-	private TelegramBot bot;
+	@Autowired
+	private TelegramBotWrapper bot;
 
 	@MockBean
 	private Chat chat;
@@ -64,11 +65,12 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 				.build();
 		Mockito.when(databaseService.getOwnedRepository("repo01", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
 		Mockito.when(sendResponse.message()).thenReturn(new Message());
-		Mockito.when(bot.execute(any(SendMessage.class)))
+		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
 				.then(executeEditDomainAndAssert())
 				.then(invocation -> {
-					assertEquals("Select build to get build status", getText(invocation));
+					TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+					assertEquals("message.command.build.status.select.title", message.getMessageKey());
 					return sendResponse;
 				});
 
@@ -77,7 +79,7 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "Domain02");
 		executeCommand(from, "/build edit /done");
 
-		Mockito.verify(bot, Mockito.times(3)).execute(any(SendMessage.class));
+		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 
 		Mockito.verify(databaseService).updateRepository(BuildInfoDto.builder()
 				.repoName("repo01")
@@ -109,17 +111,21 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 				.build();
 		Mockito.when(databaseService.getOwnedRepository("repo01", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
 		Mockito.when(sendResponse.message()).thenReturn(new Message());
-		Mockito.when(bot.execute(any(SendMessage.class)))
+		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
 				.then(invocation -> {
-					assertEquals(getUserInfoString("Domain 01"), getText(invocation));
-					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
+					TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+					assertEquals(getUserInfoString("Domain 01"), message.getMessageKey());
+					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
 				})
 				.then(invocation -> {
-					assertEquals("Can't save entity. Following issues found:\n" +
-							"-Jenkins Domain Name is invalid", getText(invocation));
+					TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+					assertEquals("error.command.build.save.repo", message.getMessageKey());
+					assertArrayEquals(new Object[] { "error.command.build.validation.invalid.jenkins.domain" }, message.getMessageArgs());
+					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
+					assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
 				});
 
@@ -128,7 +134,7 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "Domain 01");
 		executeCommand(from, "/build edit /done");
 
-		Mockito.verify(bot, Mockito.times(3)).execute(any(SendMessage.class));
+		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 		Mockito.verify(databaseService, Mockito.times(0)).updateRepository(any());
 		Mockito.verify(databaseService, Mockito.times(0)).addRepository(any());
 	}
@@ -151,14 +157,22 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 				.build();
 		Mockito.when(databaseService.getOwnedRepository("repo01", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
 		Mockito.when(sendResponse.message()).thenReturn(new Message());
-		Mockito.when(bot.execute(any(SendMessage.class)))
+		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
 				.then(executeEditDomainAndAssert())
 				.then(invocation -> {
-					assertEquals("The command `Modifying the entity` has been cancelled. Entity discarded", getText(invocation));
+					TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+					assertEquals("message.command.build.cancel", message.getMessageKey());
+					assertArrayEquals(new Object[] { "label.field.build.common.edit" }, message.getMessageArgs());
 					return sendResponse;
 				}).then(invocation -> {
-					assertEquals("Build info main list", getText(invocation));
+					TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+					assertEquals("message.command.build.default.mainList", message.getMessageKey());
+					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
+					List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
+							new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
+					);
+					assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
 				});
 
@@ -167,16 +181,17 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "Domain02");
 		executeCommand(from, "/cancel");
 
-		Mockito.verify(bot, Mockito.times(4)).execute(any(SendMessage.class));
+		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 		Mockito.verify(databaseService, Mockito.times(0)).updateRepository(any());
 	}
 
 	private Answer<Object> executeEditIntroAndAssert() {
 		return invocation -> {
-			assertEquals("Okay. Lets modify `repo01` repository. Press `/cancel` to cancel creation any time \n" +
-							getUserInfoString("Domain01"), getText(invocation));
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals("message.command.build.edit.intro", message.getMessageKey());
+			assertArrayEquals(new Object[] { "repo01", getUserInfoString("Domain01") }, message.getMessageArgs());
 			List<InlineKeyboardButton> expectedInlineButtons = getExpectedInlineButtons();
-			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
+			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
 		};
@@ -184,36 +199,37 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 
 	private Answer<Object> executeEditDomainAndAssert() {
 		return invocation -> {
-			assertEquals(getUserInfoString("Domain02"), getText(invocation));
-			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals(getUserInfoString("Domain02"), message.getMessageKey());
+			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
 		};
 	}
 
 	private String getUserInfoString(String domain) {
-		return String.format("Current repository info:\n" +
-				"- repoName: %s\n" +
-				"- jenkinsDomain: %s\n" +
-				"- jenkinsUser: \uD83D\uDEAB\n" +
-				"- jenkinsPassword: \uD83D\uDEAB\n" +
-				"- jobName: Job01\n" +
-				"- isPublic: false", "repo01", domain);
+		return String.format("Current repository info: \\n" +
+				"- label.field.build.repo.name: repo01\n" +
+				"- label.field.build.repo.public: false\n" +
+				"- label.field.build.jenkins.domain: %s\n" +
+				"- label.field.build.jenkins.user: \uD83D\uDEAB\n" +
+				"- label.field.build.jenkins.password: \uD83D\uDEAB\n" +
+				"- label.field.build.jenkins.job: Job01", domain);
 	}
 
 	private List<InlineKeyboardButton> getExpectedInlineButtons() {
 		return Arrays.asList(
-				new InlineKeyboardButton("Set Publicity").callbackData("/build EDIT repo.public"),
-				new InlineKeyboardButton("Set Jenkins Domain️").callbackData("/build EDIT jenkins.domain"),
-				new InlineKeyboardButton("Set Jenkins User").callbackData("/build EDIT jenkins.user"),
-				new InlineKeyboardButton("Set Jenkins Password").callbackData("/build EDIT jenkins.password"),
-				new InlineKeyboardButton("Set Jenkins Job").callbackData("/build EDIT jenkins.job"),
-				new InlineKeyboardButton("Complete action ✅").callbackData("/build EDIT /done"),
-				new InlineKeyboardButton("Cancel action ❌").callbackData("/cancel")
+				new InlineKeyboardButton("Set `label.field.build.repo.public`").callbackData("/build EDIT repo.public"),
+				new InlineKeyboardButton("Set `label.field.build.jenkins.domain`").callbackData("/build EDIT jenkins.domain"),
+				new InlineKeyboardButton("Set `label.field.build.jenkins.user`").callbackData("/build EDIT jenkins.user"),
+				new InlineKeyboardButton("Set `label.field.build.jenkins.password`").callbackData("/build EDIT jenkins.password"),
+				new InlineKeyboardButton("Set `label.field.build.jenkins.job`").callbackData("/build EDIT jenkins.job"),
+				new InlineKeyboardButton("button.build.common.complete").callbackData("/build EDIT /done"),
+				new InlineKeyboardButton("button.build.common.cancel").callbackData("/cancel")
 		);
 	}
 
 	private void executeCommand(User from, String command) {
-		factory.getCommand(command).process(bot, chat, from, command);
+		factory.getCommand(command).process(chat, from, command);
 	}
 }

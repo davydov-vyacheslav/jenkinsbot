@@ -1,13 +1,12 @@
 package com.javanix.bot.jenkinsBot.command;
 
+import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,7 +21,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 
 @SpringJUnitConfig
@@ -32,8 +33,8 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 	@Autowired
 	private CommandFactory factory;
 
-	@MockBean
-	private TelegramBot bot;
+	@Autowired
+	private TelegramBotWrapper bot;
 
 	@MockBean
 	private Chat chat;
@@ -49,17 +50,19 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build delete";
 		User from = new User(123L);
 
+		Mockito.when(bot.getI18nMessage(any())).then(returnsFirstArg());
 		Mockito.when(databaseService.getOwnedRepository("", 123L)).thenReturn(Optional.empty());
 		Mockito.when(sendResponse.message()).thenReturn(new Message());
-		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("Wrong repo. You can delete only owned repository.", getText(invocation));
+		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals("error.command.build.delete", message.getMessageKey());
 
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton("⬅️ Back to action list️").callbackData("/build"),
-					new InlineKeyboardButton("Add New ✅").callbackData("/build add"),
-					new InlineKeyboardButton("Delete ❌️").switchInlineQueryCurrentChat("/build delete ")
+					new InlineKeyboardButton("button.build.backToActionList").callbackData("/build"),
+					new InlineKeyboardButton("button.build.repo.add").callbackData("/build add"),
+					new InlineKeyboardButton("button.build.repo.delete").switchInlineQueryCurrentChat("/build delete ")
 			);
-			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
+			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 
 			return sendResponse;
@@ -67,8 +70,8 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(BuildCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
 
 	@Test
@@ -76,17 +79,19 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build delete xmen";
 		User from = new User(123L);
 
+		Mockito.when(bot.getI18nMessage(any())).then(returnsFirstArg());
 		Mockito.when(sendResponse.message()).thenReturn(new Message());
 		Mockito.when(databaseService.getOwnedRepository("xmen", 123L)).thenReturn(Optional.empty());
-		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("Wrong repo. You can delete only owned repository.", getText(invocation));
+		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals("error.command.build.delete", message.getMessageKey());
 
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton("⬅️ Back to action list️").callbackData("/build"),
-					new InlineKeyboardButton("Add New ✅").callbackData("/build add"),
-					new InlineKeyboardButton("Delete ❌️").switchInlineQueryCurrentChat("/build delete ")
+					new InlineKeyboardButton("button.build.backToActionList").callbackData("/build"),
+					new InlineKeyboardButton("button.build.repo.add").callbackData("/build add"),
+					new InlineKeyboardButton("button.build.repo.delete").switchInlineQueryCurrentChat("/build delete ")
 			);
-			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
+			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 
 			return sendResponse;
@@ -94,8 +99,8 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(BuildCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
 
 	@Test
@@ -103,6 +108,7 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build delete xmen";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
+		Mockito.when(bot.getI18nMessage(any())).then(returnsFirstArg());
 		Mockito.when(sendResponse.message()).thenReturn(new Message());
 		Mockito.when(databaseService.getOwnedRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(
 				Optional.of(BuildInfoDto.builder()
@@ -110,28 +116,30 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.build()));
 
-		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("Repository xmen has been removed", getText(invocation));
-
+		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals("message.command.build.delete.processed", message.getMessageKey());
+			assertArrayEquals(new Object[] { "xmen" }, message.getMessageArgs());
 			List<InlineKeyboardButton> expectedInlineButtons = Collections.emptyList();
-			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
+			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 
 			return sendResponse;
 		}).then(invocation -> {
-			assertEquals("Build info main list", getText(invocation));
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals("message.command.build.default.mainList", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
-					new InlineKeyboardButton("Modify My Items ➡️").callbackData("/build my_list")
+					new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
 			);
-			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
+			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
 		});
 
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(BuildCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot, Mockito.times(2)).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot, Mockito.times(2)).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
 
 }

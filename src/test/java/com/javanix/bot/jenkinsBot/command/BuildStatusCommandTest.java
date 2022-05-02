@@ -1,17 +1,16 @@
 package com.javanix.bot.jenkinsBot.command;
 
+import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.cli.BuildStatus;
 import com.javanix.bot.jenkinsBot.cli.CliProcessor;
 import com.javanix.bot.jenkinsBot.cli.JenkinsBuildDetails;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,6 +26,7 @@ import java.util.List;
 import static com.javanix.bot.jenkinsBot.command.build.BuildSubCommand.ICON_PRIVATE;
 import static com.javanix.bot.jenkinsBot.command.build.BuildSubCommand.ICON_PUBLIC;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -38,8 +38,8 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 	@Autowired
 	private CommandFactory factory;
 
-	@MockBean
-	private TelegramBot bot;
+	@Autowired
+	private TelegramBotWrapper bot;
 
 	@MockBean
 	private Chat chat;
@@ -72,15 +72,15 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.build()));
 
-		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("Wrong team. Please choose correct one", getText(invocation));
-
+		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals("error.command.build.common.wrongTeam", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
 					new InlineKeyboardButton(ICON_PUBLIC + "repo1").callbackData("/build status repo1"),
 					new InlineKeyboardButton(ICON_PRIVATE + "repo2").callbackData("/build status repo2"),
-					new InlineKeyboardButton("Modify My Items ➡️").callbackData("/build my_list")
+					new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
 			);
-			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
+			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 
 			return sendResponse;
@@ -88,8 +88,8 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(BuildCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
 
 	@Test
@@ -111,24 +111,23 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 						.isPublic(false)
 						.build()));
 
-		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("Wrong team. Please choose correct one", getText(invocation));
-
+		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals("error.command.build.common.wrongTeam", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
 					new InlineKeyboardButton(ICON_PUBLIC + "repo1").callbackData("/build status repo1"),
 					new InlineKeyboardButton(ICON_PRIVATE + "repo2").callbackData("/build status repo2"),
-					new InlineKeyboardButton("Modify My Items ➡️").callbackData("/build my_list")
+					new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
 			);
-			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
+			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
-
 			return sendResponse;
 		});
 
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(BuildCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
 
 	@Test
@@ -165,30 +164,27 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build status xmen";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(bot.execute(any(SendMessage.class)))
-				.then(invocation -> {
-					assertEquals("Build status for `xmen` team (`IN_PROGRESS`):\n" +
-									"Run tests: 500 (of approximately 1000)\n" +
-									"Top 20 Failed tests (of 2): \n" +
-									"- [AssemblyExportTest](http://domain:7331/job/Insight/ws/output/reports/TEST-com.liquent.insight.manager.assembly.test.AssemblyExportTest.xml/*view*/)\n" +
-									"- [AnotherFailedTest](http://domain:7331/job/Insight/ws/output/reports/TEST-com.liquent.insight.manager.assembly.test2.AnotherFailedTest.xml/*view*/)",
-							getText(invocation));
-
-					List<InlineKeyboardButton> expectedInlineButtons = Collections.emptyList();
-					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
-					assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
-
-					return sendResponse;
-				})
-				.then(invocation -> {
-					assertEquals("Build info main list", getText(invocation));
-					return sendResponse;
-				});
+		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals("message.command.build.status.repo", message.getMessageKey());
+			assertArrayEquals(new Object[] { "xmen", BuildStatus.IN_PROGRESS, 500L, 1000L, 20, 2L,
+					"- [AssemblyExportTest](http://domain:7331/job/Insight/ws/output/reports/TEST-com.liquent.insight.manager.assembly.test.AssemblyExportTest.xml/*view*/)\n" +
+							"- [AnotherFailedTest](http://domain:7331/job/Insight/ws/output/reports/TEST-com.liquent.insight.manager.assembly.test2.AnotherFailedTest.xml/*view*/)" },
+					message.getMessageArgs());
+			List<InlineKeyboardButton> expectedInlineButtons = Collections.emptyList();
+			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
+			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
+			return sendResponse;
+		}).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals("message.command.build.default.mainList", message.getMessageKey());
+			return sendResponse;
+		});
 
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(BuildCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot, times(2)).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot, times(2)).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
 
 }

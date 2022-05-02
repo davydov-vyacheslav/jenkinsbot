@@ -1,6 +1,5 @@
 package com.javanix.bot.jenkinsBot.command;
 
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 
@@ -9,7 +8,7 @@ public interface ProgressableCommand extends Processable {
 
 	boolean isInProgress(Long userId);
 
-	void cancelProgress(TelegramBot bot, Chat chat, User from);
+	void cancelProgress(Chat chat, User from);
 
-	void progress(TelegramBot bot, Chat chat, User from, String message);
+	void progress(Chat chat, User from, String message);
 }

@@ -7,70 +7,58 @@ import java.util.Arrays;
 
 public enum StateType {
 	PUBLIC(
-			"Set repo.isPublic field",
-			"Publicity",
 			"repo.public",
+			BuildInfoDto::getIsPublic,
 			(repo, value) -> repo.setIsPublic(Boolean.parseBoolean(value))),
 	JOB_NAME(
-			"Set jobName field",
-			"Jenkins Job",
 			"jenkins.job",
+			repo -> repo.getJenkinsInfo().getJobName(),
 			(repo, value) -> repo.getJenkinsInfo().setJobName(value)),
 	PASSWORD(
-			"Set password field",
-			"Jenkins Password",
 			"jenkins.password",
+			repo -> repo.getJenkinsInfo().getPassword(),
 			(repo, value) -> repo.getJenkinsInfo().setPassword(value)),
 	USER(
-			"Set user field",
-			"Jenkins User",
 			"jenkins.user",
+			repo -> repo.getJenkinsInfo().getUser(),
 			(repo, value) -> repo.getJenkinsInfo().setUser(value)),
 	DOMAIN(
-			"Set domain field",
-			"Jenkins Domain️",
 			"jenkins.domain",
+			repo -> repo.getJenkinsInfo().getDomain(),
 			(repo, value) -> repo.getJenkinsInfo().setDomain(value)),
 	REPO_NAME(
-			"Set repoName field",
-			"Repo Name",
 			"repo.name",
+			BuildInfoDto::getRepoName,
 			BuildInfoDto::setRepoName),
 	NA_ADD(
-			"Adding the entity",
-			"", "not applicable",
+			"common.add",
+			repo -> "",
 			(repo, value) -> {}),
 	NA_EDIT(
-			"Modifying the entity",
-			"", "not applicable",
+			"common.edit",
+			repo -> "",
 			(repo, value) -> {});
 
 	private final EntityUpdateAction updateAction;
-	private final String info;
-	private final String fieldName;
+	private final EntityGetFieldValueAction getAction;
 	private final String fieldKey;
 
-	StateType(String info, String fieldName, String fieldKey, EntityUpdateAction updateAction) {
-		this.info = info;
+	StateType(String fieldKey, EntityGetFieldValueAction getAction, EntityUpdateAction updateAction) {
 		this.updateAction = updateAction;
+		this.getAction = getAction;
 		this.fieldKey = fieldKey;
-		this.fieldName = fieldName;
 	}
 
 	public String getFieldKey() {
 		return fieldKey;
 	}
 
-	public String getFieldName() {
-		return fieldName;
+	public Object getValue(BuildInfoDto repo) {
+		return getAction.get(repo);
 	}
 
 	public void updateField(BuildInfoDto repo, String value) {
 		updateAction.updateEntity(repo, value);
-	}
-
-	public String getInfo() {
-		return info;
 	}
 
 	@FunctionalInterface
@@ -78,6 +66,10 @@ public enum StateType {
 		void updateEntity(BuildInfoDto repo, String value);
 	}
 
+	@FunctionalInterface
+	private interface EntityGetFieldValueAction {
+		Object get(BuildInfoDto repo);
+	}
 	public static StateType of(String code, StateType fallbackValue) {
 		return Arrays.stream(values())
 				.filter(stateType -> stateType.fieldKey.equalsIgnoreCase(code))

@@ -2,7 +2,6 @@ package com.javanix.bot.jenkinsBot.command;
 
 import com.javanix.bot.jenkinsBot.command.build.BuildCommandFactory;
 import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ class BuildCommand implements TelegramCommand {
     private static final Pattern buildCommandPattern = Pattern.compile(".*/build.?(add|edit|status|delete|my_list).?(.*)", CASE_INSENSITIVE);
 
     @Override
-    public void process(TelegramBot bot, Chat chat, User from, String message) {
+    public void process(Chat chat, User from, String message) {
 
         // assuming income message is '@botname /build status teamname'
         Matcher m = buildCommandPattern.matcher(message);
@@ -33,7 +32,7 @@ class BuildCommand implements TelegramCommand {
             buildArguments = m.group(2);
         }
 
-        buildCommandFactory.getCommand(buildType).process(bot, chat, from, buildArguments);
+        buildCommandFactory.getCommand(buildType).process(chat, from, buildArguments);
     }
 
 

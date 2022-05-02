@@ -1,7 +1,7 @@
 package com.javanix.bot.jenkinsBot.command;
 
+import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
@@ -24,7 +24,9 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 
 @SpringJUnitConfig
 @ContextConfiguration(classes = CommandTestConfiguration.class)
@@ -34,8 +36,8 @@ public class CommandTest extends AbstractCommandTestCase {
 	@Autowired
 	private CommandFactory factory;
 
-	@MockBean
-	private TelegramBot bot;
+	@Autowired
+	private TelegramBotWrapper bot;
 
 	@MockBean
 	private Chat chat;
@@ -47,44 +49,20 @@ public class CommandTest extends AbstractCommandTestCase {
 	public void helpCommandTest() {
 		String commandText = "/help";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
-
-		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("JenkinsBot. Основная задача - получение статуса билдов от Дженкиса (состояние билда и кол-во упавших тестов). \n" +
-					"Текущая версия заточена на работу с Java/jUnit проектами. \n" +
-					"\n" +
-					"Смежные команды:\n* /history - Показ содержимого файла с изменениями\n" +
-					"\n" +
-					"Остальные команды доступны в меню ;)\n" +
-					"\n" +
-					"Авторы:\n" +
-					"* Viacheslav Davydov <davs@javanix.com>\n" +
-					"\n" +
-					"Со-авторы:\n" +
-					"* N/A\n" +
-					"\n", getText(invocation));
-			return null;
-		});
-
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(HelpCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot).sendI18nMessage(chat, "message.command.help");
 	}
 
 	@Test
 	public void fooCommandTest() {
 		String commandText = "/non-exists asd asd";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
-
-		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("Unknown command. Press /help to see list of all commands", getText(invocation));
-			return null;
-		});
-
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(UnknownCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot).sendI18nMessage(chat, "message.command.unknown");
 	}
 
 	@Test
@@ -93,22 +71,22 @@ public class CommandTest extends AbstractCommandTestCase {
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
 		Mockito.when(sendResponse.message()).thenReturn(new Message());
-		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("Build info main list", getText(invocation));
-
+		Mockito.when(bot.getI18nMessage(any())).then(returnsFirstArg());
+		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals("message.command.build.default.mainList", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
-					new InlineKeyboardButton("Modify My Items ➡️").callbackData("/build my_list")
+					new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
 			);
-			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
+			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
-
 			return sendResponse;
 		});
 
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(BuildCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
 
 	@Test
@@ -117,22 +95,22 @@ public class CommandTest extends AbstractCommandTestCase {
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
 		Mockito.when(sendResponse.message()).thenReturn(new Message());
-		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("Build info main list", getText(invocation));
-
+		Mockito.when(bot.getI18nMessage(any())).then(returnsFirstArg());
+		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			assertEquals("message.command.build.default.mainList", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
-					new InlineKeyboardButton("Modify My Items ➡️").callbackData("/build my_list")
+					new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
 			);
-			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(invocation);
+			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
-
 			return sendResponse;
 		});
 
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(BuildCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
 
 	@Test
@@ -147,25 +125,23 @@ public class CommandTest extends AbstractCommandTestCase {
 
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(HistoryCommand.class);
-		command.process(bot, chat, from, commandText);
+		command.process(chat, from, commandText);
 		Mockito.verify(bot).execute(any(SendMessage.class));
 	}
 
 	@Test
 	public void unhandledTextTest() {
-
 		String commandText = "some text";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
-
-		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("Okay, what does `some text` mean?", getText(invocation));
-			return null;
-		});
-
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(UnhandledTextCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot).sendI18nMessage(Mockito.eq(chat),
+				 argThat((TelegramBotWrapper.MessageInfo messageInfo) ->
+						messageInfo.getMessageKey().equals("message.command.defaultInProgress.progress")
+						&& Arrays.equals(messageInfo.getMessageArgs(), new Object[]{"some text"})
+				)
+		);
 	}
 
 	@Test
@@ -184,7 +160,7 @@ public class CommandTest extends AbstractCommandTestCase {
 
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(StartCommand.class);
-		command.process(bot, chat, from, commandText);
+		command.process(chat, from, commandText);
 		Mockito.verify(bot).execute(any(SetMyCommands.class));
 	}
 
@@ -192,16 +168,10 @@ public class CommandTest extends AbstractCommandTestCase {
 	public void cancelCommandTest_noActive() {
 		String commandText = "/cancel";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
-
-		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertEquals("No active command to cancel. I wasn't doing anything anyway. Zzzzz... (c)", getText(invocation));
-			return null;
-		});
-
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(CancelCommand.class);
-		command.process(bot, chat, from, commandText);
-		Mockito.verify(bot).execute(any(SendMessage.class));
+		command.process(chat, from, commandText);
+		Mockito.verify(bot).sendI18nMessage(chat, "message.command.defaultInProgress.cancel");
 	}
 
 }

@@ -1,30 +1,40 @@
 package com.javanix.bot.jenkinsBot.command;
 
-import com.pengrad.telegrambot.TelegramBot;
+import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
-import com.pengrad.telegrambot.request.SendMessage;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 class DefaultInProgressCommand implements ProgressableCommand {
+
+	private final TelegramBotWrapper bot;
+
 	@Override
 	public boolean isInProgress(Long userId) {
 		return false;
 	}
 
 	@Override
-	public void cancelProgress(TelegramBot bot, Chat chat, User from) {
-		bot.execute(new SendMessage(chat.id(), "No active command to cancel. I wasn't doing anything anyway. Zzzzz... (c)"));
+	public void cancelProgress(Chat chat, User from) {
+		bot.sendI18nMessage(chat, "message.command.defaultInProgress.cancel");
 	}
 
 	@Override
-	public void progress(TelegramBot bot, Chat chat, User from, String message) {
-		bot.execute(new SendMessage(chat.id(), String.format("Okay, what does `%s` mean?", message)));
+	public void progress(Chat chat, User from, String message) {
+		bot.sendI18nMessage(chat, TelegramBotWrapper.MessageInfo.builder()
+				.messageKey("message.command.defaultInProgress.progress")
+				.messageArgs(new Object[] { message })
+				.build());
 	}
 
 	@Override
-	public void process(TelegramBot bot, Chat chat, User from, String message) {
-		bot.execute(new SendMessage(chat.id(), String.format("Okay, what does `%s` mean?", message)));
+	public void process(Chat chat, User from, String message) {
+		bot.sendI18nMessage(chat, TelegramBotWrapper.MessageInfo.builder()
+				.messageKey("message.command.defaultInProgress.process")
+				.messageArgs(new Object[] { message })
+				.build());
 	}
 }

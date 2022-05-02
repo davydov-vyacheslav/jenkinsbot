@@ -1,16 +1,15 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
+import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.cli.CliProcessor;
 import com.javanix.bot.jenkinsBot.cli.JenkinsBuildDetails;
 import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.ParseMode;
-import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
@@ -27,24 +26,21 @@ class StatusBuildCommand implements BuildSubCommand {
     private final DefaultBuildCommand defaultBuildCommand;
     private final CliProcessor cliProcessor;
     private final BuildInfoService database;
+    private final TelegramBotWrapper bot;
     private static final int failedTestsCount = 20;
     private static final Pattern failedTestsPattern = Pattern.compile(".*\\[junit\\] TEST (.*)\\.(.*Test) FAILED");
 
-    public void process(TelegramBot bot, Chat chat, User from, String buildCommandArguments) {
+    @Override
+    public void process(Chat chat, User from, String buildCommandArguments) {
         BuildInfoDto repository = database.getAvailableRepository(buildCommandArguments.trim().split(" ")[0], from.id());
 
         if (repository == null) {
-            defaultBuildCommand.process(bot, chat, from, "Wrong team. Please choose correct one");
+            defaultBuildCommand.process(chat, from, "error.command.build.common.wrongTeam");
             return;
         }
 
         log.info(from.username() + " is getting status build for team: " + repository.getRepoName());
         JenkinsInfoDto jenkinsInfo = repository.getJenkinsInfo();
-
-        String statusFormatString = "Build status for `%s` team (`%s`):\n" +
-                "Run tests: %d (of approximately %d)\n" +
-                "Top %d Failed tests (of %d): \n" +
-                "%s";
 
         JenkinsBuildDetails currentBuildDetails = cliProcessor.getCurrentBuildJenkinsBuildDetails(repository.getJenkinsInfo(), failedTestsCount);
         JenkinsBuildDetails lastBuildDetails = cliProcessor.getPreviousBuildJenkinsBuildDetails(repository.getJenkinsInfo());
@@ -54,18 +50,18 @@ class StatusBuildCommand implements BuildSubCommand {
             failedTestsOutputWithLinks = "N/A";
         }
 
-        String buildStatus = String.format(statusFormatString, repository.getRepoName(),
-                currentBuildDetails.getBuildStatus(),
-                currentBuildDetails.getRunTestsCount(),
-                lastBuildDetails.getRunTestsCount(),
-                currentBuildDetails.getFailedTestsCapacity(),
-                currentBuildDetails.getFailedTestsCount(),
-                failedTestsOutputWithLinks);
-
-        log.info(buildStatus);
-
-        bot.execute(new SendMessage(chat.id(), buildStatus).parseMode(ParseMode.Markdown));
-        defaultBuildCommand.process(bot, chat, from, "");
+        bot.sendI18nMessage(chat, TelegramBotWrapper.MessageInfo.builder()
+                        .messageKey("message.command.build.status.repo")
+                        .messageArgs(new Object[] { repository.getRepoName(),
+                                currentBuildDetails.getBuildStatus(),
+                                currentBuildDetails.getRunTestsCount(),
+                                lastBuildDetails.getRunTestsCount(),
+                                currentBuildDetails.getFailedTestsCapacity(),
+                                currentBuildDetails.getFailedTestsCount(),
+                                failedTestsOutputWithLinks})
+                        .parseMode(ParseMode.Markdown)
+                .build());
+        defaultBuildCommand.process(chat, from, "");
     }
 
     // convert

@@ -18,7 +18,7 @@ public class BuildInfoAddValidator implements Validator {
 		Validator.super.validate(target, errors);
 
 		if (database.hasRepository(target.getRepoName())) {
-			errors.add("Repo Name is invalid (or not unique)");
+			errors.add("error.command.build.validation.invalid.repo.name");
 		}
 
 		return errors.isEmpty();

@@ -1,5 +1,6 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
+import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
 import com.javanix.bot.jenkinsBot.command.build.model.RepoBuildInformation;
 import com.javanix.bot.jenkinsBot.command.build.model.StateType;
@@ -7,7 +8,6 @@ import com.javanix.bot.jenkinsBot.command.build.model.UserBuildContext;
 import com.javanix.bot.jenkinsBot.command.build.validator.BuildInfoAddValidator;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import org.springframework.stereotype.Component;
@@ -18,18 +18,18 @@ import java.util.List;
 @Component
 class AddBuildCommand extends AbstractModifyBuildCommand {
 
-	public AddBuildCommand(BuildInfoAddValidator buildInfoValidator, BuildInfoService database, UserBuildContext userContext, DefaultBuildCommand defaultBuildCommand) {
-		super(database, userContext, defaultBuildCommand, buildInfoValidator);
+	public AddBuildCommand(BuildInfoAddValidator buildInfoValidator, BuildInfoService database, UserBuildContext userContext, DefaultBuildCommand defaultBuildCommand, TelegramBotWrapper telegramBotWrapper) {
+		super(database, userContext, defaultBuildCommand, buildInfoValidator, telegramBotWrapper);
 	}
 
 	@Override
-	protected void processOnStart(TelegramBot bot, Chat chat, User from, String command) {
+	protected void processOnStart(Chat chat, User from, String command) {
 		userInProgressBuilds.put(from.id(), new RepoBuildInformation(getDefaultInProgressState(), BuildInfoDto.emptyEntityBuilder()
 				.creatorId(from.id())
 				.creatorFullName(from.username())
 				.build()));
 
-		showMenu(bot, chat, from, "Okay. Lets create new repository. Press `/cancel` to cancel creation any time");
+		showMenu(chat, from, "message.command.build.add.intro", null);
 	}
 
 	@Override

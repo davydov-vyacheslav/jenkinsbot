@@ -1,5 +1,6 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
+import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
 import com.javanix.bot.jenkinsBot.command.build.model.RepoBuildInformation;
 import com.javanix.bot.jenkinsBot.command.build.model.StateType;
@@ -7,7 +8,6 @@ import com.javanix.bot.jenkinsBot.command.build.model.UserBuildContext;
 import com.javanix.bot.jenkinsBot.command.build.validator.BuildInfoEditValidator;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import org.springframework.stereotype.Component;
@@ -20,23 +20,23 @@ class EditBuildCommand extends AbstractModifyBuildCommand {
 
 	private final MyReposBuildCommand myReposBuildCommand;
 
-	public EditBuildCommand(BuildInfoEditValidator buildInfoValidator, MyReposBuildCommand myReposBuildCommand, BuildInfoService database, UserBuildContext userContext, DefaultBuildCommand defaultBuildCommand) {
-		super(database, userContext, defaultBuildCommand, buildInfoValidator);
+	public EditBuildCommand(BuildInfoEditValidator buildInfoValidator, MyReposBuildCommand myReposBuildCommand, BuildInfoService database, UserBuildContext userContext, DefaultBuildCommand defaultBuildCommand, TelegramBotWrapper telegramBotWrapper) {
+		super(database, userContext, defaultBuildCommand, buildInfoValidator, telegramBotWrapper);
 		this.myReposBuildCommand = myReposBuildCommand;
 	}
 
 	// FIXME: more gracier
 	@Override
-	protected void processOnStart(TelegramBot bot, Chat chat, User from, String command) {
+	protected void processOnStart(Chat chat, User from, String command) {
 		database.getOwnedRepository(command, from.id())
 				.map(repo -> {
 					RepoBuildInformation repoBuildInformation = new RepoBuildInformation(getDefaultInProgressState(), repo);
 					userInProgressBuilds.put(from.id(), repoBuildInformation);
-					showMenu(bot, chat, from, String.format("Okay. Lets modify `%s` repository. Press `/cancel` to cancel creation any time \n%s", repo.getRepoName(), repoBuildInformation.getRepositoryDetails()));
+					showMenu(chat, from, "message.command.build.edit.intro", new Object[] { repo.getRepoName(), getRepositoryDetails(repo) } );
 					return repo;
 				})
 				.orElseGet(() -> {
-					myReposBuildCommand.process(bot, chat, from, "Wrong repo. You can edit only owned repository.");
+					myReposBuildCommand.process(chat, from, "error.command.build.edit.repo");
 					return null;
 				});
 	}

@@ -1,14 +1,12 @@
 package com.javanix.bot.jenkinsBot;
 
 import com.javanix.bot.jenkinsBot.command.CommandFactory;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,8 +14,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Main implements CommandLineRunner {
 
-    @Value("${bot.token}")
-    private String botToken;
+    @Autowired
+    private TelegramBotWrapper bot;
 
     @Autowired
     private CommandFactory commandFactory;
@@ -28,7 +26,6 @@ public class Main implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        TelegramBot bot = new TelegramBot(botToken);
 
         bot.setUpdatesListener(updates -> {
             updates.forEach(update -> {
@@ -52,7 +49,7 @@ public class Main implements CommandLineRunner {
                 }
                 if (message != null) {
                     try {
-                        commandFactory.getCommand(text).process(bot, message.chat(), from, text);
+                        commandFactory.getCommand(text).process(message.chat(), from, text);
                     } catch (Exception e) {
                         bot.execute(new SendMessage(message.chat().id(), "Error: " + e.getMessage()));
                         e.printStackTrace();
