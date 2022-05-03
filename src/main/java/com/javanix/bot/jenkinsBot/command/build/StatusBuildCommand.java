@@ -54,6 +54,7 @@ class StatusBuildCommand implements BuildSubCommand {
                         .messageKey("message.command.build.status.repo")
                         .messageArgs(new Object[] { repository.getRepoName(),
                                 currentBuildDetails.getBuildStatus(),
+                                bot.getI18nMessage(currentBuildDetails.getBuildStatus().getMessageKey()),
                                 currentBuildDetails.getRunTestsCount(),
                                 lastBuildDetails.getRunTestsCount(),
                                 currentBuildDetails.getFailedTestsCapacity(),

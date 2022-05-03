@@ -167,7 +167,7 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
 			assertEquals("message.command.build.status.repo", message.getMessageKey());
-			assertArrayEquals(new Object[] { "xmen", BuildStatus.IN_PROGRESS, 500L, 1000L, 20, 2L,
+			assertArrayEquals(new Object[] { "xmen", BuildStatus.IN_PROGRESS, BuildStatus.IN_PROGRESS.getMessageKey(), 500L, 1000L, 20, 2L,
 					"- [AssemblyExportTest](http://domain:7331/job/Insight/ws/output/reports/TEST-com.liquent.insight.manager.assembly.test.AssemblyExportTest.xml/*view*/)\n" +
 							"- [AnotherFailedTest](http://domain:7331/job/Insight/ws/output/reports/TEST-com.liquent.insight.manager.assembly.test2.AnotherFailedTest.xml/*view*/)" },
 					message.getMessageArgs());
