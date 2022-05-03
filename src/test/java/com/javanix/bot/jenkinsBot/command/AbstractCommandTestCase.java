@@ -25,6 +25,7 @@ public abstract class AbstractCommandTestCase {
 
 	@BeforeEach
 	public void setup() {
+		// FIXME: make bean?
 		Mockito.when(bot.getI18nMessage(any())).then(returnsFirstArg());
 		Mockito.when(bot.getI18nMessage(any(), any())).then(invocation -> {
 			String key = invocation.getArgument(0);

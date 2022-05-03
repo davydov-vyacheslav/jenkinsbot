@@ -1,8 +1,8 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
 import com.javanix.bot.jenkinsBot.command.build.model.UserBuildContext;
+import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
@@ -37,8 +37,8 @@ class DeleteBuildCommand implements BuildSubCommand {
 				});
 	}
 
-	public BuildType getBuildType() {
-		return BuildType.DELETE;
+	public CommonEntityActionType getBuildType() {
+		return CommonEntityActionType.DELETE;
 	}
 
 }

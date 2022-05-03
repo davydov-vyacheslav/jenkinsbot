@@ -7,7 +7,7 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class CommandFactory {
+public class CommonCommandFactory {
 
     private final Set<TelegramCommand> commands;
     private final UnknownCommand unknownCommand;

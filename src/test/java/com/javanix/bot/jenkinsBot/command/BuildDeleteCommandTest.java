@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 
 	@Autowired
-	private CommandFactory factory;
+	private CommonCommandFactory factory;
 
 	@Autowired
 	private TelegramBotWrapper bot;

@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 public class BuildAddCommandTest extends AbstractCommandTestCase {
 
 	@Autowired
-	private CommandFactory factory;
+	private CommonCommandFactory factory;
 
 	@MockBean
 	private BuildInfoService databaseService;

@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 public class CommandTest extends AbstractCommandTestCase {
 
 	@Autowired
-	private CommandFactory factory;
+	private CommonCommandFactory factory;
 
 	@Autowired
 	private TelegramBotWrapper bot;

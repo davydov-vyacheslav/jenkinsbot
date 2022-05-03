@@ -36,7 +36,7 @@ import static org.mockito.Mockito.times;
 public class BuildStatusCommandTest extends AbstractCommandTestCase {
 
 	@Autowired
-	private CommandFactory factory;
+	private CommonCommandFactory factory;
 
 	@Autowired
 	private TelegramBotWrapper bot;

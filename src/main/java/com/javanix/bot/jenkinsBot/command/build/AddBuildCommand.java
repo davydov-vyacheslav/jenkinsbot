@@ -1,11 +1,11 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
 import com.javanix.bot.jenkinsBot.command.build.model.RepoBuildInformation;
 import com.javanix.bot.jenkinsBot.command.build.model.StateType;
 import com.javanix.bot.jenkinsBot.command.build.model.UserBuildContext;
 import com.javanix.bot.jenkinsBot.command.build.validator.BuildInfoAddValidator;
+import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
@@ -43,8 +43,8 @@ class AddBuildCommand extends AbstractModifyBuildCommand {
 	}
 
 	@Override
-	public BuildType getBuildType() {
-		return BuildType.ADD;
+	public CommonEntityActionType getBuildType() {
+		return CommonEntityActionType.ADD;
 	}
 
 	@Override

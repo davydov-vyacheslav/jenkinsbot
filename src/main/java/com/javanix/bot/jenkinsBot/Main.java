@@ -1,6 +1,6 @@
 package com.javanix.bot.jenkinsBot;
 
-import com.javanix.bot.jenkinsBot.command.CommandFactory;
+import com.javanix.bot.jenkinsBot.command.CommonCommandFactory;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
@@ -18,7 +18,7 @@ public class Main implements CommandLineRunner {
     private TelegramBotWrapper bot;
 
     @Autowired
-    private CommandFactory commandFactory;
+    private CommonCommandFactory commonCommandFactory;
 
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
@@ -49,7 +49,7 @@ public class Main implements CommandLineRunner {
                 }
                 if (message != null) {
                     try {
-                        commandFactory.getCommand(text).process(message.chat(), from, text);
+                        commonCommandFactory.getCommand(text).process(message.chat(), from, text);
                     } catch (Exception e) {
                         bot.execute(new SendMessage(message.chat().id(), "Error: " + e.getMessage()));
                         e.printStackTrace();

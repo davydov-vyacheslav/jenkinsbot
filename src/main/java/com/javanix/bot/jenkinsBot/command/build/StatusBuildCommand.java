@@ -3,7 +3,7 @@ package com.javanix.bot.jenkinsBot.command.build;
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.cli.CliProcessor;
 import com.javanix.bot.jenkinsBot.cli.JenkinsBuildDetails;
-import com.javanix.bot.jenkinsBot.command.build.model.BuildType;
+import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
@@ -81,7 +81,7 @@ class StatusBuildCommand implements BuildSubCommand {
         return result;
     }
 
-    public BuildType getBuildType() {
-        return BuildType.STATUS;
+    public CommonEntityActionType getBuildType() {
+        return CommonEntityActionType.STATUS;
     }
 }
