@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 interface BuildInfoRepository extends MongoRepository<BuildInfoEntity, String> {
 
-	List<BuildInfoEntity> getByCreatorIdOrIsPublicTrue(@Param("ownerId") Long ownerId);
+	List<BuildInfoEntity> getByCreatorIdOrIsPublicTrue(Long ownerId);
 
 	List<BuildInfoEntity> getByCreatorId(Long ownerId);
 

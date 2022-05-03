@@ -1,8 +1,10 @@
 package com.javanix.bot.jenkinsBot.database;
 
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
+import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
+import com.javanix.bot.jenkinsBot.core.service.HealthCheckService;
 import com.javanix.bot.jenkinsBot.core.service.SettingsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -19,6 +21,7 @@ import static com.javanix.bot.jenkinsBot.core.service.SettingsService.KEY_DB_VER
 final class MigrationTool {
 
 	private final BuildInfoService service;
+	private final HealthCheckService healthCheckService;
 	private final SettingsService settingsService;
 
 	@PostConstruct
@@ -110,6 +113,52 @@ final class MigrationTool {
 					.build());
 			settingsService.saveSettings(KEY_DB_VERSION, "1");
 		}
+
+		if (healthCheckService.isDatabaseEmpty()) {
+			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+					.endpointName("test-dmsmanager-dvt-rim-lb01")
+					.endpointUrl("http://dvt-rim-lb01.perceptive.cloud:9091/dmsmanager/actuator/health")
+					.creatorFullName("auto")
+					.creatorId(DEFAULT_CREATOR_ID)
+					.isPublic(true)
+					.build());
+			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+					.endpointName("test-dmsmanager-10.215.162.170")
+					.endpointUrl("http://10.215.162.170:9091/dmsmanager/actuator/health")
+					.creatorFullName("auto")
+					.creatorId(DEFAULT_CREATOR_ID)
+					.isPublic(true)
+					.build());
+			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+					.endpointName("test-ir-dvt-rim-res01")
+					.endpointUrl("http://dvt-rim-res01:2861/InSightRenderingService/Service.svc?wsdl")
+					.creatorFullName("auto")
+					.creatorId(DEFAULT_CREATOR_ID)
+					.isPublic(true)
+					.build());
+			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+					.endpointName("test-ir-vlqt-53-0587")
+					.endpointUrl("http://vlqt-53-0587:2861/InSightRenderingService/Service.svc?wsdl")
+					.creatorFullName("auto")
+					.creatorId(DEFAULT_CREATOR_ID)
+					.isPublic(true)
+					.build());
+			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+					.endpointName("test-ir-wrong-host")
+					.endpointUrl("http://vlqt-53-0588:2861/InSightRenderingService/Service.svc?wsdl")
+					.creatorFullName("auto")
+					.creatorId(DEFAULT_CREATOR_ID)
+					.isPublic(true)
+					.build());
+			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+					.endpointName("test-ir-wrong-port")
+					.endpointUrl("http://vlqt-53-0587:2862/InSightRenderingService/Service.svc?wsdl")
+					.creatorFullName("auto")
+					.creatorId(DEFAULT_CREATOR_ID)
+					.isPublic(true)
+					.build());
+		}
+
 	}
 
 	public void fixDomainNames() {

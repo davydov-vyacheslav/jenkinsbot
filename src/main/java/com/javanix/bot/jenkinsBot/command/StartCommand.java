@@ -21,6 +21,7 @@ class StartCommand implements TelegramCommand {
 				new BotCommand("/help", "Show help message"),
 				new BotCommand("/cancel", "Cancel any in-progress action (e.g. creation)"),
 				new BotCommand("/start", "You already did that ;)"),
+				new BotCommand("/healthcheck", "HealthCheck for external services"),
 				new BotCommand("/build", "Build processing"))
 		);
 	}

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -79,6 +80,20 @@ public class CliProcessor {
 		}
 
 		return details;
+	}
+
+	@SneakyThrows
+	public HealthStatus getHealthStatusForUrl(String urlValue) {
+		URL url = new URL(urlValue);
+		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+		connection.setRequestMethod("GET"); // FIXME: HEAD ?
+		connection.setConnectTimeout(5000);
+		try {
+			connection.connect();
+		} catch (IOException ioe) {
+			return HealthStatus.DOWN;
+		}
+		return HealthStatus.of(connection.getResponseCode());
 	}
 
 }
