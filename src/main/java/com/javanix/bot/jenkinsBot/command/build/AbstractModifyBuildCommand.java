@@ -73,9 +73,7 @@ public abstract class AbstractModifyBuildCommand implements BuildSubCommand, Pro
 		}
 
 		userInProgressBuilds.get(currentId).setState(StateType.of(command, getDefaultInProgressState()));
-		// TODO: show field welcome message: label.welcome.field.build.repo.name
-
-		// TOD: /cancel when entering fieldname
+		bot.sendI18nMessage(from, chat, "label.welcome.field.build." + command);
 	}
 
 	protected abstract void persist(BuildInfoDto repo);
