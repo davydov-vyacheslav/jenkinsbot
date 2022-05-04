@@ -3,10 +3,8 @@ package com.javanix.bot.jenkinsBot.command;
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import com.pengrad.telegrambot.request.SendMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.text.MessageFormat;
@@ -36,10 +34,6 @@ public abstract class AbstractCommandTestCase {
 			}
 			return new MessageFormat(key).format(invocation.getArgument(1));
 		});
-	}
-
-	protected String getText(InvocationOnMock invocation) {
-		return (String) ((SendMessage) invocation.getArgument(0)).getParameters().get("text");
 	}
 
 	protected List<InlineKeyboardButton> getInlineKeyboardButtons(TelegramBotWrapper.MessageInfo message) {

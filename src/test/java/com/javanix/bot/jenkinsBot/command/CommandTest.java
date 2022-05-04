@@ -119,7 +119,8 @@ public class CommandTest extends AbstractCommandTestCase {
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
 		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
-			assertThat(getText(invocation)).contains("What's new / Changelog");
+			String actualText = (String) ((SendMessage) invocation.getArgument(0)).getParameters().get("text");
+			assertThat(actualText).contains("What's new / Changelog");
 			return null;
 		});
 
