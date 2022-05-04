@@ -14,7 +14,7 @@ class UnknownCommand implements TelegramCommand {
 
     @Override
     public void process(Chat chat, User from, String message) {
-        bot.sendI18nMessage(chat, "message.command.unknown");
+        bot.sendI18nMessage(from, chat, "message.command.unknown");
     }
 
     @Override

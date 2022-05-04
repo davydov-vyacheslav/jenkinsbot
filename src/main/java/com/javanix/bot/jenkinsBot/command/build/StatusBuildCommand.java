@@ -50,11 +50,11 @@ class StatusBuildCommand implements BuildSubCommand {
             failedTestsOutputWithLinks = "N/A";
         }
 
-        bot.sendI18nMessage(chat, TelegramBotWrapper.MessageInfo.builder()
+        bot.sendI18nMessage(from, chat, TelegramBotWrapper.MessageInfo.builder()
                         .messageKey("message.command.build.status.repo")
                         .messageArgs(new Object[] { repository.getRepoName(),
                                 currentBuildDetails.getBuildStatus(),
-                                bot.getI18nMessage(currentBuildDetails.getBuildStatus().getMessageKey()),
+                                bot.getI18nMessage(from, currentBuildDetails.getBuildStatus().getMessageKey()),
                                 currentBuildDetails.getRunTestsCount(),
                                 lastBuildDetails.getRunTestsCount(),
                                 currentBuildDetails.getFailedTestsCapacity(),

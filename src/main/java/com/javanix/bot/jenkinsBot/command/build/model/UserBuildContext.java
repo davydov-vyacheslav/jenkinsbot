@@ -28,7 +28,7 @@ public class UserBuildContext {
 
 	public void executeCommandAndSaveMessageId(Chat chat, User from, TelegramBotWrapper.MessageInfo messageInfo) {
 		removeLastMessage(chat, from);
-		SendResponse execute = bot.sendI18nMessage(chat, messageInfo);
+		SendResponse execute = bot.sendI18nMessage(from, chat, messageInfo);
 		UserInfoDto user = userService.getUser(from.id());
 		user.setUserName(from.username());
 		user.setBuildMenuLastMessageId(execute.message().messageId());

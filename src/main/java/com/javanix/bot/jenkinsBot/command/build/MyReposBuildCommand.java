@@ -25,7 +25,7 @@ class MyReposBuildCommand implements BuildSubCommand {
 	@Override
 	public void process(Chat chat, User from, String defaultMessage) {
 		List<BuildInfoDto> availableRepositories = database.getOwnedRepositories(from.id());
-		InlineKeyboardMarkup inlineKeyboard = buildMyRepoListMarkup(availableRepositories);
+		InlineKeyboardMarkup inlineKeyboard = buildMyRepoListMarkup(from, availableRepositories);
 		userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
 				.messageKey(defaultMessage.isEmpty() ? "message.command.build.myRepos.title" : defaultMessage)
 				.keyboard(inlineKeyboard)
@@ -37,14 +37,14 @@ class MyReposBuildCommand implements BuildSubCommand {
 		return CommonEntityActionType.MY_LIST;
 	}
 
-	private InlineKeyboardMarkup buildMyRepoListMarkup(List<BuildInfoDto> availableRepositories) {
+	private InlineKeyboardMarkup buildMyRepoListMarkup(User from, List<BuildInfoDto> availableRepositories) {
 
 		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 		groupRepositoriesBy(availableRepositories, 2, inlineKeyboardMarkup, "/build edit ");
 		inlineKeyboardMarkup.addRow(
-				new InlineKeyboardButton(bot.getI18nMessage("button.build.backToActionList")).callbackData("/build"),
-				new InlineKeyboardButton(bot.getI18nMessage("button.build.repo.add")).callbackData("/build add"),
-				new InlineKeyboardButton(bot.getI18nMessage("button.build.repo.delete")).switchInlineQueryCurrentChat("/build delete ")
+				new InlineKeyboardButton(bot.getI18nMessage(from, "button.build.backToActionList")).callbackData("/build"),
+				new InlineKeyboardButton(bot.getI18nMessage(from, "button.build.repo.add")).callbackData("/build add"),
+				new InlineKeyboardButton(bot.getI18nMessage(from, "button.build.repo.delete")).switchInlineQueryCurrentChat("/build delete ")
 		);
 
 		return inlineKeyboardMarkup;

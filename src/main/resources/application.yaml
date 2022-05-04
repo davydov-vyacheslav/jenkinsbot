@@ -2,7 +2,7 @@ bot:
   token: ${BOT_TOKEN:foo}
 spring:
   messages:
-    basename: messages
+    basename: i18n/messages
   data:
     mongodb:
       uri: mongodb://localhost/jenkinsbot?authSource=admin

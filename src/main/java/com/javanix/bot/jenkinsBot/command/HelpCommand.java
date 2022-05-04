@@ -14,7 +14,7 @@ class HelpCommand implements TelegramCommand {
 
 	@Override
 	public void process(Chat chat, User from, String message) {
-		bot.sendI18nMessage(chat, "message.command.help");
+		bot.sendI18nMessage(from, chat, "message.command.help");
 	}
 
 	@Override

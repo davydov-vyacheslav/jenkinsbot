@@ -19,12 +19,12 @@ class DefaultInProgressCommand implements ProgressableCommand {
 
 	@Override
 	public void cancelProgress(Chat chat, User from) {
-		bot.sendI18nMessage(chat, "message.command.defaultInProgress.cancel");
+		bot.sendI18nMessage(from, chat, "message.command.defaultInProgress.cancel");
 	}
 
 	@Override
 	public void progress(Chat chat, User from, String message) {
-		bot.sendI18nMessage(chat, TelegramBotWrapper.MessageInfo.builder()
+		bot.sendI18nMessage(from, chat, TelegramBotWrapper.MessageInfo.builder()
 				.messageKey("message.command.defaultInProgress.progress")
 				.messageArgs(new Object[] { message })
 				.build());
@@ -32,7 +32,7 @@ class DefaultInProgressCommand implements ProgressableCommand {
 
 	@Override
 	public void process(Chat chat, User from, String message) {
-		bot.sendI18nMessage(chat, TelegramBotWrapper.MessageInfo.builder()
+		bot.sendI18nMessage(from, chat, TelegramBotWrapper.MessageInfo.builder()
 				.messageKey("message.command.defaultInProgress.process")
 				.messageArgs(new Object[] { message })
 				.build());

@@ -8,13 +8,10 @@ import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
-import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.response.SendResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -35,30 +32,17 @@ import static org.mockito.Mockito.times;
 @ContextConfiguration(classes = CommandTestConfiguration.class)
 public class BuildStatusCommandTest extends AbstractCommandTestCase {
 
-	@Autowired
-	private CommonCommandFactory factory;
-
-	@Autowired
-	private TelegramBotWrapper bot;
-
-	@MockBean
-	private Chat chat;
-
 	@MockBean
 	private BuildInfoService databaseService;
 
 	@MockBean
 	private CliProcessor cliProcessor;
 
-	@MockBean
-	private SendResponse sendResponse;
-
 	@Test
 	public void status_noParams() {
 		String commandText = "/build status";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(sendResponse.message()).thenReturn(new Message());
 		Mockito.when(databaseService.getAvailableRepository("", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(null);
 		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Arrays.asList(
 				BuildInfoDto.builder()
@@ -72,8 +56,8 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.build()));
 
-		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
-			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.build.common.wrongTeam", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
 					new InlineKeyboardButton(ICON_PUBLIC + "repo1").callbackData("/build status repo1"),
@@ -89,7 +73,7 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(BuildCommand.class);
 		command.process(chat, from, commandText);
-		Mockito.verify(bot).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(bot).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
 
 	@Test
@@ -97,7 +81,6 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build status xmen";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(sendResponse.message()).thenReturn(new Message());
 		Mockito.when(databaseService.getAvailableRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(null);
 		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Arrays.asList(
 				BuildInfoDto.builder()
@@ -111,8 +94,8 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 						.isPublic(false)
 						.build()));
 
-		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
-			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.build.common.wrongTeam", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
 					new InlineKeyboardButton(ICON_PUBLIC + "repo1").callbackData("/build status repo1"),
@@ -127,7 +110,7 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(BuildCommand.class);
 		command.process(chat, from, commandText);
-		Mockito.verify(bot).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(bot).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
 
 	@Test
@@ -144,7 +127,6 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 				.build();
 		Mockito.when(databaseService.getAvailableRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(team);
 
-		Mockito.when(sendResponse.message()).thenReturn(new Message());
 		Mockito.when(cliProcessor.getPreviousBuildJenkinsBuildDetails(jenkinsInfo)).thenReturn(
 				JenkinsBuildDetails.builder()
 						.runTestsCount(1000L)
@@ -164,8 +146,8 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build status xmen";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(bot.sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
-			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("message.command.build.status.repo", message.getMessageKey());
 			assertArrayEquals(new Object[] { "xmen", BuildStatus.IN_PROGRESS, BuildStatus.IN_PROGRESS.getMessageKey(), 500L, 1000L, 20, 2L,
 					"- [AssemblyExportTest](http://domain:7331/job/Insight/ws/output/reports/TEST-com.liquent.insight.manager.assembly.test.AssemblyExportTest.xml/*view*/)\n" +
@@ -176,7 +158,7 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
 		}).then(invocation -> {
-			TelegramBotWrapper.MessageInfo message = invocation.getArgument(1);
+			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("message.command.build.default.mainList", message.getMessageKey());
 			return sendResponse;
 		});
@@ -184,7 +166,7 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		TelegramCommand command = factory.getCommand(commandText);
 		assertThat(command).isInstanceOf(BuildCommand.class);
 		command.process(chat, from, commandText);
-		Mockito.verify(bot, times(2)).sendI18nMessage(any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(bot, times(2)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
 
 }

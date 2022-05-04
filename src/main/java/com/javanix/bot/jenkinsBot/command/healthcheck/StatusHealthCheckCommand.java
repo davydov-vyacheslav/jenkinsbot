@@ -36,24 +36,24 @@ class StatusHealthCheckCommand implements HealthCheckSubCommand {
 				.map(status -> new StatusCheckForStatusDto(status, HealthStatus.NA))
 				.collect(Collectors.toList());
 
-		SendResponse execute = bot.execute(new SendMessage(chat.id(), buildMessage(endpoints)));
+		SendResponse execute = bot.execute(new SendMessage(chat.id(), buildMessage(from, endpoints)));
 
 		ExecutorService threadPool = Executors.newFixedThreadPool(4);
 		for (StatusCheckForStatusDto endpoint: endpoints) {
 			CompletableFuture.supplyAsync(() -> {
 				endpoint.setHealthStatus(cliProcessor.getHealthStatusForUrl(endpoint.getHealthCheckInfoDto().getEndpointUrl()));
-				return bot.execute(new EditMessageText(chat.id(), execute.message().messageId(), buildMessage(endpoints)));
+				return bot.execute(new EditMessageText(chat.id(), execute.message().messageId(), buildMessage(from, endpoints)));
 			}, threadPool);
 		}
 	}
 
-	private String buildMessage(List<StatusCheckForStatusDto> endpoints) {
+	private String buildMessage(User from, List<StatusCheckForStatusDto> endpoints) {
 		StringBuilder message = new StringBuilder();
-		message.append(bot.getI18nMessage("message.command.endpoint.common.status.prefix")).append("\n");
+		message.append(bot.getI18nMessage(from, "message.command.endpoint.common.status.prefix")).append("\n");
 		for (StatusCheckForStatusDto endpoint: endpoints) {
-			message.append(bot.getI18nMessage("message.command.endpoint.common.status.info",
+			message.append(bot.getI18nMessage(from, "message.command.endpoint.common.status.info",
 					new Object[] { endpoint.getHealthCheckInfoDto().getEndpointName(),
-							bot.getI18nMessage(endpoint.getHealthStatus().getMessageKey())}))
+							bot.getI18nMessage(from, endpoint.getHealthStatus().getMessageKey())}))
 					.append("\n");
 		}
 		return message.toString();

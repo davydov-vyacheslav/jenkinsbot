@@ -28,7 +28,7 @@ class DefaultBuildCommand implements BuildSubCommand {
 
 		userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
 				.messageKey(defaultMessageKey.isEmpty() ? "message.command.build.default.mainList" : defaultMessageKey)
-				.keyboard(buildMainMenuMarkup(availableRepositories))
+				.keyboard(buildMainMenuMarkup(from, availableRepositories))
 				.build());
 	}
 
@@ -37,12 +37,12 @@ class DefaultBuildCommand implements BuildSubCommand {
 		return null;
 	}
 
-	private InlineKeyboardMarkup buildMainMenuMarkup(List<BuildInfoDto> availableRepositories) {
+	private InlineKeyboardMarkup buildMainMenuMarkup(User from, List<BuildInfoDto> availableRepositories) {
 
 		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 		groupRepositoriesBy(availableRepositories, 2, inlineKeyboardMarkup, "/build status ");
 		inlineKeyboardMarkup.addRow(
-				new InlineKeyboardButton(bot.getI18nMessage("button.build.modifyMyItems")).callbackData("/build my_list")
+				new InlineKeyboardButton(bot.getI18nMessage(from, "button.build.modifyMyItems")).callbackData("/build my_list")
 		);
 
 		return inlineKeyboardMarkup;

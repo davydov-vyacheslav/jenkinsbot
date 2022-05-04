@@ -5,9 +5,21 @@ import java.util.Locale;
 public enum LocaleType {
 	EN(Locale.ENGLISH), RU(new Locale("ru"));
 
-	private Locale locale;
+	private final Locale locale;
 
 	LocaleType(Locale locale) {
 		this.locale = locale;
+	}
+
+	public Locale getLocale() {
+		return locale;
+	}
+
+	public static LocaleType of(String localeType) {
+		LocaleType result = EN;
+		if (localeType.equalsIgnoreCase("ru")) {
+			result = RU;
+		}
+		return result;
 	}
 }

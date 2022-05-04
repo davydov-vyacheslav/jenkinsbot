@@ -32,7 +32,7 @@ class EditBuildCommand extends AbstractModifyBuildCommand {
 				.map(repo -> {
 					RepoBuildInformation repoBuildInformation = new RepoBuildInformation(getDefaultInProgressState(), repo);
 					userInProgressBuilds.put(from.id(), repoBuildInformation);
-					showMenu(chat, from, "message.command.build.edit.intro", new Object[] { repo.getRepoName(), getRepositoryDetails(repo) } );
+					showMenu(chat, from, "message.command.build.edit.intro", new Object[] { repo.getRepoName(), getRepositoryDetails(from, repo) } );
 					return repo;
 				})
 				.orElseGet(() -> {
