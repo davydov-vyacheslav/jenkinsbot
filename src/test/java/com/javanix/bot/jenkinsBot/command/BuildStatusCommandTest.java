@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static com.javanix.bot.jenkinsBot.command.build.BuildSubCommand.ICON_PRIVATE;
-import static com.javanix.bot.jenkinsBot.command.build.BuildSubCommand.ICON_PUBLIC;
+import static com.javanix.bot.jenkinsBot.command.common.EntitySubCommand.ICON_PRIVATE;
+import static com.javanix.bot.jenkinsBot.command.common.EntitySubCommand.ICON_PUBLIC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;

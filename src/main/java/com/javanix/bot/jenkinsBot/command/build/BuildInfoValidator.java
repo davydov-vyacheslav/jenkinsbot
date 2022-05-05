@@ -14,7 +14,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class BuildInfoValidator implements EntityValidator<BuildInfoDto> {
+class BuildInfoValidator implements EntityValidator<BuildInfoDto> {
 
 	private final EmptyValidator emptyValidator;
 	private final SpaceValidator spaceValidator;

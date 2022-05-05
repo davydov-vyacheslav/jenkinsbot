@@ -5,7 +5,7 @@ import com.javanix.bot.jenkinsBot.command.common.EntitySubCommand;
 import com.javanix.bot.jenkinsBot.core.model.EntityType;
 import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
 
-public interface HealthCheckSubCommand extends EntitySubCommand<HealthCheckInfoDto> {
+interface HealthCheckSubCommand extends EntitySubCommand<HealthCheckInfoDto> {
 
 	@Override
 	default String getMainCommandName() {

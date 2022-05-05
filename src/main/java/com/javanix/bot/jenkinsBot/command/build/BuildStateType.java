@@ -6,7 +6,7 @@ import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 
 import java.util.Arrays;
 
-public enum BuildStateType implements EntityState<BuildInfoDto> {
+enum BuildStateType implements EntityState<BuildInfoDto> {
 	PUBLIC(
 			"repo.public",
 			BuildInfoDto::isPublic,

@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class HealthCheckValidator implements EntityValidator<HealthCheckInfoDto> {
+class HealthCheckValidator implements EntityValidator<HealthCheckInfoDto> {
 
 	private final EmptyValidator emptyValidator;
 	private final HealthCheckService database;

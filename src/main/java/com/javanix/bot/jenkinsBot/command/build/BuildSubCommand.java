@@ -5,7 +5,7 @@ import com.javanix.bot.jenkinsBot.command.common.EntitySubCommand;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.EntityType;
 
-public interface BuildSubCommand extends EntitySubCommand<BuildInfoDto> {
+interface BuildSubCommand extends EntitySubCommand<BuildInfoDto> {
 
 	@Override
 	default String getMainCommandName() {

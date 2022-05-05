@@ -6,7 +6,7 @@ import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
 
 import java.util.Arrays;
 
-public enum HealthCheckStateType implements EntityState<HealthCheckInfoDto> {
+enum HealthCheckStateType implements EntityState<HealthCheckInfoDto> {
 
 	PUBLIC("public",
 		HealthCheckInfoDto::isPublic,
