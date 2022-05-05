@@ -6,8 +6,8 @@ import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.ImmutableMongodConfig;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
@@ -27,14 +27,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringJUnitConfig
 @ContextConfiguration(classes = DatabaseTestConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 // NOTE: DirtiesContext need to refresh mongoTemplate bean after each database down/up
-public class DatabaseSourceTest {
+public class DatabaseBuildInfoTest {
 
 	private static final Long CURRENT_USER_ID = 1L;
 	private static final Long SOMEONE_USER_ID = 111L;
 
-	private MongodExecutable mongodExecutable;
+	private static MongodExecutable mongodExecutable;
 
 	@Autowired
 	ImmutableMongodConfig mongodConfig;
@@ -44,7 +44,6 @@ public class DatabaseSourceTest {
 
 	@Test
 	public void testGetAvailableRepositories() {
-		dataSetup();
 		List<BuildInfoDto> availableRepositories = databaseService.getAvailableRepositories(CURRENT_USER_ID);
 		assertEquals(3, availableRepositories.size());
 		assertThat(Arrays.asList("owned-public", "foreign-public", "owned-private"))
@@ -54,7 +53,6 @@ public class DatabaseSourceTest {
 
 	@Test
 	public void testGetOwnedRepositories() {
-		dataSetup();
 		List<BuildInfoDto> ownedRepositories = databaseService.getOwnedEntities(CURRENT_USER_ID);
 		assertEquals(2, ownedRepositories.size());
 		assertThat(Arrays.asList("owned-public", "owned-private"))
@@ -63,7 +61,6 @@ public class DatabaseSourceTest {
 
 	@Test
 	public void testGetAvailableRepository() {
-		dataSetup();
 		BuildInfoDto resultRepositoryEqual = databaseService.getAvailableRepository("owned-public", CURRENT_USER_ID);
 		BuildInfoDto resultRepositoryUppercase = databaseService.getAvailableRepository("OWNED-PUBLIC", CURRENT_USER_ID);
 		BuildInfoDto resultRepositoryWrongName = databaseService.getAvailableRepository("xyz-public", CURRENT_USER_ID);
@@ -85,7 +82,7 @@ public class DatabaseSourceTest {
 		});
 	}
 
-	private void dataSetup() {
+	private static void dataSetup(BuildInfoService databaseService) {
 		databaseService.save(BuildInfoDto.builder()
 				.repoName("owned-public")
 				.jenkinsInfo(JenkinsInfoDto.builder()
@@ -100,16 +97,19 @@ public class DatabaseSourceTest {
 				.repoName("foreign-private").isPublic(false).creatorId(SOMEONE_USER_ID).build());
 	}
 
-	@AfterEach
-	void clean() {
-		mongodExecutable.stop();
-	}
-
-	@BeforeEach
-	void start() throws IOException {
+	@BeforeAll
+	public static void init(@Autowired ImmutableMongodConfig mongodConfig,
+							@Autowired BuildInfoService databaseService) throws IOException {
 		MongodStarter starter = MongodStarter.getDefaultInstance();
 		mongodExecutable = starter.prepare(mongodConfig);
 		mongodExecutable.start();
+		dataSetup(databaseService);
 	}
+
+	@AfterAll
+	public static void tearDown() {
+		mongodExecutable.stop();
+	}
+
 
 }
