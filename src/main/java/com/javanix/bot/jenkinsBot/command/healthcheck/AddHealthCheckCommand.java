@@ -29,7 +29,7 @@ class AddHealthCheckCommand extends AbstractModifyEntityCommand<HealthCheckInfoD
 				.creatorFullName(from.username())
 				.build(), null));
 
-		showMenu(chat, from, "message.command.endpoint.add.intro", null);
+		showMenu(chat, from, "message.command.healthcheck.add.intro", null);
 	}
 
 	@Override

@@ -1,10 +1,10 @@
 package com.javanix.bot.jenkinsBot.cli;
 
 public enum HealthStatus {
-	SUCCESS("label.command.endpoint.status.type.success"),
-	NA("label.command.endpoint.status.type.na"),
-	UNSTABLE("label.command.endpoint.status.type.unstable"),
-	DOWN("label.command.endpoint.status.type.down");
+	SUCCESS("label.command.healthcheck.status.type.success"),
+	NA("label.command.healthcheck.status.type.na"),
+	UNSTABLE("label.command.healthcheck.status.type.unstable"),
+	DOWN("label.command.healthcheck.status.type.down");
 
 	private final String messageKey;
 

@@ -52,9 +52,9 @@ class StatusHealthCheckCommand implements HealthCheckSubCommand {
 
 	private String buildMessage(User from, List<StatusCheckDto> endpoints) {
 		StringBuilder message = new StringBuilder();
-		message.append(bot.getI18nMessage(from, "message.command.endpoint.common.status.prefix")).append("\n");
+		message.append(bot.getI18nMessage(from, "message.command.healthcheck.common.list.prefix")).append("\n");
 		for (StatusCheckDto endpoint: endpoints) {
-			message.append(bot.getI18nMessage(from, "message.command.endpoint.common.status.info",
+			message.append(bot.getI18nMessage(from, "message.command.healthcheck.common.status.info",
 					new Object[] { endpoint.getHealthCheckInfoDto().getEndpointName(),
 							bot.getI18nMessage(from, endpoint.getHealthStatus().getMessageKey())}))
 					.append("\n");

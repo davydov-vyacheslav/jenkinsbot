@@ -144,7 +144,7 @@ public abstract class AbstractModifyEntityCommand<DTO extends Entity> implements
 	private InlineKeyboardButton getInlineKeyboardButton(User from, EntityState<DTO> fieldsValue) {
 		String fieldName = bot.getI18nMessage(from, getFieldLabelKey(fieldsValue.getFieldKey()));
 		String action = String.format("/%s %s %s", getMainCommandName(), getCommandType(), fieldsValue.getFieldKey());
-		return new InlineKeyboardButton(bot.getI18nMessage(from, "button." + getMainCommandName() + ".setFieldValue", new Object[]{fieldName}))
+		return new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.setFieldValue", new Object[]{fieldName}))
 				.callbackData(action);
 	}
 

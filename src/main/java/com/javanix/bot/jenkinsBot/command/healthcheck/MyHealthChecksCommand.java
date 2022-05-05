@@ -28,7 +28,7 @@ class MyHealthChecksCommand implements HealthCheckSubCommand {
 		List<HealthCheckInfoDto> availableRepositories = database.getOwnedEntities(from.id());
 		InlineKeyboardMarkup inlineKeyboard = buildMyEntitiesListMarkup(from, availableRepositories);
 		userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
-				.messageKey(defaultMessage.isEmpty() ? "message.command.endpoint.list.title" : defaultMessage)
+				.messageKey(defaultMessage.isEmpty() ? "message.command.healthcheck.list.title" : defaultMessage)
 				.keyboard(inlineKeyboard)
 				.build(), EntityType.HEALTH_CHECK);
 	}

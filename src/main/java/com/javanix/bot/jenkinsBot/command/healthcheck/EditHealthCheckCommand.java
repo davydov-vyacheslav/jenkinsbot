@@ -33,7 +33,7 @@ class EditHealthCheckCommand extends AbstractModifyEntityCommand<HealthCheckInfo
 			HealthCheckInfoDto entityDto = entity.get();
 			StatedEntity<HealthCheckInfoDto> entityBuildInformation = new StatedEntity<>(entityDto, null);
 			usersInProgress.put(from.id(), entityBuildInformation);
-			showMenu(chat, from, "message.command.endpoint.edit.intro", new Object[] { entityDto.getEndpointName(), getEntityDetails(from, entityDto) } );
+			showMenu(chat, from, "message.command.healthcheck.edit.intro", new Object[] { entityDto.getEndpointName(), getEntityDetails(from, entityDto) } );
 		} else {
 			myReposBuildCommand.process(chat, from, "error.command.healthcheck.edit.repo");
 		}

@@ -57,7 +57,7 @@ public abstract class AbstractCommandTestCase {
 			String key = invocation.getArgument(1);
 			if (key.equals("message.command.build.common.status.prefix")) {
 				key = "Current repository info: \\n{0}";
-			} else if (key.equals("button.build.setFieldValue")) {
+			} else if (key.equals("button.common.setFieldValue")) {
 				key = "Set `{0}`";
 			}
 			return new MessageFormat(key).format(invocation.getArgument(2));

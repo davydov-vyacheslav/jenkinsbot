@@ -29,7 +29,7 @@ class DeleteHealthCheckCommand implements HealthCheckSubCommand {
 			HealthCheckInfoDto repository = ownedRepository.get();
 			database.removeEntity(repository.getEndpointName());
 			userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
-					.messageKey("message.command.endpoint.delete.processed")
+					.messageKey("message.command.healthcheck.delete.processed")
 					.messageArgs(new Object[] { repository.getEndpointName() })
 					.build(), EntityType.HEALTH_CHECK);
 			defaultCommand.process(chat, from, "");
