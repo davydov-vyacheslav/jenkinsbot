@@ -41,8 +41,8 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
 					new InlineKeyboardButton("button.build.backToActionList").callbackData("/build"),
-					new InlineKeyboardButton("button.build.repo.add").callbackData("/build add"),
-					new InlineKeyboardButton("button.build.repo.delete").switchInlineQueryCurrentChat("/build delete ")
+					new InlineKeyboardButton("button.common.add").callbackData("/build add"),
+					new InlineKeyboardButton("button.common.delete").switchInlineQueryCurrentChat("/build delete ")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -68,8 +68,8 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
 					new InlineKeyboardButton("button.build.backToActionList").callbackData("/build"),
-					new InlineKeyboardButton("button.build.repo.add").callbackData("/build add"),
-					new InlineKeyboardButton("button.build.repo.delete").switchInlineQueryCurrentChat("/build delete ")
+					new InlineKeyboardButton("button.common.add").callbackData("/build add"),
+					new InlineKeyboardButton("button.common.delete").switchInlineQueryCurrentChat("/build delete ")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);

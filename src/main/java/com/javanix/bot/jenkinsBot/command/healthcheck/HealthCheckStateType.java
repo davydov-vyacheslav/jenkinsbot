@@ -8,7 +8,15 @@ import java.util.Arrays;
 
 public enum HealthCheckStateType implements EntityState<HealthCheckInfoDto> {
 
-	TBD(null, null, null); // TODO: implement me
+	PUBLIC("public",
+		HealthCheckInfoDto::isPublic,
+		(entity, value) -> entity.setIsPublic(Boolean.parseBoolean(value))),
+	NAME("name",
+			HealthCheckInfoDto::getEndpointName,
+			HealthCheckInfoDto::setEndpointName),
+	URL("url",
+			HealthCheckInfoDto::getEndpointUrl,
+			HealthCheckInfoDto::setEndpointUrl);
 
 	private final EntityUpdateAction<HealthCheckInfoDto> updateAction;
 	private final EntityGetFieldValueAction<HealthCheckInfoDto> getAction;

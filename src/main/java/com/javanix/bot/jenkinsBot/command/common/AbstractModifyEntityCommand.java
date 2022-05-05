@@ -42,7 +42,7 @@ public abstract class AbstractModifyEntityCommand<DTO extends Entity> implements
 				.messageKey(repoBuildInformationKey)
 				.messageArgs(messageArgs)
 				.keyboard(buildEntityMarkup(from))
-				.build());
+				.build(), getEntityType());
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public abstract class AbstractModifyEntityCommand<DTO extends Entity> implements
 		DTO repo = repoBuildInformation.getEntityDto();
 		EntityState<DTO> state = repoBuildInformation.getState();
 		state.updateField(repo, value);
-		showMenu(chat, from, getRepositoryDetails(from, repo), null);
+		showMenu(chat, from, getEntityDetails(from, repo), null);
 		repoBuildInformation.setState(null);
 	}
 
@@ -134,8 +134,8 @@ public abstract class AbstractModifyEntityCommand<DTO extends Entity> implements
 
 		String doneAction = String.format("/%s %s " + ACTION_DONE, getMainCommandName(), getCommandType());
 		inlineKeyboardMarkup.addRow(
-				new InlineKeyboardButton(bot.getI18nMessage(from, "button." + getMainCommandName() + ".common.complete")).callbackData(doneAction),
-				new InlineKeyboardButton(bot.getI18nMessage(from, "button." + getMainCommandName() + ".common.cancel")).callbackData("/cancel")
+				new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.complete")).callbackData(doneAction),
+				new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.cancel")).callbackData("/cancel")
 		);
 
 		return inlineKeyboardMarkup;
@@ -148,7 +148,7 @@ public abstract class AbstractModifyEntityCommand<DTO extends Entity> implements
 				.callbackData(action);
 	}
 
-	public String getRepositoryDetails(User from, DTO repo) {
+	public String getEntityDetails(User from, DTO repo) {
 		String fieldsInfo = getFieldsToDisplay().stream()
 				.map(stateType -> "- "
 						+ bot.getI18nMessage(from, getFieldLabelKey(stateType.getFieldKey()))

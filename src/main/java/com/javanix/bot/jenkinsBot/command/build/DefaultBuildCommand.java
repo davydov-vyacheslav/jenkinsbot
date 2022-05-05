@@ -2,7 +2,9 @@ package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.UserEntityContext;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
+import com.javanix.bot.jenkinsBot.core.model.EntityType;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
@@ -18,7 +20,7 @@ import java.util.List;
 class DefaultBuildCommand implements BuildSubCommand {
 
 	private final BuildInfoService database;
-	private final UserBuildContext userContext;
+	private final UserEntityContext userContext;
 	private final TelegramBotWrapper bot;
 
 	@Override
@@ -28,7 +30,7 @@ class DefaultBuildCommand implements BuildSubCommand {
 		userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
 				.messageKey(defaultMessageKey.isEmpty() ? "message.command.build.default.mainList" : defaultMessageKey)
 				.keyboard(buildMainMenuMarkup(from, availableRepositories))
-				.build());
+				.build(), EntityType.BUILD_INFO);
 	}
 
 	@Override

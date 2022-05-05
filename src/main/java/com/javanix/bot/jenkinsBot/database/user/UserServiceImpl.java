@@ -33,7 +33,7 @@ class UserServiceImpl implements UserService {
 		return UserInfoDto.builder()
 				.userId(userEntity.getUserId())
 				.userName(userEntity.getUserName())
-				.buildMenuLastMessageId(userEntity.getBuildMenuLastMessageId())
+				.lastMessageIdMap(userEntity.getLastMessageIdMap())
 				.subscribedBuildRepositories(userEntity.getSubscribedBuildRepositories())
 				.locale(userEntity.getLocale())
 				.build();
@@ -43,7 +43,7 @@ class UserServiceImpl implements UserService {
 		return UserEntity.builder()
 				.userId(userInfoDto.getUserId())
 				.userName(userInfoDto.getUserName())
-				.buildMenuLastMessageId(userInfoDto.getBuildMenuLastMessageId())
+				.lastMessageIdMap(userInfoDto.getLastMessageIdMap())
 				.subscribedBuildRepositories(userInfoDto.getSubscribedBuildRepositories())
 				.locale(userInfoDto.getLocale())
 				.build();

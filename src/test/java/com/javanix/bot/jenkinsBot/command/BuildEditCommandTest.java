@@ -205,8 +205,8 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 				new InlineKeyboardButton("Set `label.field.build.jenkins.user`").callbackData("/build EDIT jenkins.user"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.password`").callbackData("/build EDIT jenkins.password"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.job`").callbackData("/build EDIT jenkins.job"),
-				new InlineKeyboardButton("button.build.common.complete").callbackData("/build EDIT /done"),
-				new InlineKeyboardButton("button.build.common.cancel").callbackData("/cancel")
+				new InlineKeyboardButton("button.common.complete").callbackData("/build EDIT /done"),
+				new InlineKeyboardButton("button.common.cancel").callbackData("/cancel")
 		);
 	}
 

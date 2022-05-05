@@ -46,6 +46,23 @@ class HealthCheckServiceImpl implements HealthCheckService {
 	}
 
 	@Override
+	public boolean hasEntity(String name) {
+		return repository.getByEndpointNameIgnoreCase(name).isPresent();
+	}
+
+	@Override
+	public void removeEntity(String name) {
+		repository.getByEndpointNameIgnoreCase(name).ifPresent(repository::delete);
+	}
+
+	@Override
+	public List<HealthCheckInfoDto> getOwnedEntities(Long ownerId) {
+		return repository.getByCreatorId(ownerId).stream()
+				.map(this::convertEntityToDto)
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public boolean isDatabaseEmpty() {
 		return repository.count() == 0;
 	}

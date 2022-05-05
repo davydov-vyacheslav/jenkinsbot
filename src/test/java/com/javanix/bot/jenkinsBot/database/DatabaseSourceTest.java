@@ -55,7 +55,7 @@ public class DatabaseSourceTest {
 	@Test
 	public void testGetOwnedRepositories() {
 		dataSetup();
-		List<BuildInfoDto> ownedRepositories = databaseService.getOwnedRepositories(CURRENT_USER_ID);
+		List<BuildInfoDto> ownedRepositories = databaseService.getOwnedEntities(CURRENT_USER_ID);
 		assertEquals(2, ownedRepositories.size());
 		assertThat(Arrays.asList("owned-public", "owned-private"))
 				.containsExactlyInAnyOrderElementsOf(ownedRepositories.stream().map(BuildInfoDto::getRepoName).collect(Collectors.toList()));

@@ -5,6 +5,7 @@ import com.javanix.bot.jenkinsBot.command.common.AbstractModifyEntityCommand;
 import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
 import com.javanix.bot.jenkinsBot.command.common.EntityState;
 import com.javanix.bot.jenkinsBot.command.common.StatedEntity;
+import com.javanix.bot.jenkinsBot.command.common.UserEntityContext;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
@@ -20,7 +21,8 @@ class EditBuildCommand extends AbstractModifyEntityCommand<BuildInfoDto> impleme
 
 	private final MyReposBuildCommand myReposBuildCommand;
 
-	public EditBuildCommand(BuildInfoValidator buildInfoValidator, MyReposBuildCommand myReposBuildCommand, BuildInfoService database, UserBuildContext userContext, DefaultBuildCommand defaultBuildCommand, TelegramBotWrapper telegramBotWrapper) {
+	public EditBuildCommand(BuildInfoValidator buildInfoValidator, MyReposBuildCommand myReposBuildCommand, BuildInfoService database,
+							UserEntityContext userContext, DefaultBuildCommand defaultBuildCommand, TelegramBotWrapper telegramBotWrapper) {
 		super(database, userContext, defaultBuildCommand, buildInfoValidator, telegramBotWrapper);
 		this.myReposBuildCommand = myReposBuildCommand;
 	}
@@ -32,7 +34,7 @@ class EditBuildCommand extends AbstractModifyEntityCommand<BuildInfoDto> impleme
 			BuildInfoDto repoDto = repo.get();
 			StatedEntity<BuildInfoDto> repoBuildInformation = new StatedEntity<>(repoDto, null);
 			usersInProgress.put(from.id(), repoBuildInformation);
-			showMenu(chat, from, "message.command.build.edit.intro", new Object[] { repoDto.getRepoName(), getRepositoryDetails(from, repoDto) } );
+			showMenu(chat, from, "message.command.build.edit.intro", new Object[] { repoDto.getRepoName(), getEntityDetails(from, repoDto) } );
 		} else {
 			myReposBuildCommand.process(chat, from, "error.command.build.edit.repo");
 		}

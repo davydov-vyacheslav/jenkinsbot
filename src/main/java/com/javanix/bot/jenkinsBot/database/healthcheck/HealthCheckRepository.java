@@ -14,4 +14,6 @@ interface HealthCheckRepository extends MongoRepository<HealthCheckEntity, Strin
 	Optional<HealthCheckEntity> getByEndpointNameIgnoreCase(String endpointName);
 
 	Optional<HealthCheckEntity> getByEndpointNameIgnoreCaseAndCreatorId(String name, Long ownerId);
+
+	Collection<HealthCheckEntity> getByCreatorId(Long ownerId);
 }

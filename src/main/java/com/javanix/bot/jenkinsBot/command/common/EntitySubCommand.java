@@ -2,6 +2,7 @@ package com.javanix.bot.jenkinsBot.command.common;
 
 import com.javanix.bot.jenkinsBot.command.Processable;
 import com.javanix.bot.jenkinsBot.core.model.Entity;
+import com.javanix.bot.jenkinsBot.core.model.EntityType;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 
@@ -17,6 +18,8 @@ public interface EntitySubCommand<T extends Entity> extends Processable {
 	String getMainCommandName();
 
 	EntityState<T> commandToState(String command);
+
+	EntityType getEntityType();
 
 	default void groupEntitiesBy(List<? extends Entity> entities, int pageSize, InlineKeyboardMarkup inlineKeyboardMarkup, String callbackPrefix) {
 		splitListByNElements(pageSize, entities)

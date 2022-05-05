@@ -38,7 +38,7 @@ public class BuildInfoValidator implements EntityValidator<BuildInfoDto> {
 		spaceValidator.validate(jenkinsInfo.getDomain(), errors, "error.command.build.validation.invalid.jenkins.domain");
 
 		// TODO: another validator
-		if (actionType == EntityActionType.ADD && database.hasRepository(target.getRepoName())) {
+		if (actionType == EntityActionType.ADD && database.hasEntity(target.getRepoName())) {
 			errors.add("error.command.build.validation.invalid.repo.name");
 		}
 		return errors.isEmpty();

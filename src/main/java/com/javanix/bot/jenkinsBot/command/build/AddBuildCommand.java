@@ -5,6 +5,7 @@ import com.javanix.bot.jenkinsBot.command.common.AbstractModifyEntityCommand;
 import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
 import com.javanix.bot.jenkinsBot.command.common.EntityState;
 import com.javanix.bot.jenkinsBot.command.common.StatedEntity;
+import com.javanix.bot.jenkinsBot.command.common.UserEntityContext;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
@@ -17,7 +18,8 @@ import java.util.List;
 @Component
 class AddBuildCommand extends AbstractModifyEntityCommand<BuildInfoDto> implements BuildSubCommand {
 
-	public AddBuildCommand(BuildInfoValidator buildInfoValidator, BuildInfoService database, UserBuildContext userContext, DefaultBuildCommand defaultBuildCommand, TelegramBotWrapper telegramBotWrapper) {
+	public AddBuildCommand(BuildInfoValidator buildInfoValidator, BuildInfoService database, UserEntityContext userContext,
+						   DefaultBuildCommand defaultBuildCommand, TelegramBotWrapper telegramBotWrapper) {
 		super(database, userContext, defaultBuildCommand, buildInfoValidator, telegramBotWrapper);
 	}
 

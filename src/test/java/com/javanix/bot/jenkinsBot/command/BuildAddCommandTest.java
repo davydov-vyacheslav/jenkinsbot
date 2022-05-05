@@ -37,7 +37,7 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 	public void okFlowTest() {
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(databaseService.hasRepository("Repo01")).thenReturn(false);
+		Mockito.when(databaseService.hasEntity("Repo01")).thenReturn(false);
 		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeAddIntroAndAssert())
@@ -82,7 +82,7 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 	public void failedSaveFlowTest() {
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(databaseService.hasRepository("Repo01")).thenReturn(false);
+		Mockito.when(databaseService.hasEntity("Repo01")).thenReturn(false);
 		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeAddIntroAndAssert())
@@ -114,7 +114,7 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 	public void cancelledFlowTest() {
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(databaseService.hasRepository("Repo01")).thenReturn(false);
+		Mockito.when(databaseService.hasEntity("Repo01")).thenReturn(false);
 		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeAddIntroAndAssert())
@@ -204,8 +204,8 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 				new InlineKeyboardButton("Set `label.field.build.jenkins.user`").callbackData("/build ADD jenkins.user"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.password`").callbackData("/build ADD jenkins.password"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.job`").callbackData("/build ADD jenkins.job"),
-				new InlineKeyboardButton("button.build.common.complete").callbackData("/build ADD /done"),
-				new InlineKeyboardButton("button.build.common.cancel").callbackData("/cancel")
+				new InlineKeyboardButton("button.common.complete").callbackData("/build ADD /done"),
+				new InlineKeyboardButton("button.common.cancel").callbackData("/cancel")
 		);
 	}
 

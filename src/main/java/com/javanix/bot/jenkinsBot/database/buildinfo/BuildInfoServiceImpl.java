@@ -23,12 +23,12 @@ class BuildInfoServiceImpl implements BuildInfoService {
 	}
 
 	@Override
-	public void removeRepo(String repoName) {
+	public void removeEntity(String repoName) {
 		repository.getByRepoNameIgnoreCase(repoName).ifPresent(repository::delete);
 	}
 
 	@Override
-	public List<BuildInfoDto> getOwnedRepositories(Long ownerId) {
+	public List<BuildInfoDto> getOwnedEntities(Long ownerId) {
 		return repository.getByCreatorId(ownerId).stream()
 				.map(this::convertEntityToDto)
 				.collect(Collectors.toList());
@@ -63,7 +63,7 @@ class BuildInfoServiceImpl implements BuildInfoService {
 	}
 
 	@Override
-	public boolean hasRepository(String name) {
+	public boolean hasEntity(String name) {
 		return repository.getByRepoNameIgnoreCase(name).isPresent();
 	}
 
