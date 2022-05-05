@@ -1,9 +1,12 @@
-package com.javanix.bot.jenkinsBot.command;
+package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.cli.BuildStatus;
 import com.javanix.bot.jenkinsBot.cli.CliProcessor;
 import com.javanix.bot.jenkinsBot.cli.JenkinsBuildDetails;
+import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
+import com.javanix.bot.jenkinsBot.command.CommandTestConfiguration;
+import com.javanix.bot.jenkinsBot.command.TelegramCommand;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
@@ -71,7 +74,6 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		});
 
 		TelegramCommand command = factory.getCommand(commandText);
-		assertThat(command).isInstanceOf(BuildCommand.class);
 		command.process(chat, from, commandText);
 		Mockito.verify(bot).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
@@ -108,7 +110,6 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		});
 
 		TelegramCommand command = factory.getCommand(commandText);
-		assertThat(command).isInstanceOf(BuildCommand.class);
 		command.process(chat, from, commandText);
 		Mockito.verify(bot).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
@@ -164,7 +165,6 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		});
 
 		TelegramCommand command = factory.getCommand(commandText);
-		assertThat(command).isInstanceOf(BuildCommand.class);
 		command.process(chat, from, commandText);
 		Mockito.verify(bot, times(2)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 	}
