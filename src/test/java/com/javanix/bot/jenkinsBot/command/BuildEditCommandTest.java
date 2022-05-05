@@ -48,13 +48,13 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 						.jobName("Job01")
 						.build())
 				.build();
-		Mockito.when(databaseService.getOwnedRepository("repo01", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
+		Mockito.when(databaseService.getOwnedEntityByName("repo01", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
 				.then(executeEditDomainAndAssert())
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.build.status.select.title", message.getMessageKey());
+					assertEquals("message.command.build.default.mainList", message.getMessageKey());
 					return sendResponse;
 				});
 
@@ -65,7 +65,7 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 
 		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 
-		Mockito.verify(databaseService).updateRepository(BuildInfoDto.builder()
+		Mockito.verify(databaseService).save(BuildInfoDto.builder()
 				.repoName("repo01")
 				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 				.isPublic(false)
@@ -93,7 +93,7 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 						.jobName("Job01")
 						.build())
 				.build();
-		Mockito.when(databaseService.getOwnedRepository("repo01", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
+		Mockito.when(databaseService.getOwnedEntityByName("repo01", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
 				.then(invocation -> {
@@ -105,7 +105,7 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 				})
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("error.command.build.save.repo", message.getMessageKey());
+					assertEquals("error.command.common.save.prefix", message.getMessageKey());
 					assertArrayEquals(new Object[] { "error.command.build.validation.invalid.jenkins.domain" }, message.getMessageArgs());
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -118,8 +118,7 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/build edit /done");
 
 		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
-		Mockito.verify(databaseService, Mockito.times(0)).updateRepository(any());
-		Mockito.verify(databaseService, Mockito.times(0)).addRepository(any());
+		Mockito.verify(databaseService, Mockito.times(0)).save(any());
 	}
 
 
@@ -138,14 +137,14 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 						.jobName("Job01")
 						.build())
 				.build();
-		Mockito.when(databaseService.getOwnedRepository("repo01", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
+		Mockito.when(databaseService.getOwnedEntityByName("repo01", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
 				.then(executeEditDomainAndAssert())
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.build.cancel", message.getMessageKey());
-					assertArrayEquals(new Object[] { "label.field.build.common.edit" }, message.getMessageArgs());
+					assertEquals("message.command.common.cancel", message.getMessageKey());
+					assertArrayEquals(new Object[] {"label.field.common.edit"}, message.getMessageArgs());
 					return sendResponse;
 				}).then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
@@ -164,7 +163,7 @@ public class BuildEditCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/cancel");
 
 		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
-		Mockito.verify(databaseService, Mockito.times(0)).updateRepository(any());
+		Mockito.verify(databaseService, Mockito.times(0)).save(any());
 	}
 
 	private Answer<Object> executeEditIntroAndAssert() {

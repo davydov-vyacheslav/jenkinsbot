@@ -1,6 +1,7 @@
-package com.javanix.bot.jenkinsBot.command.build.model;
+package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
+import com.javanix.bot.jenkinsBot.command.common.UserEntityContext;
 import com.javanix.bot.jenkinsBot.core.model.UserInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.UserService;
 import com.pengrad.telegrambot.model.Chat;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
 // Context of User-based action during `/build` action processing
 @Component
 @RequiredArgsConstructor
-public class UserBuildContext {
+public class UserBuildContext implements UserEntityContext {
 
 	private final UserService userService;
 	private final TelegramBotWrapper bot;
@@ -26,6 +27,7 @@ public class UserBuildContext {
 		}
 	}
 
+	@Override
 	public void executeCommandAndSaveMessageId(Chat chat, User from, TelegramBotWrapper.MessageInfo messageInfo) {
 		removeLastMessage(chat, from);
 		SendResponse execute = bot.sendI18nMessage(from, chat, messageInfo);

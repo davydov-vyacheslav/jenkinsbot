@@ -1,11 +1,10 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.command.build.model.RepoBuildInformation;
-import com.javanix.bot.jenkinsBot.command.build.model.StateType;
-import com.javanix.bot.jenkinsBot.command.build.model.UserBuildContext;
-import com.javanix.bot.jenkinsBot.command.build.validator.BuildInfoEditValidator;
-import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.AbstractModifyEntityCommand;
+import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.EntityState;
+import com.javanix.bot.jenkinsBot.command.common.StatedEntity;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
@@ -14,51 +13,44 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Component
-class EditBuildCommand extends AbstractModifyBuildCommand {
+class EditBuildCommand extends AbstractModifyEntityCommand<BuildInfoDto> implements BuildSubCommand {
 
 	private final MyReposBuildCommand myReposBuildCommand;
 
-	public EditBuildCommand(BuildInfoEditValidator buildInfoValidator, MyReposBuildCommand myReposBuildCommand, BuildInfoService database, UserBuildContext userContext, DefaultBuildCommand defaultBuildCommand, TelegramBotWrapper telegramBotWrapper) {
+	public EditBuildCommand(BuildInfoValidator buildInfoValidator, MyReposBuildCommand myReposBuildCommand, BuildInfoService database, UserBuildContext userContext, DefaultBuildCommand defaultBuildCommand, TelegramBotWrapper telegramBotWrapper) {
 		super(database, userContext, defaultBuildCommand, buildInfoValidator, telegramBotWrapper);
 		this.myReposBuildCommand = myReposBuildCommand;
 	}
 
-	// FIXME: more gracier
 	@Override
 	protected void processOnStart(Chat chat, User from, String command) {
-		database.getOwnedRepository(command, from.id())
-				.map(repo -> {
-					RepoBuildInformation repoBuildInformation = new RepoBuildInformation(getDefaultInProgressState(), repo);
-					userInProgressBuilds.put(from.id(), repoBuildInformation);
-					showMenu(chat, from, "message.command.build.edit.intro", new Object[] { repo.getRepoName(), getRepositoryDetails(from, repo) } );
-					return repo;
-				})
-				.orElseGet(() -> {
-					myReposBuildCommand.process(chat, from, "error.command.build.edit.repo");
-					return null;
-				});
+		Optional<BuildInfoDto> repo = database.getOwnedEntityByName(command, from.id());
+		if (repo.isPresent()) {
+			BuildInfoDto repoDto = repo.get();
+			StatedEntity<BuildInfoDto> repoBuildInformation = new StatedEntity<>(repoDto, null);
+			usersInProgress.put(from.id(), repoBuildInformation);
+			showMenu(chat, from, "message.command.build.edit.intro", new Object[] { repoDto.getRepoName(), getRepositoryDetails(from, repoDto) } );
+		} else {
+			myReposBuildCommand.process(chat, from, "error.command.build.edit.repo");
+		}
 	}
 
 	@Override
-	protected void persist(BuildInfoDto repo) {
-		database.updateRepository(repo);
+	public EntityActionType getCommandType() {
+		return EntityActionType.EDIT;
 	}
 
 	@Override
-	protected StateType getDefaultInProgressState() {
-		return StateType.NA_EDIT;
+	protected List<BuildStateType> fieldsToModify() {
+		return Arrays.asList(BuildStateType.PUBLIC, BuildStateType.DOMAIN, BuildStateType.USER, BuildStateType.PASSWORD, BuildStateType.JOB_NAME);
 	}
 
 	@Override
-	public CommonEntityActionType getBuildType() {
-		return CommonEntityActionType.EDIT;
-	}
-
-	@Override
-	protected List<StateType> fieldsToModify() {
-		return Arrays.asList(StateType.PUBLIC, StateType.DOMAIN, StateType.USER, StateType.PASSWORD, StateType.JOB_NAME);
+	protected List<? extends EntityState<BuildInfoDto>> getFieldsToDisplay() {
+		return Arrays.asList(BuildStateType.REPO_NAME, BuildStateType.PUBLIC, BuildStateType.DOMAIN, BuildStateType.USER, BuildStateType.PASSWORD, BuildStateType.JOB_NAME);
 	}
 
 }

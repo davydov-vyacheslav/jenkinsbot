@@ -1,14 +1,15 @@
-package com.javanix.bot.jenkinsBot.command.build.model;
+package com.javanix.bot.jenkinsBot.command.build;
 
 
+import com.javanix.bot.jenkinsBot.command.common.EntityState;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 
 import java.util.Arrays;
 
-public enum StateType {
+public enum BuildStateType implements EntityState<BuildInfoDto> {
 	PUBLIC(
 			"repo.public",
-			BuildInfoDto::getIsPublic,
+			BuildInfoDto::isPublic,
 			(repo, value) -> repo.setIsPublic(Boolean.parseBoolean(value))),
 	JOB_NAME(
 			"jenkins.job",
@@ -29,51 +30,38 @@ public enum StateType {
 	REPO_NAME(
 			"repo.name",
 			BuildInfoDto::getRepoName,
-			BuildInfoDto::setRepoName),
-	NA_ADD(
-			"common.add",
-			repo -> "",
-			(repo, value) -> {}),
-	NA_EDIT(
-			"common.edit",
-			repo -> "",
-			(repo, value) -> {});
+			BuildInfoDto::setRepoName);
 
-	private final EntityUpdateAction updateAction;
-	private final EntityGetFieldValueAction getAction;
+	private final EntityUpdateAction<BuildInfoDto> updateAction;
+	private final EntityGetFieldValueAction<BuildInfoDto> getAction;
 	private final String fieldKey;
 
-	StateType(String fieldKey, EntityGetFieldValueAction getAction, EntityUpdateAction updateAction) {
+	BuildStateType(String fieldKey, EntityGetFieldValueAction<BuildInfoDto> getAction, EntityUpdateAction<BuildInfoDto> updateAction) {
 		this.updateAction = updateAction;
 		this.getAction = getAction;
 		this.fieldKey = fieldKey;
 	}
 
+	@Override
 	public String getFieldKey() {
 		return fieldKey;
 	}
 
+	@Override
 	public Object getValue(BuildInfoDto repo) {
 		return getAction.get(repo);
 	}
 
+	@Override
 	public void updateField(BuildInfoDto repo, String value) {
 		updateAction.updateEntity(repo, value);
 	}
 
-	@FunctionalInterface
-	private interface EntityUpdateAction {
-		void updateEntity(BuildInfoDto repo, String value);
-	}
-
-	@FunctionalInterface
-	private interface EntityGetFieldValueAction {
-		Object get(BuildInfoDto repo);
-	}
-	public static StateType of(String code, StateType fallbackValue) {
+	public static BuildStateType of(String code) {
 		return Arrays.stream(values())
 				.filter(stateType -> stateType.fieldKey.equalsIgnoreCase(code))
 				.findAny()
-				.orElse(fallbackValue);
+				.orElse(null);
 	}
+
 }

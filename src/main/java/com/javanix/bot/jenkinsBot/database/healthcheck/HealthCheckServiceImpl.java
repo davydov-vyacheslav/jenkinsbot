@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,8 +24,11 @@ class HealthCheckServiceImpl implements HealthCheckService {
 	}
 
 	@Override
-	public void addEndpoint(HealthCheckInfoDto endpoint) {
-		repository.save(convertDtoToEntity(endpoint));
+	public void save(HealthCheckInfoDto endpoint) {
+		Optional<HealthCheckEntity> endpointInDb = repository.getByEndpointNameIgnoreCase(endpoint.getEndpointName());
+		HealthCheckEntity endpointEntity = convertDtoToEntity(endpoint);
+		endpointInDb.ifPresent(endpointInfoEntity -> endpointEntity.setId(endpointInfoEntity.getId()));
+		repository.save(endpointEntity);
 	}
 
 	@Override
@@ -33,6 +37,12 @@ class HealthCheckServiceImpl implements HealthCheckService {
 				.stream()
 				.map(this::convertEntityToDto)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Optional<HealthCheckInfoDto> getOwnedEntityByName(String name, Long ownerId) {
+		return repository.getByEndpointNameIgnoreCaseAndCreatorId(name, ownerId)
+				.map(this::convertEntityToDto);
 	}
 
 	@Override
@@ -56,7 +66,7 @@ class HealthCheckServiceImpl implements HealthCheckService {
 				.endpointUrl(healthCheckInfoDto.getEndpointUrl())
 				.creatorFullName(healthCheckInfoDto.getCreatorFullName())
 				.creatorId(healthCheckInfoDto.getCreatorId())
-				.isPublic(healthCheckInfoDto.getIsPublic())
+				.isPublic(healthCheckInfoDto.isPublic())
 				.build();
 	}
 

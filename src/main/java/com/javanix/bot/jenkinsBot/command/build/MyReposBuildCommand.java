@@ -1,8 +1,7 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.command.build.model.UserBuildContext;
-import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
@@ -33,14 +32,14 @@ class MyReposBuildCommand implements BuildSubCommand {
 	}
 
 
-	public CommonEntityActionType getBuildType() {
-		return CommonEntityActionType.MY_LIST;
+	public EntityActionType getCommandType() {
+		return EntityActionType.MY_LIST;
 	}
 
 	private InlineKeyboardMarkup buildMyRepoListMarkup(User from, List<BuildInfoDto> availableRepositories) {
 
 		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-		groupRepositoriesBy(availableRepositories, 2, inlineKeyboardMarkup, "/build edit ");
+		groupEntitiesBy(availableRepositories, 2, inlineKeyboardMarkup, "/build edit ");
 		inlineKeyboardMarkup.addRow(
 				new InlineKeyboardButton(bot.getI18nMessage(from, "button.build.backToActionList")).callbackData("/build"),
 				new InlineKeyboardButton(bot.getI18nMessage(from, "button.build.repo.add")).callbackData("/build add"),

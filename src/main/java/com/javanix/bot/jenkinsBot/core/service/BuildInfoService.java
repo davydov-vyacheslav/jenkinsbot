@@ -3,9 +3,8 @@ package com.javanix.bot.jenkinsBot.core.service;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface BuildInfoService {
+public interface BuildInfoService extends EntityService<BuildInfoDto> {
 	long DEFAULT_CREATOR_ID = -1L;
 
 	/**
@@ -19,13 +18,7 @@ public interface BuildInfoService {
 
 	List<BuildInfoDto> getOwnedRepositories(Long ownerId);
 
-	void addRepository(BuildInfoDto repo);
-
-	void updateRepository(BuildInfoDto repo);
-
 	boolean isDatabaseEmpty();
-
-	Optional<BuildInfoDto> getOwnedRepository(String name, Long ownerId);
 
 	/**
 	 * Get repository by name, case-insensitive, available for specific user for view (e.g. public or owned)

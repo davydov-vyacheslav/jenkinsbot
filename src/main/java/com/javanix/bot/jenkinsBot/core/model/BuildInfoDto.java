@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class BuildInfoDto {
+public class BuildInfoDto implements Entity {
 	private String repoName;
 	private JenkinsInfoDto jenkinsInfo;
 	private Boolean isPublic;
@@ -22,5 +22,15 @@ public class BuildInfoDto {
 						.user("")
 						.build())
 				.isPublic(false);
+	}
+
+	@Override
+	public boolean isPublic() {
+		return isPublic;
+	}
+
+	@Override
+	public String getName() {
+		return repoName;
 	}
 }

@@ -1,7 +1,7 @@
 package com.javanix.bot.jenkinsBot.command.healthcheck;
 
-import com.javanix.bot.jenkinsBot.command.common.CommandFactory;
-import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.EntityCommandFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -9,14 +9,14 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class HealthCheckCommandFactory implements CommandFactory {
+public class HealthCheckEntityCommandFactory implements EntityCommandFactory {
 
     private final Set<HealthCheckSubCommand> commands;
     private final DefaultHealthCheckCommand defaultCommand;
 
-    public HealthCheckSubCommand getCommand(CommonEntityActionType buildType) {
+    public HealthCheckSubCommand getCommand(EntityActionType buildType) {
         return commands.stream().filter(command ->
-                command.getBuildType() == buildType).findAny().orElse(defaultCommand);
+                command.getCommandType() == buildType).findAny().orElse(defaultCommand);
     }
 
 }

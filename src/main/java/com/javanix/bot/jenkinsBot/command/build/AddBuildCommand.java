@@ -1,11 +1,10 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.command.build.model.RepoBuildInformation;
-import com.javanix.bot.jenkinsBot.command.build.model.StateType;
-import com.javanix.bot.jenkinsBot.command.build.model.UserBuildContext;
-import com.javanix.bot.jenkinsBot.command.build.validator.BuildInfoAddValidator;
-import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.AbstractModifyEntityCommand;
+import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.EntityState;
+import com.javanix.bot.jenkinsBot.command.common.StatedEntity;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
@@ -16,39 +15,35 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
-class AddBuildCommand extends AbstractModifyBuildCommand {
+class AddBuildCommand extends AbstractModifyEntityCommand<BuildInfoDto> implements BuildSubCommand {
 
-	public AddBuildCommand(BuildInfoAddValidator buildInfoValidator, BuildInfoService database, UserBuildContext userContext, DefaultBuildCommand defaultBuildCommand, TelegramBotWrapper telegramBotWrapper) {
+	public AddBuildCommand(BuildInfoValidator buildInfoValidator, BuildInfoService database, UserBuildContext userContext, DefaultBuildCommand defaultBuildCommand, TelegramBotWrapper telegramBotWrapper) {
 		super(database, userContext, defaultBuildCommand, buildInfoValidator, telegramBotWrapper);
 	}
 
 	@Override
 	protected void processOnStart(Chat chat, User from, String command) {
-		userInProgressBuilds.put(from.id(), new RepoBuildInformation(getDefaultInProgressState(), BuildInfoDto.emptyEntityBuilder()
+		usersInProgress.put(from.id(), new StatedEntity<>(BuildInfoDto.emptyEntityBuilder()
 				.creatorId(from.id())
 				.creatorFullName(from.username())
-				.build()));
+				.build(), null));
 
 		showMenu(chat, from, "message.command.build.add.intro", null);
 	}
 
 	@Override
-	protected void persist(BuildInfoDto repo) {
-		database.addRepository(repo);
+	public EntityActionType getCommandType() {
+		return EntityActionType.ADD;
 	}
 
 	@Override
-	protected StateType getDefaultInProgressState() {
-		return StateType.NA_ADD;
+	protected List<BuildStateType> fieldsToModify() {
+		return Arrays.asList(BuildStateType.REPO_NAME, BuildStateType.PUBLIC, BuildStateType.DOMAIN, BuildStateType.USER, BuildStateType.PASSWORD, BuildStateType.JOB_NAME);
 	}
 
 	@Override
-	public CommonEntityActionType getBuildType() {
-		return CommonEntityActionType.ADD;
+	protected List<? extends EntityState<BuildInfoDto>> getFieldsToDisplay() {
+		return Arrays.asList(BuildStateType.REPO_NAME, BuildStateType.PUBLIC, BuildStateType.DOMAIN, BuildStateType.USER, BuildStateType.PASSWORD, BuildStateType.JOB_NAME);
 	}
 
-	@Override
-	protected List<StateType> fieldsToModify() {
-		return Arrays.asList(StateType.REPO_NAME, StateType.PUBLIC, StateType.DOMAIN, StateType.USER, StateType.PASSWORD, StateType.JOB_NAME);
-	}
 }

@@ -34,7 +34,7 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build delete";
 		User from = new User(123L);
 
-		Mockito.when(databaseService.getOwnedRepository("", 123L)).thenReturn(Optional.empty());
+		Mockito.when(databaseService.getOwnedEntityByName("", 123L)).thenReturn(Optional.empty());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.build.delete", message.getMessageKey());
@@ -61,7 +61,7 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build delete xmen";
 		User from = new User(123L);
 
-		Mockito.when(databaseService.getOwnedRepository("xmen", 123L)).thenReturn(Optional.empty());
+		Mockito.when(databaseService.getOwnedEntityByName("xmen", 123L)).thenReturn(Optional.empty());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.build.delete", message.getMessageKey());
@@ -88,7 +88,7 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build delete xmen";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(databaseService.getOwnedRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(
+		Mockito.when(databaseService.getOwnedEntityByName("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(
 				Optional.of(BuildInfoDto.builder()
 						.repoName("xmen")
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)

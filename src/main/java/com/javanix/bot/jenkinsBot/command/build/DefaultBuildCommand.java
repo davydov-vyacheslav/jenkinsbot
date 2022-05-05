@@ -1,8 +1,7 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.command.build.model.UserBuildContext;
-import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
@@ -33,14 +32,14 @@ class DefaultBuildCommand implements BuildSubCommand {
 	}
 
 	@Override
-	public CommonEntityActionType getBuildType() {
+	public EntityActionType getCommandType() {
 		return null;
 	}
 
 	private InlineKeyboardMarkup buildMainMenuMarkup(User from, List<BuildInfoDto> availableRepositories) {
 
 		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-		groupRepositoriesBy(availableRepositories, 2, inlineKeyboardMarkup, "/build status ");
+		groupEntitiesBy(availableRepositories, 2, inlineKeyboardMarkup, "/build status ");
 		inlineKeyboardMarkup.addRow(
 				new InlineKeyboardButton(bot.getI18nMessage(from, "button.build.modifyMyItems")).callbackData("/build my_list")
 		);

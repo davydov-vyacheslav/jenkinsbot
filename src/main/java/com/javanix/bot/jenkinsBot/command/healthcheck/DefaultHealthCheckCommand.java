@@ -1,6 +1,6 @@
 package com.javanix.bot.jenkinsBot.command.healthcheck;
 
-import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ class DefaultHealthCheckCommand implements HealthCheckSubCommand {
 	}
 
 	@Override
-	public CommonEntityActionType getBuildType() {
+	public EntityActionType getCommandType() {
 		return null;
 	}
 

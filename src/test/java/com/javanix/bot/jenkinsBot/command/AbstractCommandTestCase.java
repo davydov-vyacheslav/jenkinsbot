@@ -55,7 +55,7 @@ public abstract class AbstractCommandTestCase {
 		Mockito.when(bot.getI18nMessage(any(), any())).then(returnsArgAt(ReturnsArgumentAt.LAST_ARGUMENT));
 		Mockito.when(bot.getI18nMessage(any(), any(), any())).then(invocation -> {
 			String key = invocation.getArgument(1);
-			if (key.equals("message.command.build.common.repoInfo.prefix")) {
+			if (key.equals("message.command.build.common.status.prefix")) {
 				key = "Current repository info: \\n{0}";
 			} else if (key.equals("button.build.setFieldValue")) {
 				key = "Set `{0}`";

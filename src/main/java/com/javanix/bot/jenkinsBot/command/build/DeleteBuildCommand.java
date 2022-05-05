@@ -1,13 +1,15 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.command.build.model.UserBuildContext;
-import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
+import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -20,25 +22,22 @@ class DeleteBuildCommand implements BuildSubCommand {
 
 	@Override
 	public void process(Chat chat, User from, String buildCommandArguments) {
-// FIXME: grace: exception based?
-		database.getOwnedRepository(buildCommandArguments.trim().split(" ")[0], from.id())
-				.map(repository -> {
-					database.removeRepo(repository.getRepoName());
-					userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
-							.messageKey("message.command.build.delete.processed")
-							.messageArgs(new Object[] { repository.getRepoName() })
-							.build());
-					defaultBuildCommand.process(chat, from, "");
-					return repository;
-				})
-				.orElseGet(() -> {
-					myReposBuildCommand.process(chat, from, "error.command.build.delete");
-					return null;
-				});
+		Optional<BuildInfoDto> ownedRepository = database.getOwnedEntityByName(buildCommandArguments, from.id());
+		if (ownedRepository.isPresent()) {
+			BuildInfoDto repository = ownedRepository.get();
+			database.removeRepo(repository.getRepoName());
+			userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
+					.messageKey("message.command.build.delete.processed")
+					.messageArgs(new Object[] { repository.getRepoName() })
+					.build());
+			defaultBuildCommand.process(chat, from, "");
+		} else {
+			myReposBuildCommand.process(chat, from, "error.command.build.delete");
+		}
 	}
 
-	public CommonEntityActionType getBuildType() {
-		return CommonEntityActionType.DELETE;
+	public EntityActionType getCommandType() {
+		return EntityActionType.DELETE;
 	}
 
 }

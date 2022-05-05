@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static com.javanix.bot.jenkinsBot.command.build.AbstractModifyBuildCommand.ICON_NA;
+import static com.javanix.bot.jenkinsBot.command.common.AbstractModifyEntityCommand.ICON_NA;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +46,7 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 				.then(executeAddJobNameAndAssert())
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.build.status.select.title", message.getMessageKey());
+					assertEquals("message.command.build.default.mainList", message.getMessageKey());
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
 							new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
@@ -65,7 +65,7 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/build ADD /done");
 
 		Mockito.verify(bot, Mockito.times(5)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
-		Mockito.verify(databaseService).addRepository(BuildInfoDto.builder()
+		Mockito.verify(databaseService).save(BuildInfoDto.builder()
 						.repoName("Repo01")
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.isPublic(false)
@@ -90,7 +90,7 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 				.then(executeAddDomainAndAssert())
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("error.command.build.save.repo", message.getMessageKey());
+					assertEquals("error.command.common.save.prefix", message.getMessageKey());
 					assertArrayEquals(new Object[] { "error.command.build.validation.required.jenkins.job" }, message.getMessageArgs());
 					List<InlineKeyboardButton> expectedInlineButtons = getExpectedInlineButtons();
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
@@ -106,7 +106,7 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/build ADD /done");
 
 		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
-		Mockito.verify(databaseService, Mockito.times(0)).addRepository(any());
+		Mockito.verify(databaseService, Mockito.times(0)).save(any());
 	}
 
 
@@ -121,8 +121,8 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 				.then(executeAddRepoNameAndAssert())
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.build.cancel", message.getMessageKey());
-					assertArrayEquals(new Object[] { "label.field.build.common.add" }, message.getMessageArgs());
+					assertEquals("message.command.common.cancel", message.getMessageKey());
+					assertArrayEquals(new Object[] {"label.field.common.add"}, message.getMessageArgs());
 					return sendResponse;
 				}).then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
@@ -141,7 +141,7 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/cancel");
 
 		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
-		Mockito.verify(databaseService, Mockito.times(0)).addRepository(any());
+		Mockito.verify(databaseService, Mockito.times(0)).save(any());
 	}
 
 	private Answer<Object> executeAddIntroAndAssert() {

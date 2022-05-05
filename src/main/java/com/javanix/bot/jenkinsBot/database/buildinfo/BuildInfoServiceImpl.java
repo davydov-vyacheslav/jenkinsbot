@@ -35,17 +35,11 @@ class BuildInfoServiceImpl implements BuildInfoService {
 	}
 
 	@Override
-	public void addRepository(BuildInfoDto repo) {
-		repository.save(convertDtoToEntity(repo));
-	}
-
-	@Override
-	public void updateRepository(BuildInfoDto repo) {
-		repository.getByRepoNameIgnoreCase(repo.getRepoName()).ifPresent(buildInfoEntity -> {
-				BuildInfoEntity repoEntity = convertDtoToEntity(repo);
-				repoEntity.setId(buildInfoEntity.getId());
-				repository.save(repoEntity);
-		});
+	public void save(BuildInfoDto repo) {
+		Optional<BuildInfoEntity> repoInDb = repository.getByRepoNameIgnoreCase(repo.getRepoName());
+		BuildInfoEntity repoEntity = convertDtoToEntity(repo);
+		repoInDb.ifPresent(buildInfoEntity -> repoEntity.setId(buildInfoEntity.getId()));
+		repository.save(repoEntity);
 	}
 
 	@Override
@@ -54,7 +48,7 @@ class BuildInfoServiceImpl implements BuildInfoService {
 	}
 
 	@Override
-	public Optional<BuildInfoDto> getOwnedRepository(String name, Long ownerId) {
+	public Optional<BuildInfoDto> getOwnedEntityByName(String name, Long ownerId) {
 		return repository.getByRepoNameIgnoreCaseAndCreatorId(name, ownerId)
 				.map(this::convertEntityToDto);
 	}
@@ -97,7 +91,7 @@ class BuildInfoServiceImpl implements BuildInfoService {
 				.creatorFullName(buildInfoEntity.getCreatorFullName())
 				.jenkinsInfo(buildInfoEntity.getJenkinsInfo())
 				.creatorId(buildInfoEntity.getCreatorId())
-				.isPublic(buildInfoEntity.getIsPublic())
+				.isPublic(buildInfoEntity.isPublic())
 				.build();
 	}
 

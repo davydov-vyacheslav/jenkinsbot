@@ -1,7 +1,7 @@
 package com.javanix.bot.jenkinsBot.command;
 
-import com.javanix.bot.jenkinsBot.command.common.CommandFactory;
-import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.EntityCommandFactory;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 
@@ -15,7 +15,7 @@ public abstract class AbstractEntityCommand implements TelegramCommand {
 
 		// assuming income message is '@botname /build status teamname'
 		Matcher m = getCommandPattern().matcher(message);
-		CommonEntityActionType buildType = null;
+		EntityActionType buildType = null;
 		String buildArguments = "";
 		if (m.find()) {
 			buildType = getBuildType(m.group(1));
@@ -26,12 +26,12 @@ public abstract class AbstractEntityCommand implements TelegramCommand {
 	}
 
 	protected abstract Pattern getCommandPattern();
-	protected abstract CommandFactory getCommandFactory();
+	protected abstract EntityCommandFactory getCommandFactory();
 
-	protected CommonEntityActionType getBuildType(String message) {
-		CommonEntityActionType type = null;
+	protected EntityActionType getBuildType(String message) {
+		EntityActionType type = null;
 		try {
-			type = CommonEntityActionType.valueOf(message.trim().split(" ")[0].toUpperCase());
+			type = EntityActionType.valueOf(message.trim().split(" ")[0].toUpperCase());
 		} catch (IllegalArgumentException iae) {
 			// no op
 		}

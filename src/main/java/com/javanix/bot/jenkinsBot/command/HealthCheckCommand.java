@@ -1,7 +1,7 @@
 package com.javanix.bot.jenkinsBot.command;
 
-import com.javanix.bot.jenkinsBot.command.common.CommandFactory;
-import com.javanix.bot.jenkinsBot.command.healthcheck.HealthCheckCommandFactory;
+import com.javanix.bot.jenkinsBot.command.common.EntityCommandFactory;
+import com.javanix.bot.jenkinsBot.command.healthcheck.HealthCheckEntityCommandFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ import static java.util.regex.Pattern.CASE_INSENSITIVE;
 @RequiredArgsConstructor
 class HealthCheckCommand extends AbstractEntityCommand {
 
-	private final HealthCheckCommandFactory healthCheckCommandFactory;
+	private final HealthCheckEntityCommandFactory healthCheckCommandFactory;
 	private static final Pattern healthCheckCommandPattern = Pattern.compile(".*/healthcheck.?(add|edit|status|delete|my_list).?(.*)", CASE_INSENSITIVE);
 
 	@Override
@@ -27,7 +27,7 @@ class HealthCheckCommand extends AbstractEntityCommand {
 	}
 
 	@Override
-	protected CommandFactory getCommandFactory() {
+	protected EntityCommandFactory getCommandFactory() {
 		return healthCheckCommandFactory;
 	}
 

@@ -1,7 +1,7 @@
 package com.javanix.bot.jenkinsBot.command;
 
-import com.javanix.bot.jenkinsBot.command.build.BuildCommandFactory;
-import com.javanix.bot.jenkinsBot.command.common.CommandFactory;
+import com.javanix.bot.jenkinsBot.command.build.BuildEntityCommandFactory;
+import com.javanix.bot.jenkinsBot.command.common.EntityCommandFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ import static java.util.regex.Pattern.CASE_INSENSITIVE;
 @RequiredArgsConstructor
 class BuildCommand extends AbstractEntityCommand {
 
-	private final BuildCommandFactory buildCommandFactory;
+	private final BuildEntityCommandFactory buildCommandFactory;
 
 	private static final Pattern buildCommandPattern = Pattern.compile(".*/build.?(add|edit|status|delete|my_list).?(.*)", CASE_INSENSITIVE);
 
@@ -28,7 +28,7 @@ class BuildCommand extends AbstractEntityCommand {
 	}
 
 	@Override
-	protected CommandFactory getCommandFactory() {
+	protected EntityCommandFactory getCommandFactory() {
 		return buildCommandFactory;
 	}
 }

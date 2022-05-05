@@ -34,7 +34,7 @@ final class MigrationTool {
 	private void createOotbData() {
 		if (service.isDatabaseEmpty()) {
 			log.info("Adding OOTB values");
-			service.addRepository(BuildInfoDto.builder()
+			service.save(BuildInfoDto.builder()
 					.creatorFullName("auto")
 					.creatorId(DEFAULT_CREATOR_ID)
 					.isPublic(true)
@@ -47,7 +47,7 @@ final class MigrationTool {
 							.build())
 					.build());
 
-			service.addRepository(BuildInfoDto.builder()
+			service.save(BuildInfoDto.builder()
 					.creatorFullName("auto")
 					.creatorId(DEFAULT_CREATOR_ID)
 					.isPublic(true)
@@ -60,7 +60,7 @@ final class MigrationTool {
 							.build())
 					.build());
 
-			service.addRepository(BuildInfoDto.builder()
+			service.save(BuildInfoDto.builder()
 					.creatorFullName("auto")
 					.creatorId(DEFAULT_CREATOR_ID)
 					.isPublic(true)
@@ -73,7 +73,7 @@ final class MigrationTool {
 							.build())
 					.build());
 
-			service.addRepository(BuildInfoDto.builder()
+			service.save(BuildInfoDto.builder()
 					.creatorFullName("auto")
 					.creatorId(DEFAULT_CREATOR_ID)
 					.isPublic(true)
@@ -86,7 +86,7 @@ final class MigrationTool {
 							.build())
 					.build());
 
-			service.addRepository(BuildInfoDto.builder()
+			service.save(BuildInfoDto.builder()
 					.creatorFullName("auto")
 					.creatorId(DEFAULT_CREATOR_ID)
 					.isPublic(true)
@@ -99,7 +99,7 @@ final class MigrationTool {
 							.build())
 					.build());
 
-			service.addRepository(BuildInfoDto.builder()
+			service.save(BuildInfoDto.builder()
 					.creatorFullName("auto")
 					.creatorId(DEFAULT_CREATOR_ID)
 					.isPublic(true)
@@ -115,42 +115,42 @@ final class MigrationTool {
 		}
 
 		if (healthCheckService.isDatabaseEmpty()) {
-			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+			healthCheckService.save(HealthCheckInfoDto.builder()
 					.endpointName("test-dmsmanager-dvt-rim-lb01")
 					.endpointUrl("http://dvt-rim-lb01.perceptive.cloud:9091/dmsmanager/actuator/health")
 					.creatorFullName("auto")
 					.creatorId(DEFAULT_CREATOR_ID)
 					.isPublic(true)
 					.build());
-			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+			healthCheckService.save(HealthCheckInfoDto.builder()
 					.endpointName("test-dmsmanager-10.215.162.170")
 					.endpointUrl("http://10.215.162.170:9091/dmsmanager/actuator/health")
 					.creatorFullName("auto")
 					.creatorId(DEFAULT_CREATOR_ID)
 					.isPublic(true)
 					.build());
-			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+			healthCheckService.save(HealthCheckInfoDto.builder()
 					.endpointName("test-ir-dvt-rim-res01")
 					.endpointUrl("http://dvt-rim-res01:2861/InSightRenderingService/Service.svc?wsdl")
 					.creatorFullName("auto")
 					.creatorId(DEFAULT_CREATOR_ID)
 					.isPublic(true)
 					.build());
-			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+			healthCheckService.save(HealthCheckInfoDto.builder()
 					.endpointName("test-ir-vlqt-53-0587")
 					.endpointUrl("http://vlqt-53-0587:2861/InSightRenderingService/Service.svc?wsdl")
 					.creatorFullName("auto")
 					.creatorId(DEFAULT_CREATOR_ID)
 					.isPublic(true)
 					.build());
-			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+			healthCheckService.save(HealthCheckInfoDto.builder()
 					.endpointName("test-ir-wrong-host")
 					.endpointUrl("http://vlqt-53-0588:2861/InSightRenderingService/Service.svc?wsdl")
 					.creatorFullName("auto")
 					.creatorId(DEFAULT_CREATOR_ID)
 					.isPublic(true)
 					.build());
-			healthCheckService.addEndpoint(HealthCheckInfoDto.builder()
+			healthCheckService.save(HealthCheckInfoDto.builder()
 					.endpointName("test-ir-wrong-port")
 					.endpointUrl("http://vlqt-53-0587:2862/InSightRenderingService/Service.svc?wsdl")
 					.creatorFullName("auto")
@@ -169,7 +169,7 @@ final class MigrationTool {
 					.filter(buildInfoDto -> !buildInfoDto.getJenkinsInfo().getDomain().contains("."))
 					.peek(buildInfoDto -> buildInfoDto.getJenkinsInfo().setDomain(buildInfoDto.getJenkinsInfo().getDomain() + ".perceptive.cloud"))
 					.peek(buildInfoDto -> log.info("Fixed: " + buildInfoDto.getJenkinsInfo().getDomain()))
-					.forEach(service::updateRepository);
+					.forEach(service::save);
 			settingsService.saveSettings(KEY_DB_VERSION, "2");
 		}
 	}

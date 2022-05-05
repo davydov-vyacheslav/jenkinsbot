@@ -3,7 +3,7 @@ package com.javanix.bot.jenkinsBot.command.build;
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.cli.CliProcessor;
 import com.javanix.bot.jenkinsBot.cli.JenkinsBuildDetails;
-import com.javanix.bot.jenkinsBot.command.common.CommonEntityActionType;
+import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
@@ -32,7 +32,7 @@ class StatusBuildCommand implements BuildSubCommand {
 
     @Override
     public void process(Chat chat, User from, String buildCommandArguments) {
-        BuildInfoDto repository = database.getAvailableRepository(buildCommandArguments.trim().split(" ")[0], from.id());
+        BuildInfoDto repository = database.getAvailableRepository(buildCommandArguments, from.id());
 
         if (repository == null) {
             defaultBuildCommand.process(chat, from, "error.command.build.common.wrongTeam");
@@ -81,7 +81,7 @@ class StatusBuildCommand implements BuildSubCommand {
         return result;
     }
 
-    public CommonEntityActionType getBuildType() {
-        return CommonEntityActionType.STATUS;
+    public EntityActionType getCommandType() {
+        return EntityActionType.STATUS;
     }
 }

@@ -86,17 +86,17 @@ public class DatabaseSourceTest {
 	}
 
 	private void dataSetup() {
-		databaseService.addRepository(BuildInfoDto.builder()
+		databaseService.save(BuildInfoDto.builder()
 				.repoName("owned-public")
 				.jenkinsInfo(JenkinsInfoDto.builder()
 						.domain("domain")
 						.build())
 				.isPublic(true).creatorId(CURRENT_USER_ID).build());
-		databaseService.addRepository(BuildInfoDto.builder()
+		databaseService.save(BuildInfoDto.builder()
 				.repoName("foreign-public").isPublic(true).creatorId(SOMEONE_USER_ID).build());
-		databaseService.addRepository(BuildInfoDto.builder()
+		databaseService.save(BuildInfoDto.builder()
 				.repoName("owned-private").isPublic(false).creatorId(CURRENT_USER_ID).build());
-		databaseService.addRepository(BuildInfoDto.builder()
+		databaseService.save(BuildInfoDto.builder()
 				.repoName("foreign-private").isPublic(false).creatorId(SOMEONE_USER_ID).build());
 	}
 
