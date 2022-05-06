@@ -28,7 +28,7 @@ class StatusBuildCommand implements BuildSubCommand {
     private final BuildInfoService database;
     private final TelegramBotWrapper bot;
     private static final int failedTestsCount = 20;
-    private static final Pattern failedTestsPattern = Pattern.compile(".*\\[junit\\] TEST (.*)\\.(.*Test) FAILED");
+    private static final Pattern failedTestsPattern = Pattern.compile(".*\\[junit] TEST (.*)\\.(.*Test) FAILED");
 
     @Override
     public void process(Chat chat, User from, String buildCommandArguments) {
@@ -68,14 +68,14 @@ class StatusBuildCommand implements BuildSubCommand {
     // convert
     // [junit] TEST com.liquent.insight.manager.assembly.test.AssemblyExportTest FAILED
     // to
-    // - [%s](http://%s:7331/job/%s/ws/output/reports/TEST-%s.xml/*view*/)
+    // - [%s](http://domain:7331/job/job-name/ws/output/reports/TEST-testFullName.xml/*view*/)
     private String convertFailedTestsOutputToLinks(List<String> origin, JenkinsInfoDto jenkinsInfo) {
         String result = String.join("\n", origin);
         Matcher m = failedTestsPattern.matcher(result);
         if (m.find()) {
             result = m.replaceAll(
-                    String.format("- [%s](http://%s:7331/job/%s/ws/output/reports/TEST-%s.xml/*view*/)",
-                            "$2", jenkinsInfo.getDomain(), jenkinsInfo.getJobName(), "$1.$2"));
+                    String.format("- [%s](%s/ws/output/reports/TEST-%s.xml/*view*/)", "$2", jenkinsInfo.getJobUrl(), "$1.$2")
+            );
         }
 
         return result;

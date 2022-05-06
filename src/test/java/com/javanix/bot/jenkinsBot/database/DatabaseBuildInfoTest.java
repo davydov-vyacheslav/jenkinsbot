@@ -1,7 +1,6 @@
 package com.javanix.bot.jenkinsBot.database;
 
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
-import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.javanix.bot.jenkinsBot.core.service.EntityService;
 import de.flapdoodle.embed.mongo.MongodExecutable;
@@ -71,11 +70,7 @@ public class DatabaseBuildInfoTest extends AbstractDatabaseEntityTest<BuildInfoD
 
 	private static void dataSetup(BuildInfoService databaseService) {
 		databaseService.save(BuildInfoDto.builder()
-				.repoName("owned-public")
-				.jenkinsInfo(JenkinsInfoDto.builder()
-						.domain("domain")
-						.build())
-				.isPublic(true).creatorId(CURRENT_USER_ID).build());
+				.repoName("owned-public").isPublic(true).creatorId(CURRENT_USER_ID).build());
 		databaseService.save(BuildInfoDto.builder()
 				.repoName("foreign-public").isPublic(true).creatorId(SOMEONE_USER_ID).build());
 		databaseService.save(BuildInfoDto.builder()

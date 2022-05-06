@@ -114,8 +114,7 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 	@Test
 	public void status_ok() {
 		JenkinsInfoDto jenkinsInfo = JenkinsInfoDto.builder()
-				.domain("domain")
-				.jobName("Insight")
+				.jobUrl("https://domain:7331/job/project")
 				.build();
 		BuildInfoDto team = BuildInfoDto.builder()
 				.repoName("xmen")
@@ -136,8 +135,8 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 						.buildStatus(BuildStatus.IN_PROGRESS)
 						.failedTestsCapacity(20)
 						.topFailedTests(Arrays.asList(
-								" [junit] TEST com.liquent.insight.manager.assembly.test.AssemblyExportTest FAILED",
-								" [junit] TEST com.liquent.insight.manager.assembly.test2.AnotherFailedTest FAILED"
+								" [junit] TEST com.javanix.jenkinsbot.test.AssemblyExportTest FAILED",
+								" [junit] TEST com.javanix.jenkinsbot.test2.AnotherFailedTest FAILED"
 						))
 						.build());
 
@@ -148,8 +147,8 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("message.command.build.status.repo", message.getMessageKey());
 			assertArrayEquals(new Object[] { "xmen", BuildStatus.IN_PROGRESS, BuildStatus.IN_PROGRESS.getMessageKey(), 500L, 1000L, 20, 2L,
-					"- [AssemblyExportTest](http://domain:7331/job/Insight/ws/output/reports/TEST-com.liquent.insight.manager.assembly.test.AssemblyExportTest.xml/*view*/)\n" +
-							"- [AnotherFailedTest](http://domain:7331/job/Insight/ws/output/reports/TEST-com.liquent.insight.manager.assembly.test2.AnotherFailedTest.xml/*view*/)" },
+					"- [AssemblyExportTest](https://domain:7331/job/project/ws/output/reports/TEST-com.javanix.jenkinsbot.test.AssemblyExportTest.xml/*view*/)\n" +
+							"- [AnotherFailedTest](https://domain:7331/job/project/ws/output/reports/TEST-com.javanix.jenkinsbot.test2.AnotherFailedTest.xml/*view*/)" },
 					message.getMessageArgs());
 			List<InlineKeyboardButton> expectedInlineButtons = Collections.emptyList();
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);

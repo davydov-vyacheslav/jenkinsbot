@@ -47,12 +47,12 @@ class EditBuildCommand extends AbstractModifyEntityCommand<BuildInfoDto> impleme
 
 	@Override
 	protected List<BuildStateType> fieldsToModify() {
-		return Arrays.asList(BuildStateType.PUBLIC, BuildStateType.DOMAIN, BuildStateType.USER, BuildStateType.PASSWORD, BuildStateType.JOB_NAME);
+		return Arrays.asList(BuildStateType.PUBLIC, BuildStateType.JOB_URL, BuildStateType.USER, BuildStateType.PASSWORD);
 	}
 
 	@Override
 	protected List<? extends EntityState<BuildInfoDto>> getFieldsToDisplay() {
-		return Arrays.asList(BuildStateType.REPO_NAME, BuildStateType.PUBLIC, BuildStateType.DOMAIN, BuildStateType.USER, BuildStateType.PASSWORD, BuildStateType.JOB_NAME);
+		return Arrays.asList(BuildStateType.REPO_NAME, BuildStateType.PUBLIC, BuildStateType.JOB_URL, BuildStateType.USER, BuildStateType.PASSWORD);
 	}
 
 }

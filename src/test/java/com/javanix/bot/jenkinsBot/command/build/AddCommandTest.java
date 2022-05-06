@@ -42,7 +42,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeAddIntroAndAssert())
 				.then(executeAddRepoNameAndAssert())
-				.then(executeAddDomainAndAssert())
+				.then(executeAddUserAndAssert())
 				.then(executeAddJobNameAndAssert())
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
@@ -58,10 +58,10 @@ public class AddCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/build add");
 		executeCommand(from, "/build add repo.name");
 		executeCommand(from, ENTITY_NAME);
-		executeCommand(from, "/build add jenkins.domain");
+		executeCommand(from, "/build add jenkins.user");
+		executeCommand(from, "admin");
+		executeCommand(from, "/build add jenkins.jobUrl");
 		executeCommand(from, "Domain01");
-		executeCommand(from, "/build add jenkins.job");
-		executeCommand(from, "Job01");
 		executeCommand(from, "/build ADD /done");
 
 		Mockito.verify(bot, Mockito.times(5)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
@@ -70,10 +70,9 @@ public class AddCommandTest extends AbstractCommandTestCase {
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.isPublic(false)
 						.jenkinsInfo(JenkinsInfoDto.builder()
-								.domain("Domain01")
-								.user("")
+								.jobUrl("Domain01")
+								.user("admin")
 								.password("")
-								.jobName("Job01")
 								.build())
 				.build());
 	}
@@ -87,11 +86,11 @@ public class AddCommandTest extends AbstractCommandTestCase {
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeAddIntroAndAssert())
 				.then(executeAddRepoNameAndAssert())
-				.then(executeAddDomainAndAssert())
+				.then(executeAddUserAndAssert())
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 					assertEquals("error.command.common.save.prefix", message.getMessageKey());
-					assertArrayEquals(new Object[] { "error.command.build.validation.required.jenkins.job" }, message.getMessageArgs());
+					assertArrayEquals(new Object[] { "error.command.build.validation.required.jenkins.jobUrl" }, message.getMessageArgs());
 					List<InlineKeyboardButton> expectedInlineButtons = getExpectedInlineButtons();
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -101,8 +100,8 @@ public class AddCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/build add");
 		executeCommand(from, "/build add repo.name");
 		executeCommand(from, ENTITY_NAME);
-		executeCommand(from, "/build add jenkins.domain");
-		executeCommand(from, "Domain01");
+		executeCommand(from, "/build add jenkins.user");
+		executeCommand(from, "admin");
 		executeCommand(from, "/build ADD /done");
 
 		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
@@ -166,10 +165,10 @@ public class AddCommandTest extends AbstractCommandTestCase {
 		};
 	}
 
-	private Answer<Object> executeAddDomainAndAssert() {
+	private Answer<Object> executeAddUserAndAssert() {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-			assertEquals(getUserInfoString("Domain01", ICON_NA), message.getMessageKey());
+			assertEquals(getUserInfoString(ICON_NA, "admin"), message.getMessageKey());
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
@@ -179,31 +178,29 @@ public class AddCommandTest extends AbstractCommandTestCase {
 	private Answer<Object> executeAddJobNameAndAssert() {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-			assertEquals(getUserInfoString("Domain01", "Job01"), message.getMessageKey());
+			assertEquals(getUserInfoString("Domain01", "admin"), message.getMessageKey());
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
 		};
 	}
 
-	private String getUserInfoString(String domain, String job) {
+	private String getUserInfoString(String jobUrl, String user) {
 		return String.format("Current repository info: \\n" +
 				"- label.field.build.repo.name: Repo01\n" +
 				"- label.field.build.repo.public: false\n" +
-				"- label.field.build.jenkins.domain: %s\n" +
-				"- label.field.build.jenkins.user: \uD83D\uDEAB\n" +
-				"- label.field.build.jenkins.password: \uD83D\uDEAB\n" +
-				"- label.field.build.jenkins.job: %s", domain, job);
+				"- label.field.build.jenkins.jobUrl: %s\n" +
+				"- label.field.build.jenkins.user: %s\n" +
+				"- label.field.build.jenkins.password: \uD83D\uDEAB", jobUrl, user);
 	}
 
 	private List<InlineKeyboardButton> getExpectedInlineButtons() {
 		return Arrays.asList(
 				new InlineKeyboardButton("Set `label.field.build.repo.name`").callbackData("/build ADD repo.name"),
 				new InlineKeyboardButton("Set `label.field.build.repo.public`").callbackData("/build ADD repo.public"),
-				new InlineKeyboardButton("Set `label.field.build.jenkins.domain`").callbackData("/build ADD jenkins.domain"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.user`").callbackData("/build ADD jenkins.user"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.password`").callbackData("/build ADD jenkins.password"),
-				new InlineKeyboardButton("Set `label.field.build.jenkins.job`").callbackData("/build ADD jenkins.job"),
+				new InlineKeyboardButton("Set `label.field.build.jenkins.jobUrl`").callbackData("/build ADD jenkins.jobUrl"),
 				new InlineKeyboardButton("button.common.complete").callbackData("/build ADD /done"),
 				new InlineKeyboardButton("button.common.cancel").callbackData("/cancel")
 		);

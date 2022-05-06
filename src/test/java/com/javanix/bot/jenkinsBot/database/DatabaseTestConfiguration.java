@@ -9,16 +9,13 @@ import de.flapdoodle.embed.process.runtime.Network;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import java.net.UnknownHostException;
 
 @TestConfiguration
-@ComponentScan(basePackages = {"com.javanix.bot.jenkinsBot.database"},
-		excludeFilters = { @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = MigrationTool.class) }
-)
+@ComponentScan(basePackages = {"com.javanix.bot.jenkinsBot.database"})
 @EnableMongoRepositories(basePackages = "com.javanix.bot.jenkinsBot.database")
 public class DatabaseTestConfiguration {
 

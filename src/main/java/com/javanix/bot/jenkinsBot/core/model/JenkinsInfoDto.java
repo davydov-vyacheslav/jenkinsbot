@@ -6,8 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class JenkinsInfoDto {
-	private String domain;
+	private String jobUrl;
 	private String user;
 	private String password;
-	private String jobName;
 }

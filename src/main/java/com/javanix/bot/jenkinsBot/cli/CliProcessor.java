@@ -27,8 +27,6 @@ import java.util.stream.Stream;
 @Log4j2
 public class CliProcessor {
 
-	private static final String urlTemplate = "http://%s:7331/job/%s/%s/consoleText";
-
 	public JenkinsBuildDetails getCurrentBuildJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo, int count) {
 		return getJenkinsBuildDetails(jenkinsInfo, "lastBuild", count);
 	}
@@ -43,7 +41,7 @@ public class CliProcessor {
 		File tempFile = File.createTempFile("jenkinsbot-", ".log");
 		tempFile.deleteOnExit();
 
-		String url = String.format(urlTemplate, jenkinsInfo.getDomain(), jenkinsInfo.getJobName(), buildType);
+		String url = String.format("%s/%s/consoleText", jenkinsInfo.getJobUrl(), buildType);
 
 		log.info(String.format("Saving `%s` data to file: `%s`", url, tempFile.getAbsoluteFile()));
 

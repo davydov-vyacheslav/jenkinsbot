@@ -43,10 +43,9 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 				.isPublic(false)
 				.jenkinsInfo(JenkinsInfoDto.builder()
-						.domain("Domain01")
+						.jobUrl("Domain01")
 						.user("")
 						.password("")
-						.jobName("Job01")
 						.build())
 				.build();
 		Mockito.when(buildInfoService.getOwnedEntityByName(ENTITY_NAME, BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
@@ -60,7 +59,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				});
 
 		executeCommand(from, "/build edit repo01");
-		executeCommand(from, "/build edit jenkins.domain");
+		executeCommand(from, "/build edit jenkins.jobUrl");
 		executeCommand(from, "Domain02");
 		executeCommand(from, "/build edit /done");
 
@@ -71,10 +70,9 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 				.isPublic(false)
 				.jenkinsInfo(JenkinsInfoDto.builder()
-						.domain("Domain02")
+						.jobUrl("Domain02")
 						.user("")
 						.password("")
-						.jobName("Job01")
 						.build())
 				.build());
 	}
@@ -88,10 +86,9 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 				.isPublic(false)
 				.jenkinsInfo(JenkinsInfoDto.builder()
-						.domain("Domain01")
+						.jobUrl("Domain01")
 						.user("")
 						.password("")
-						.jobName("Job01")
 						.build())
 				.build();
 		Mockito.when(buildInfoService.getOwnedEntityByName(ENTITY_NAME, BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
@@ -107,14 +104,14 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 					assertEquals("error.command.common.save.prefix", message.getMessageKey());
-					assertArrayEquals(new Object[] { "error.command.build.validation.required.domain" }, message.getMessageArgs());
+					assertArrayEquals(new Object[] { "error.command.build.validation.required.jenkins.jobUrl" }, message.getMessageArgs());
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
 				});
 
 		executeCommand(from, "/build edit repo01");
-		executeCommand(from, "/build edit jenkins.domain");
+		executeCommand(from, "/build edit jenkins.jobUrl");
 		executeCommand(from, "");
 		executeCommand(from, "/build edit /done");
 
@@ -132,10 +129,9 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 				.isPublic(false)
 				.jenkinsInfo(JenkinsInfoDto.builder()
-						.domain("Domain01")
+						.jobUrl("Domain01")
 						.user("")
 						.password("")
-						.jobName("Job01")
 						.build())
 				.build();
 		Mockito.when(buildInfoService.getOwnedEntityByName(ENTITY_NAME, BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
@@ -159,7 +155,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				});
 
 		executeCommand(from, "/build edit repo01");
-		executeCommand(from, "/build edit jenkins.domain");
+		executeCommand(from, "/build edit jenkins.jobUrl");
 		executeCommand(from, "Domain02");
 		executeCommand(from, "/cancel");
 
@@ -193,19 +189,17 @@ public class EditCommandTest extends AbstractCommandTestCase {
 		return String.format("Current repository info: \\n" +
 				"- label.field.build.repo.name: repo01\n" +
 				"- label.field.build.repo.public: false\n" +
-				"- label.field.build.jenkins.domain: %s\n" +
+				"- label.field.build.jenkins.jobUrl: %s\n" +
 				"- label.field.build.jenkins.user: \uD83D\uDEAB\n" +
-				"- label.field.build.jenkins.password: \uD83D\uDEAB\n" +
-				"- label.field.build.jenkins.job: Job01", domain);
+				"- label.field.build.jenkins.password: \uD83D\uDEAB", domain);
 	}
 
 	private List<InlineKeyboardButton> getExpectedInlineButtons() {
 		return Arrays.asList(
 				new InlineKeyboardButton("Set `label.field.build.repo.public`").callbackData("/build EDIT repo.public"),
-				new InlineKeyboardButton("Set `label.field.build.jenkins.domain`").callbackData("/build EDIT jenkins.domain"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.user`").callbackData("/build EDIT jenkins.user"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.password`").callbackData("/build EDIT jenkins.password"),
-				new InlineKeyboardButton("Set `label.field.build.jenkins.job`").callbackData("/build EDIT jenkins.job"),
+				new InlineKeyboardButton("Set `label.field.build.jenkins.jobUrl`").callbackData("/build EDIT jenkins.jobUrl"),
 				new InlineKeyboardButton("button.common.complete").callbackData("/build EDIT /done"),
 				new InlineKeyboardButton("button.common.cancel").callbackData("/cancel")
 		);

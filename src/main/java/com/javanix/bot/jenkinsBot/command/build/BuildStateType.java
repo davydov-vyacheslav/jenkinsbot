@@ -11,10 +11,10 @@ enum BuildStateType implements EntityState<BuildInfoDto> {
 			"repo.public",
 			BuildInfoDto::isPublic,
 			(repo, value) -> repo.setIsPublic(Boolean.parseBoolean(value))),
-	JOB_NAME(
-			"jenkins.job",
-			repo -> repo.getJenkinsInfo().getJobName(),
-			(repo, value) -> repo.getJenkinsInfo().setJobName(value)),
+	JOB_URL(
+			"jenkins.jobUrl",
+			repo -> repo.getJenkinsInfo().getJobUrl(),
+			(repo, value) -> repo.getJenkinsInfo().setJobUrl(value)),
 	PASSWORD(
 			"jenkins.password",
 			repo -> repo.getJenkinsInfo().getPassword(),
@@ -23,10 +23,6 @@ enum BuildStateType implements EntityState<BuildInfoDto> {
 			"jenkins.user",
 			repo -> repo.getJenkinsInfo().getUser(),
 			(repo, value) -> repo.getJenkinsInfo().setUser(value)),
-	DOMAIN(
-			"jenkins.domain",
-			repo -> repo.getJenkinsInfo().getDomain(),
-			(repo, value) -> repo.getJenkinsInfo().setDomain(value)),
 	REPO_NAME(
 			"repo.name",
 			BuildInfoDto::getRepoName,

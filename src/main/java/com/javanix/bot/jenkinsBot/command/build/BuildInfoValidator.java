@@ -22,14 +22,12 @@ class BuildInfoValidator implements EntityValidator<BuildInfoDto> {
 	public boolean validate(BuildInfoDto target, List<String> errors, EntityActionType actionType) {
 		JenkinsInfoDto jenkinsInfo = target.getJenkinsInfo();
 
-		// TODO: error.command.build.validation.{required,invalid}. + field.getFieldKey
-
 		// required fields check
 		emptyValidator.validate(target.getRepoName(), errors, "error.command.build.validation.required.repo.name");
-		emptyValidator.validate(jenkinsInfo.getJobName(), errors, "error.command.build.validation.required.jenkins.job");
-		emptyValidator.validate(jenkinsInfo.getDomain(), errors, "error.command.build.validation.required.domain");
+		emptyValidator.validate(jenkinsInfo.getJobUrl(), errors, "error.command.build.validation.required.jenkins.jobUrl");
 
-		// TODO: another validator
+		// TODO: Url validator
+		// TODO: unique validator
 		if (actionType == EntityActionType.ADD && database.hasEntity(target.getRepoName())) {
 			errors.add("error.command.build.validation.invalid.repo.name");
 		}
