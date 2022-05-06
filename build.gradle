@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.6.7'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id "io.freefair.lombok" version "6.4.3"
+    id "com.palantir.docker" version "0.13.0"
     id 'java'
 }
 
@@ -35,3 +36,25 @@ task copyReadMe(type: Copy, description: "Copy README.md file to resources") {
 }
 
 processResources.dependsOn(copyReadMe)
+
+/// Docker configuration
+dockerPrepare.dependsOn(bootJar)
+docker {
+    name "davs87/jenkinsbot:$version"
+    tags "latest"
+    copySpec.from("./build/libs/$project.name-$version" + ".jar").into("app")
+}
+
+task release() {
+    if (!version.contains("-SNAPSHOT")) {
+        dependsOn(dockerPush)
+        mustRunAfter('dockerPushLatest')
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'dockerPushLatest') {
+        release.dependsOn(task)
+    }
+}
+
