@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static com.javanix.bot.jenkinsBot.command.common.AbstractModifyEntityCommand.ICON_NA;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,7 +99,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				.then(executeEditIntroAndAssert())
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals(getUserInfoString("Domain 01"), message.getMessageKey());
+					assertEquals(getUserInfoString(ICON_NA), message.getMessageKey());
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
@@ -106,7 +107,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 					assertEquals("error.command.common.save.prefix", message.getMessageKey());
-					assertArrayEquals(new Object[] { "error.command.build.validation.invalid.jenkins.domain" }, message.getMessageArgs());
+					assertArrayEquals(new Object[] { "error.command.build.validation.required.domain" }, message.getMessageArgs());
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
@@ -114,7 +115,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 
 		executeCommand(from, "/build edit repo01");
 		executeCommand(from, "/build edit jenkins.domain");
-		executeCommand(from, "Domain 01");
+		executeCommand(from, "");
 		executeCommand(from, "/build edit /done");
 
 		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
