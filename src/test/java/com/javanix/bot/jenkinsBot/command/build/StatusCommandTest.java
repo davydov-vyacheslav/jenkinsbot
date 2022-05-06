@@ -33,10 +33,7 @@ import static org.mockito.Mockito.times;
 
 @SpringJUnitConfig
 @ContextConfiguration(classes = CommandTestConfiguration.class)
-public class BuildStatusCommandTest extends AbstractCommandTestCase {
-
-	@MockBean
-	private BuildInfoService databaseService;
+public class StatusCommandTest extends AbstractCommandTestCase {
 
 	@MockBean
 	private CliProcessor cliProcessor;
@@ -46,8 +43,8 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build status";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(databaseService.getAvailableRepository("", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(null);
-		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Arrays.asList(
+		Mockito.when(buildInfoService.getAvailableRepository("", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(null);
+		Mockito.when(buildInfoService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Arrays.asList(
 				BuildInfoDto.builder()
 						.repoName("repo1")
 						.isPublic(true)
@@ -83,8 +80,8 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build status xmen";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(databaseService.getAvailableRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(null);
-		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Arrays.asList(
+		Mockito.when(buildInfoService.getAvailableRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(null);
+		Mockito.when(buildInfoService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Arrays.asList(
 				BuildInfoDto.builder()
 						.repoName("repo1")
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
@@ -126,7 +123,7 @@ public class BuildStatusCommandTest extends AbstractCommandTestCase {
 				.isPublic(false)
 				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 				.build();
-		Mockito.when(databaseService.getAvailableRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(team);
+		Mockito.when(buildInfoService.getAvailableRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(team);
 
 		Mockito.when(cliProcessor.getPreviousBuildJenkinsBuildDetails(jenkinsInfo)).thenReturn(
 				JenkinsBuildDetails.builder()

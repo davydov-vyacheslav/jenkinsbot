@@ -1,18 +1,16 @@
-package com.javanix.bot.jenkinsBot.command.build;
+package com.javanix.bot.jenkinsBot.command.healthcheck;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
 import com.javanix.bot.jenkinsBot.command.CommandTestConfiguration;
-import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
-import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
-import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
+import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
+import com.javanix.bot.jenkinsBot.core.service.HealthCheckService;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -30,97 +28,86 @@ import static org.mockito.ArgumentMatchers.any;
 @SpringJUnitConfig
 @ContextConfiguration(classes = CommandTestConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class BuildAddCommandTest extends AbstractCommandTestCase {
+public class AddCommandTest extends AbstractCommandTestCase {
 
-	@MockBean
-	private BuildInfoService databaseService;
+	private static final String ENTITY_NAME = "Endpoint01";
 
 	@Test
 	public void okFlowTest() {
-		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
+		User from = new User(HealthCheckService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(databaseService.hasEntity("Repo01")).thenReturn(false);
-		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
+		Mockito.when(healthCheckService.hasEntity(ENTITY_NAME)).thenReturn(false);
+		Mockito.when(healthCheckService.getAvailableEndpoints(HealthCheckService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeAddIntroAndAssert())
-				.then(executeAddRepoNameAndAssert())
-				.then(executeAddDomainAndAssert())
-				.then(executeAddJobNameAndAssert())
+				.then(executeAddNameAndAssert())
+				.then(executeAddUrlAndAssert())
+				.then(executeAddPublicAndAssert())
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.build.default.mainList", message.getMessageKey());
+					assertEquals("message.command.healthcheck.list.title", message.getMessageKey());
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
-					List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
-							new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
-					);
+					List<InlineKeyboardButton> expectedInlineButtons = Collections.emptyList();
 					assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
 				});
 
-		executeCommand(from, "/build add");
-		executeCommand(from, "/build add repo.name");
-		executeCommand(from, "Repo01");
-		executeCommand(from, "/build add jenkins.domain");
-		executeCommand(from, "Domain01");
-		executeCommand(from, "/build add jenkins.job");
-		executeCommand(from, "Job01");
-		executeCommand(from, "/build ADD /done");
+		executeCommand(from, "/healthcheck add");
+		executeCommand(from, "/healthcheck add name");
+		executeCommand(from, ENTITY_NAME);
+		executeCommand(from, "/healthcheck add url");
+		executeCommand(from, "https://someul.com/");
+		executeCommand(from, "/healthcheck add public");
+		executeCommand(from, "true");
+		executeCommand(from, "/healthcheck ADD /done");
 
-		Mockito.verify(bot, Mockito.times(5)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
-		Mockito.verify(databaseService).save(BuildInfoDto.builder()
-						.repoName("Repo01")
-						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
-						.isPublic(false)
-						.jenkinsInfo(JenkinsInfoDto.builder()
-								.domain("Domain01")
-								.user("")
-								.password("")
-								.jobName("Job01")
-								.build())
+		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(healthCheckService).save(HealthCheckInfoDto.builder()
+						.endpointName(ENTITY_NAME)
+						.endpointUrl("https://someul.com/")
+						.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
+						.isPublic(true)
 				.build());
 	}
 
 	@Test
 	public void failedSaveFlowTest() {
-		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
+		User from = new User(HealthCheckService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(databaseService.hasEntity("Repo01")).thenReturn(false);
-		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
+		Mockito.when(healthCheckService.hasEntity(ENTITY_NAME)).thenReturn(false);
+		Mockito.when(healthCheckService.getAvailableEndpoints(HealthCheckService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeAddIntroAndAssert())
-				.then(executeAddRepoNameAndAssert())
-				.then(executeAddDomainAndAssert())
+				.then(executeAddNameAndAssert())
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 					assertEquals("error.command.common.save.prefix", message.getMessageKey());
-					assertArrayEquals(new Object[] { "error.command.build.validation.required.jenkins.job" }, message.getMessageArgs());
+					assertArrayEquals(new Object[] { "error.command.healthcheck.validation.required.url" }, message.getMessageArgs());
 					List<InlineKeyboardButton> expectedInlineButtons = getExpectedInlineButtons();
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
 				});
 
-		executeCommand(from, "/build add");
-		executeCommand(from, "/build add repo.name");
-		executeCommand(from, "Repo01");
-		executeCommand(from, "/build add jenkins.domain");
-		executeCommand(from, "Domain01");
-		executeCommand(from, "/build ADD /done");
+		executeCommand(from, "/healthcheck add");
+		executeCommand(from, "/healthcheck add name");
+		executeCommand(from, ENTITY_NAME);
+		executeCommand(from, "/healthcheck ADD /done");
 
-		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
-		Mockito.verify(databaseService, Mockito.times(0)).save(any());
+		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(healthCheckService, Mockito.times(0)).save(any());
 	}
 
 
 	@Test
 	public void cancelledFlowTest() {
-		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
+		User from = new User(HealthCheckService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(databaseService.hasEntity("Repo01")).thenReturn(false);
-		Mockito.when(databaseService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
+		Mockito.when(healthCheckService.hasEntity(ENTITY_NAME)).thenReturn(false);
+		Mockito.when(healthCheckService.getAvailableEndpoints(HealthCheckService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeAddIntroAndAssert())
-				.then(executeAddRepoNameAndAssert())
+				.then(executeAddNameAndAssert())
 				.then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 					assertEquals("message.command.common.cancel", message.getMessageKey());
@@ -128,7 +115,7 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 					return sendResponse;
 				}).then(invocation -> {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.build.default.mainList", message.getMessageKey());
+					assertEquals("message.command.healthcheck.default.mainList", message.getMessageKey());
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
 							new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
@@ -137,19 +124,19 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 					return sendResponse;
 				});
 
-		executeCommand(from, "/build add");
-		executeCommand(from, "/build add repo.name");
-		executeCommand(from, "Repo01");
+		executeCommand(from, "/healthcheck add");
+		executeCommand(from, "/healthcheck add name");
+		executeCommand(from, ENTITY_NAME);
 		executeCommand(from, "/cancel");
 
-		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
-		Mockito.verify(databaseService, Mockito.times(0)).save(any());
+		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(healthCheckService, Mockito.times(0)).save(any());
 	}
 
 	private Answer<Object> executeAddIntroAndAssert() {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-			assertEquals("message.command.build.add.intro", message.getMessageKey());
+			assertEquals("message.command.healthcheck.add.intro", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = getExpectedInlineButtons();
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -157,10 +144,10 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 		};
 	}
 
-	private Answer<Object> executeAddRepoNameAndAssert() {
+	private Answer<Object> executeAddNameAndAssert() {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-			assertEquals(getUserInfoString(ICON_NA, ICON_NA), message.getMessageKey());
+			assertEquals(getUserInfoString(ICON_NA, "false"), message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = getExpectedInlineButtons();
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -168,45 +155,39 @@ public class BuildAddCommandTest extends AbstractCommandTestCase {
 		};
 	}
 
-	private Answer<Object> executeAddDomainAndAssert() {
+	private Answer<Object> executeAddUrlAndAssert() {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-			assertEquals(getUserInfoString("Domain01", ICON_NA), message.getMessageKey());
+			assertEquals(getUserInfoString("https://someul.com/", "false"), message.getMessageKey());
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
 		};
 	}
 
-	private Answer<Object> executeAddJobNameAndAssert() {
+	private Answer<Object> executeAddPublicAndAssert() {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-			assertEquals(getUserInfoString("Domain01", "Job01"), message.getMessageKey());
+			assertEquals(getUserInfoString("https://someul.com/", "true"), message.getMessageKey());
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
 		};
 	}
 
-	private String getUserInfoString(String domain, String job) {
-		return String.format("Current repository info: \\n" +
-				"- label.field.build.repo.name: Repo01\n" +
-				"- label.field.build.repo.public: false\n" +
-				"- label.field.build.jenkins.domain: %s\n" +
-				"- label.field.build.jenkins.user: \uD83D\uDEAB\n" +
-				"- label.field.build.jenkins.password: \uD83D\uDEAB\n" +
-				"- label.field.build.jenkins.job: %s", domain, job);
+	private String getUserInfoString(String url, String isPublic) {
+		return String.format("Current Endpoint info: \\n" +
+				"- label.field.healthcheck.name: " + ENTITY_NAME + "\n" +
+				"- label.field.healthcheck.public: %s\n" +
+				"- label.field.healthcheck.url: %s", isPublic, url);
 	}
 
 	private List<InlineKeyboardButton> getExpectedInlineButtons() {
 		return Arrays.asList(
-				new InlineKeyboardButton("Set `label.field.build.repo.name`").callbackData("/build ADD repo.name"),
-				new InlineKeyboardButton("Set `label.field.build.repo.public`").callbackData("/build ADD repo.public"),
-				new InlineKeyboardButton("Set `label.field.build.jenkins.domain`").callbackData("/build ADD jenkins.domain"),
-				new InlineKeyboardButton("Set `label.field.build.jenkins.user`").callbackData("/build ADD jenkins.user"),
-				new InlineKeyboardButton("Set `label.field.build.jenkins.password`").callbackData("/build ADD jenkins.password"),
-				new InlineKeyboardButton("Set `label.field.build.jenkins.job`").callbackData("/build ADD jenkins.job"),
-				new InlineKeyboardButton("button.common.complete").callbackData("/build ADD /done"),
+				new InlineKeyboardButton("Set `label.field.healthcheck.name`").callbackData("/healthcheck ADD name"),
+				new InlineKeyboardButton("Set `label.field.healthcheck.public`").callbackData("/healthcheck ADD public"),
+				new InlineKeyboardButton("Set `label.field.healthcheck.url`").callbackData("/healthcheck ADD url"),
+				new InlineKeyboardButton("button.common.complete").callbackData("/healthcheck ADD /done"),
 				new InlineKeyboardButton("button.common.cancel").callbackData("/cancel")
 		);
 	}

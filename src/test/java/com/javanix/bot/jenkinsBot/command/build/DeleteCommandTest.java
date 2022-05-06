@@ -11,7 +11,6 @@ import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
@@ -27,17 +26,14 @@ import static org.mockito.ArgumentMatchers.any;
 
 @SpringJUnitConfig
 @ContextConfiguration(classes = CommandTestConfiguration.class)
-public class BuildDeleteCommandTest extends AbstractCommandTestCase {
-
-	@MockBean
-	private BuildInfoService databaseService;
+public class DeleteCommandTest extends AbstractCommandTestCase {
 
 	@Test
 	public void delete_noParams() {
 		String commandText = "/build delete";
 		User from = new User(123L);
 
-		Mockito.when(databaseService.getOwnedEntityByName("", 123L)).thenReturn(Optional.empty());
+		Mockito.when(buildInfoService.getOwnedEntityByName("", 123L)).thenReturn(Optional.empty());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.build.delete", message.getMessageKey());
@@ -63,7 +59,7 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build delete xmen";
 		User from = new User(123L);
 
-		Mockito.when(databaseService.getOwnedEntityByName("xmen", 123L)).thenReturn(Optional.empty());
+		Mockito.when(buildInfoService.getOwnedEntityByName("xmen", 123L)).thenReturn(Optional.empty());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.build.delete", message.getMessageKey());
@@ -89,7 +85,7 @@ public class BuildDeleteCommandTest extends AbstractCommandTestCase {
 		String commandText = "/build delete xmen";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(databaseService.getOwnedEntityByName("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(
+		Mockito.when(buildInfoService.getOwnedEntityByName("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(
 				Optional.of(BuildInfoDto.builder()
 						.repoName("xmen")
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)

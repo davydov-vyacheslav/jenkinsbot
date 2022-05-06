@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EntityService<T extends Entity> {
+
+	long DEFAULT_CREATOR_ID = -1L;
+
 	void save(T entity);
 
 	Optional<T> getOwnedEntityByName(String name, Long ownerId);

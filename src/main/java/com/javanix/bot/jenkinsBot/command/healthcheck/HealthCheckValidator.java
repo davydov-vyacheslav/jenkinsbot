@@ -21,7 +21,7 @@ class HealthCheckValidator implements EntityValidator<HealthCheckInfoDto> {
 	public boolean validate(HealthCheckInfoDto target, List<String> errors, EntityActionType actionType) {
 
 		// required fields check
-		emptyValidator.validate(target.getEndpointUrl(), errors, "error.command.healthcheck.validation.required.name");
+		emptyValidator.validate(target.getEndpointName(), errors, "error.command.healthcheck.validation.required.name");
 		emptyValidator.validate(target.getEndpointUrl(), errors, "error.command.healthcheck.validation.required.url");
 
 		if (actionType == EntityActionType.ADD && database.hasEntity(target.getEndpointName())) {

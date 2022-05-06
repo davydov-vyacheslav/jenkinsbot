@@ -35,7 +35,7 @@ class EditHealthCheckCommand extends AbstractModifyEntityCommand<HealthCheckInfo
 			usersInProgress.put(from.id(), entityBuildInformation);
 			showMenu(chat, from, "message.command.healthcheck.edit.intro", new Object[] { entityDto.getEndpointName(), getEntityDetails(from, entityDto) } );
 		} else {
-			myReposBuildCommand.process(chat, from, "error.command.healthcheck.edit.repo");
+			myReposBuildCommand.process(chat, from, "error.command.healthcheck.edit.name");
 		}
 	}
 

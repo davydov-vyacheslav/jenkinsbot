@@ -3,6 +3,7 @@ package com.javanix.bot.jenkinsBot.database;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
+import com.javanix.bot.jenkinsBot.core.service.EntityService;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.ImmutableMongodConfig;
@@ -29,15 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @ContextConfiguration(classes = DatabaseTestConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 // NOTE: DirtiesContext need to refresh mongoTemplate bean after each database down/up
-public class DatabaseBuildInfoTest {
-
-	private static final Long CURRENT_USER_ID = 1L;
-	private static final Long SOMEONE_USER_ID = 111L;
+public class DatabaseBuildInfoTest extends AbstractDatabaseEntityTest<BuildInfoDto> {
 
 	private static MongodExecutable mongodExecutable;
-
-	@Autowired
-	ImmutableMongodConfig mongodConfig;
 
 	@Autowired
 	BuildInfoService databaseService;
@@ -50,14 +45,6 @@ public class DatabaseBuildInfoTest {
 				.containsExactlyInAnyOrderElementsOf(availableRepositories.stream().map(BuildInfoDto::getRepoName).collect(Collectors.toList()));
 	}
 
-
-	@Test
-	public void testGetOwnedRepositories() {
-		List<BuildInfoDto> ownedRepositories = databaseService.getOwnedEntities(CURRENT_USER_ID);
-		assertEquals(2, ownedRepositories.size());
-		assertThat(Arrays.asList("owned-public", "owned-private"))
-				.containsExactlyInAnyOrderElementsOf(ownedRepositories.stream().map(BuildInfoDto::getRepoName).collect(Collectors.toList()));
-	}
 
 	@Test
 	public void testGetAvailableRepository() {
@@ -112,4 +99,8 @@ public class DatabaseBuildInfoTest {
 	}
 
 
+	@Override
+	protected EntityService<BuildInfoDto> getDatabaseService() {
+		return databaseService;
+	}
 }

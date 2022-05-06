@@ -3,6 +3,7 @@ package com.javanix.bot.jenkinsBot.command;
 import com.javanix.bot.jenkinsBot.CacheService;
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.core.model.UserInfoDto;
+import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.javanix.bot.jenkinsBot.core.service.HealthCheckService;
 import com.javanix.bot.jenkinsBot.core.service.UserService;
 import com.pengrad.telegrambot.model.Chat;
@@ -42,7 +43,10 @@ public abstract class AbstractCommandTestCase {
 	private UserService userService;
 
 	@MockBean
-	private HealthCheckService healthCheckService;
+	protected HealthCheckService healthCheckService;
+
+	@MockBean
+	protected BuildInfoService buildInfoService;
 
 	@Autowired
 	protected CommonCommandFactory factory;
@@ -57,6 +61,8 @@ public abstract class AbstractCommandTestCase {
 			String key = invocation.getArgument(1);
 			if (key.equals("message.command.build.common.status.prefix")) {
 				key = "Current repository info: \\n{0}";
+			} else if (key.equalsIgnoreCase("message.command.healthcheck.common.status.prefix")) {
+				key = "Current Endpoint info: \\n{0}";
 			} else if (key.equals("button.common.setFieldValue")) {
 				key = "Set `{0}`";
 			}

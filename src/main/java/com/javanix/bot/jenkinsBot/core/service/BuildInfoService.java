@@ -5,7 +5,6 @@ import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import java.util.List;
 
 public interface BuildInfoService extends EntityService<BuildInfoDto> {
-	long DEFAULT_CREATOR_ID = -1L;
 
 	/**
 	 * List of repositories user able to see:
