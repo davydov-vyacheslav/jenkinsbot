@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.javanix.bot'
-version = '0.0.5'
+version = '0.0.6'
 sourceCompatibility = '8'
 
 repositories {
@@ -29,10 +29,11 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-task copyReadMe(type: Copy, description: "Copy README.md file to resources") {
+
+task copyReadMe(type: Copy, description: "Copy Project Info file to resources") {
     from project.projectDir
     into 'src/main/resources'
-    include 'README.md', 'CHANGELOG'
+    include 'CHANGELOG'
 }
 
 processResources.dependsOn(copyReadMe)
