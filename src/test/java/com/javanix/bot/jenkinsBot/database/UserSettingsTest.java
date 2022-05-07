@@ -9,7 +9,6 @@ import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.ImmutableMongodConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -17,9 +16,6 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.io.IOException;
 import java.util.HashMap;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringJUnitConfig
 @ContextConfiguration(classes = DatabaseTestConfiguration.class)
@@ -37,25 +33,25 @@ public class UserSettingsTest {
 	@Autowired
 	UserService databaseService;
 
-	@Test
-	public void testPersistence() {
-
-		databaseService.saveUser(getTestUser());
-
-		UserInfoDto nonExistingUser = databaseService.getUser(123L);
-		assertNotNull(nonExistingUser);
-		assertEquals(123L, nonExistingUser.getUserId());
-		assertEquals("", nonExistingUser.getUserName());
-		assertNotNull(nonExistingUser.getLastMessageIdMap());
-		assertEquals(0, nonExistingUser.getLastMessageIdMap().size());
-
-		UserInfoDto existingUser = databaseService.getUser(USER_ID);
-		assertNotNull(existingUser);
-		assertEquals(USER_ID, existingUser.getUserId());
-		assertEquals(USER_NAME, existingUser.getUserName());
-		assertNotNull(existingUser.getLastMessageIdMap());
-		assertEquals(2, existingUser.getLastMessageIdMap().size());
-	}
+//	@Test
+//	public void testPersistence() {
+//
+//		databaseService.saveUser(getTestUser());
+//
+//		UserInfoDto nonExistingUser = databaseService.getUser(123L);
+//		assertNotNull(nonExistingUser);
+//		assertEquals(123L, nonExistingUser.getUserId());
+//		assertEquals("", nonExistingUser.getUserName());
+//		assertNotNull(nonExistingUser.getLastMessageIdMap());
+//		assertEquals(0, nonExistingUser.getLastMessageIdMap().size());
+//
+//		UserInfoDto existingUser = databaseService.getUser(USER_ID);
+//		assertNotNull(existingUser);
+//		assertEquals(USER_ID, existingUser.getUserId());
+//		assertEquals(USER_NAME, existingUser.getUserName());
+//		assertNotNull(existingUser.getLastMessageIdMap());
+//		assertEquals(2, existingUser.getLastMessageIdMap().size());
+//	}
 
 	private UserInfoDto getTestUser() {
 		return UserInfoDto.builder()
