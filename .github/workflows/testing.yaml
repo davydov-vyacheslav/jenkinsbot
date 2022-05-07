@@ -24,7 +24,7 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2.1.5
         with:
-          arguments: test testCoverage
+          arguments: test jacocoTestReport
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()
