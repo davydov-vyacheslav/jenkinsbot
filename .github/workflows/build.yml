@@ -49,12 +49,13 @@ jobs:
         with:
           generate-branches-badge: true
           badges-directory: badges
+          jacoco-csv-file: build/reports/jacoco/test/jacocoTestReport.csv
           generate-summary: true
       - name: Upload JaCoCo coverage report as a workflow artifact
         uses: actions/upload-artifact@v2
         with:
           name: jacoco-report
-          path: target/site/jacoco/
+          path: build/reports/jacoco/test/
 ## FIXME ???
       - name: Commit and push the coverage badges and summary file
         if: ${{ github.event_name != 'pull_request' }}
