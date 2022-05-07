@@ -35,3 +35,8 @@ jobs:
           arguments: release
 
 # TODO: depends on testing phase
+#on:
+#  workflow_run:
+#    workflows: ['CI']                     # runs after CI workflow
+#    types:
+#      - completed

@@ -26,7 +26,7 @@ jobs:
         with:
           arguments: build
       - name: Test Report
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
           name: jUnit Tests
