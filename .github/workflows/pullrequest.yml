@@ -29,9 +29,9 @@ jobs:
         uses: mikepenz/action-junit-report@v3
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
-          password: ${{ secrets.TOKEN }}
+          token: ${{ secrets.TOKEN }}
       - name: Archive Jacoco reports
-        uses: actions/upload-artifact@v3
+        uses: madrapps/jacoco-report@v1.2
         with:
-          name: jacoco-reports
-          path: "build/reports/jacoco/test/jacocoTestReport.xml"
+          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.TOKEN }}
