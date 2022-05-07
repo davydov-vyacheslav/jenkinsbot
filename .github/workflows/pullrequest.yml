@@ -30,8 +30,8 @@ jobs:
         if: always()
         with:
           files: "build/test-results/**/*.xml"
-      - name: Publish coverage results
-        id: jacoco
-        uses: madrapps/jacoco-report@v1.2
+      - name: Archive Jacoco reports
+        uses: actions/upload-artifact@v3
         with:
-          paths: "build/reports/jacoco/test/jacocoTestCoverage.xml"
+          name: jacoco-reports
+          path: "build/reports/jacoco/jacocoTestReport.xml"
