@@ -35,8 +35,16 @@ jobs:
           arguments: release
 
 # TODO: depends on testing phase
-#on:
-#  workflow_run:
-#    workflows: ['CI']                     # runs after CI workflow
-#    types:
-#      - completed
+# TODO: publish artifact .. on new version
+#      - name: Upload output file
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: output-log-file
+#          path: output.log
+
+
+# TODO: exchange artifact
+#  - name: Download a single artifact
+#      uses: actions/download-artifact@v3
+#      with:
+#        name: output-log-file
