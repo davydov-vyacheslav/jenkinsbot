@@ -1,13 +1,13 @@
 # On pull-request - perform build with unit tests
 
-name: JenkinsBot - PullRequest handler
+name: JenkinsBot
 
 on:
   pull_request:
     branches: [ master ]
 
-permissions:
-  contents: read
+#permissions:
+#  contents: read
 
 jobs:
   build:

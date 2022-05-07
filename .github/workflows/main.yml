@@ -1,6 +1,6 @@
 # On push to master - perform full build with docker updates
 
-name: JenkinsBot - Main
+name: JenkinsBot
 
 on:
   push:

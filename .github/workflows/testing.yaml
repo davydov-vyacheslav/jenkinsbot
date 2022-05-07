@@ -1,17 +1,16 @@
-name: "Test Runner"
+name: "JenkinsBot"
 on:
   push:
     branches: [ master ]
   pull_request:
-    branches:
-      - '*'
+    branches: [ master ]
 
 permissions:
   contents: read
 
 jobs:
   build:
-    name: "Run Unit Tests"
+    name: "Test Runner"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
