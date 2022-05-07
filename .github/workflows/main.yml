@@ -1,6 +1,6 @@
 # On push to master - perform full build with docker updates
 
-name: JenkinsBot
+name: JenkinsBot-Full
 
 on:
   push:
@@ -34,6 +34,8 @@ jobs:
         with:
           arguments: release
 
+# TODO: push to docker:latest
+
 # TODO: depends on testing phase
 # TODO: publish artifact .. on new version
 #      - name: Upload output file
@@ -48,3 +50,15 @@ jobs:
 #      uses: actions/download-artifact@v3
 #      with:
 #        name: output-log-file
+
+# TODO: depednds on build
+#on:
+#  push:
+#    branches: [ master ]
+#  pull_request:
+#    branches: [ master ]
+#  workflow_run:
+#    workflows: ['JenkinsBot / Build']
+#    types:
+#      - completed
+#

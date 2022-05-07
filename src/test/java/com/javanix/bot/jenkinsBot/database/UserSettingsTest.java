@@ -54,7 +54,7 @@ public class UserSettingsTest {
 		assertEquals(USER_ID, existingUser.getUserId());
 		assertEquals(USER_NAME, existingUser.getUserName());
 		assertNotNull(existingUser.getLastMessageIdMap());
-		assertEquals(3, existingUser.getLastMessageIdMap().size());
+		assertEquals(2, existingUser.getLastMessageIdMap().size());
 	}
 
 	private UserInfoDto getTestUser() {

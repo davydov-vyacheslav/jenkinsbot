@@ -1,13 +1,12 @@
 # On pull-request - perform build with unit tests
 
-name: JenkinsBot
+name: "JenkinsBot"
 
 on:
+  push:
+    branches: [ master ]
   pull_request:
     branches: [ master ]
-
-#permissions:
-#  contents: read
 
 jobs:
   build:
@@ -26,44 +25,23 @@ jobs:
         uses: gradle/gradle-build-action@v2.1.5
         with:
           arguments: bootJar
-
-
-
-
-#######PR head branch: .github/workflows/ci.yml
-#
-#name: 'CI'
-#on:
-#  pull_request:
-#jobs:
-#  build-test:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2         # checkout the repo
-#      - run: npm ci                       # install packages
-#      - run: npm test                     # run tests (configured to use jest-junit reporter)
-#      - uses: actions/upload-artifact@v2  # upload test results
-#        if: success() || failure()        # run this step even if previous step failed
-#        with:
-#          name: test-results
-#          path: jest-junit.xml
-
-
-######## default branch: .github/workflows/test-report.yml
-#
-#name: 'Test Report'
-#on:
-#  workflow_run:
-#    workflows: ['CI']                     # runs after CI workflow
-#    types:
-#      - completed
-#jobs:
-#  report:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: dorny/test-reporter@v1
-#        with:
-#          artifact: test-results            # artifact name
-#          name: JEST Tests                  # Name of the check run which will be created
-#          path: '*.xml'                     # Path to test results (inside artifact .zip)
-#          reporter: jest-junit              # Format of test results
+      - name: Run tests Test With Gradle
+        uses: gradle/gradle-build-action@v2.1.5
+        with:
+          arguments: test jacocoTestReport
+      # TODO: split
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: jUnit Tests
+          path: build/test-results/test/TEST-*.xml
+          reporter: java-junit
+      - name: Add coverage to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.2
+        with:
+          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 60
