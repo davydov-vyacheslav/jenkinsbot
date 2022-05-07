@@ -25,8 +25,6 @@ import static org.mockito.ArgumentMatchers.any;
 @ContextConfiguration(classes = CommandTestConfiguration.class)
 public class StatusCommandTest extends AbstractCommandTestCase {
 
-	public static final String ENTITY_NAME = "endpoint01";
-
 	@MockBean
 	private CliProcessor cliProcessor;
 
@@ -34,13 +32,13 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 	public void status_ok() {
 		HealthCheckInfoDto endpoint1 = HealthCheckInfoDto.builder()
 				.endpointName(ENTITY_NAME)
-				.endpointUrl("https://someul.com/")
+				.endpointUrl(ENTITY_URL)
 				.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
 				.isPublic(true)
 				.build();
 		HealthCheckInfoDto endpoint2 = HealthCheckInfoDto.builder()
-				.endpointName(ENTITY_NAME + "2")
-				.endpointUrl("https://someul.com2/")
+				.endpointName(ENTITY_NAME_2)
+				.endpointUrl(ENTITY_URL_2)
 				.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
 				.isPublic(true)
 				.build();

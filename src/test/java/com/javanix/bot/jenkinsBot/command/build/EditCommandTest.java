@@ -32,8 +32,6 @@ import static org.mockito.ArgumentMatchers.any;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class EditCommandTest extends AbstractCommandTestCase {
 
-	private  static final String ENTITY_NAME = "repo01";
-
 	@Test
 	public void okFlowTest() {
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
@@ -43,7 +41,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 				.isPublic(false)
 				.jenkinsInfo(JenkinsInfoDto.builder()
-						.jobUrl("Domain01")
+						.jobUrl(ENTITY_URL)
 						.user("")
 						.password("")
 						.build())
@@ -58,9 +56,9 @@ public class EditCommandTest extends AbstractCommandTestCase {
 					return sendResponse;
 				});
 
-		executeCommand(from, "/build edit repo01");
+		executeCommand(from, "/build edit " + ENTITY_NAME);
 		executeCommand(from, "/build edit jenkins.jobUrl");
-		executeCommand(from, "Domain02");
+		executeCommand(from, ENTITY_URL_2);
 		executeCommand(from, "/build edit /done");
 
 		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
@@ -70,7 +68,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 				.isPublic(false)
 				.jenkinsInfo(JenkinsInfoDto.builder()
-						.jobUrl("Domain02")
+						.jobUrl(ENTITY_URL_2)
 						.user("")
 						.password("")
 						.build())
@@ -86,7 +84,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 				.isPublic(false)
 				.jenkinsInfo(JenkinsInfoDto.builder()
-						.jobUrl("Domain01")
+						.jobUrl(ENTITY_URL)
 						.user("")
 						.password("")
 						.build())
@@ -110,7 +108,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 					return sendResponse;
 				});
 
-		executeCommand(from, "/build edit repo01");
+		executeCommand(from, "/build edit " + ENTITY_NAME);
 		executeCommand(from, "/build edit jenkins.jobUrl");
 		executeCommand(from, "");
 		executeCommand(from, "/build edit /done");
@@ -129,7 +127,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 				.isPublic(false)
 				.jenkinsInfo(JenkinsInfoDto.builder()
-						.jobUrl("Domain01")
+						.jobUrl(ENTITY_URL)
 						.user("")
 						.password("")
 						.build())
@@ -154,9 +152,9 @@ public class EditCommandTest extends AbstractCommandTestCase {
 					return sendResponse;
 				});
 
-		executeCommand(from, "/build edit repo01");
+		executeCommand(from, "/build edit " + ENTITY_NAME);
 		executeCommand(from, "/build edit jenkins.jobUrl");
-		executeCommand(from, "Domain02");
+		executeCommand(from, ENTITY_URL_2);
 		executeCommand(from, "/cancel");
 
 		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
@@ -167,7 +165,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("message.command.build.edit.intro", message.getMessageKey());
-			assertArrayEquals(new Object[] {ENTITY_NAME, getUserInfoString("Domain01") }, message.getMessageArgs());
+			assertArrayEquals(new Object[] {ENTITY_NAME, getUserInfoString(ENTITY_URL) }, message.getMessageArgs());
 			List<InlineKeyboardButton> expectedInlineButtons = getExpectedInlineButtons();
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -178,7 +176,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 	private Answer<Object> executeEditDomainAndAssert() {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-			assertEquals(getUserInfoString("Domain02"), message.getMessageKey());
+			assertEquals(getUserInfoString(ENTITY_URL_2), message.getMessageKey());
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
@@ -187,7 +185,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 
 	private String getUserInfoString(String domain) {
 		return String.format("Current repository info: \\n" +
-				"- label.field.build.repo.name: repo01\n" +
+				"- label.field.build.repo.name: " + ENTITY_NAME + "\n" +
 				"- label.field.build.repo.public: false\n" +
 				"- label.field.build.jenkins.jobUrl: %s\n" +
 				"- label.field.build.jenkins.user: \uD83D\uDEAB\n" +

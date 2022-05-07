@@ -33,8 +33,4 @@ public class BuildInfoDto implements Entity {
 		return repoName;
 	}
 
-	@Override
-	public EntityType getEntityType() {
-		return EntityType.BUILD_INFO;
-	}
 }

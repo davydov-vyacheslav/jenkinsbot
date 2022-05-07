@@ -31,15 +31,13 @@ import static org.mockito.ArgumentMatchers.any;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class EditCommandTest extends AbstractCommandTestCase {
 
-	public static final String ENTITY_NAME = "endpoint01";
-
 	@Test
 	public void okFlowTest() {
 		User from = new User(HealthCheckService.DEFAULT_CREATOR_ID);
 
 		HealthCheckInfoDto hcInit = HealthCheckInfoDto.builder()
 				.endpointName(ENTITY_NAME)
-				.endpointUrl("https://someul.com/")
+				.endpointUrl(ENTITY_URL)
 				.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
 				.isPublic(true)
 				.build();
@@ -56,14 +54,14 @@ public class EditCommandTest extends AbstractCommandTestCase {
 
 		executeCommand(from, "/healthcheck edit " + ENTITY_NAME);
 		executeCommand(from, "/healthcheck edit url");
-		executeCommand(from, "newurl");
+		executeCommand(from, ENTITY_URL_2);
 		executeCommand(from, "/healthcheck edit /done");
 
 		Mockito.verify(bot, Mockito.times(2)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 
 		Mockito.verify(healthCheckService).save(HealthCheckInfoDto.builder()
 				.endpointName(ENTITY_NAME)
-				.endpointUrl("newurl")
+				.endpointUrl(ENTITY_URL_2)
 				.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
 				.isPublic(true)
 				.build());
@@ -75,7 +73,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 
 		HealthCheckInfoDto repoInit = HealthCheckInfoDto.builder()
 				.endpointName(ENTITY_NAME)
-				.endpointUrl("https://someul.com/")
+				.endpointUrl(ENTITY_URL)
 				.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
 				.isPublic(true)
 				.build();
@@ -114,7 +112,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 
 		HealthCheckInfoDto repoInit = HealthCheckInfoDto.builder()
 				.endpointName(ENTITY_NAME)
-				.endpointUrl("https://someul.com/")
+				.endpointUrl(ENTITY_URL)
 				.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
 				.isPublic(true)
 				.build();
@@ -138,7 +136,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 
 		executeCommand(from, "/healthcheck edit " + ENTITY_NAME);
 		executeCommand(from, "/healthcheck edit url");
-		executeCommand(from, "newurl");
+		executeCommand(from, ENTITY_URL_2);
 		executeCommand(from, "/cancel");
 
 		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
@@ -149,7 +147,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("message.command.healthcheck.edit.intro", message.getMessageKey());
-			assertArrayEquals(new Object[] {ENTITY_NAME, getUserInfoString("https://someul.com/") }, message.getMessageArgs());
+			assertArrayEquals(new Object[] {ENTITY_NAME, getUserInfoString(ENTITY_URL) }, message.getMessageArgs());
 			List<InlineKeyboardButton> expectedInlineButtons = getExpectedInlineButtons();
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -160,7 +158,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 	private Answer<Object> executeEditDomainAndAssert() {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-			assertEquals(getUserInfoString("newurl"), message.getMessageKey());
+			assertEquals(getUserInfoString(ENTITY_URL_2), message.getMessageKey());
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;

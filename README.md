@@ -1,7 +1,10 @@
-# Insight Jenkins bot
+# Jenkins bot
 
-Основная задача - получение статуса билдов от Дженкинса (состояние билда и кол-во упавших тестов).
-Текущая версия заточена на работу с Java/jUnit проектами.
+Goals:
+- get Jenkins Build's status info (especially failed unit tests statistics)
+- get endpoints health-check status
+
+System is relying on Java/jUnit projects
 
 ## Flow: /build
 
@@ -50,46 +53,26 @@ TODO: description
 ## TODO list
 
 TODO in 0.0.7:
-
+- screenshot / gif / video based description + features in new versions
+  - /healthcheck
+  - /buildinfo
+- Optimize database-related unit tests by having single configuration they are running within
+- source code documentation
+- Validators: https://github.com/davydov-vyacheslav/jenkinsbot/issues/4
+- Progressing moving to CI/CD: https://github.com/davydov-vyacheslav/jenkinsbot/issues/5
 
 - -----
-- Moving to CI/CD
-  - stage env, prod env
-  - watchtower (or alternatives)
-  - migrate system to db01
-  - GitHub + GH Actions / Gitlab host
-  - test startup from docker :)
-  - add docker-compose.yml file?
-  - make docker build delegation to CI/CD like GH/GL 
+
+## TODO: unclassified
+
 - Event sourcing
 - Database
   - (daily) mongo database backups
   - database fallback to local datasource if mongo is unavailable / choose database type in config
 - webhooks
-- ? menu/actions list as keyboard
-- Obfuscate
-- Optimize database-related unit tests by having single configuration they are running within
-- /stop and /restart commands ?
-- source code documentation
+- test containers
 - Common Project files: CONTRIBUTING.md, SUPPORT.md, ACKNOWLEDGMENTS, CONTRIBUTORS
-- ?? spring.jmx.enabled=false
-- screenshot / gif / video based description + features in new versions
-- cleanup validators: 
-  - add url validator, 
-  - add unique validator
 - Unit Tests: cover with unit tests constructable messages that are greyed
   - label.field.*.*
   - label.welcome.field.*.*
   - DirtiesContext for CommandTests
-- Локализация.
-  * добавить «меню» настройки с выбором языка. Список регламентируется классом LocaleType и файлами в resources/i18n
-- Информирование про завершенность сборки:
-  * Создать сущность подписка, где пользователь «подписан» на билды.
-  * Создать меню подписка, где можно подписаться на собственные или публичные репозитории.
-    * овнеры репозиториев автоматически подписываются без права отписки
-  * Раз в 15 минут идёт проверка завершенности билда. Но только в том случае, если его предыдущий статус - в процессе.
-  * Если билд завершился - Всем пользователям из подписки приходит уведомление. Обновляется информация про предыдущую сборку
-  * Проблема?? Зы, получить состояние «в процессе» можно только когда какой-то из пользователей проверит его статус
-  * проблема? Что, если пользователь хочет подписаться только на текущий билд, а не все билды этого "репозитория"
-- ? do we need to change domain storage format to full link (include schema and port, e.g. `http://10.172.100.174:7331`)
-  + migration

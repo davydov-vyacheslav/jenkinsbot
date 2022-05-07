@@ -6,6 +6,7 @@ import com.javanix.bot.jenkinsBot.core.model.UserInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.javanix.bot.jenkinsBot.core.service.HealthCheckService;
 import com.javanix.bot.jenkinsBot.core.service.UserService;
+import com.javanix.bot.jenkinsBot.database.DatabaseFactory;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
@@ -27,6 +28,11 @@ import static org.mockito.ArgumentMatchers.any;
 
 public abstract class AbstractCommandTestCase {
 
+	protected static final String ENTITY_NAME = "Entity Name";
+	protected static final String ENTITY_NAME_2 = "Another Entity Name";
+	protected static final String ENTITY_URL = "https://domain.com/";
+	protected static final String ENTITY_URL_2 = "https://another.com/";
+
 	@MockBean
 	protected TelegramBotWrapper bot;
 
@@ -44,6 +50,9 @@ public abstract class AbstractCommandTestCase {
 
 	@MockBean
 	protected HealthCheckService healthCheckService;
+
+	@MockBean
+	protected DatabaseFactory databaseFactory;
 
 	@MockBean
 	protected BuildInfoService buildInfoService;

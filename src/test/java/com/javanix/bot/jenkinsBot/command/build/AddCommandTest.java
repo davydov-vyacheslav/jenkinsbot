@@ -31,12 +31,11 @@ import static org.mockito.ArgumentMatchers.any;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class AddCommandTest extends AbstractCommandTestCase {
 
-	private static final String ENTITY_NAME = "Repo01";
-
 	@Test
 	public void okFlowTest() {
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
+		Mockito.when(databaseFactory.getDatabase(any(BuildInfoDto.class))).then(invocation -> buildInfoService);
 		Mockito.when(buildInfoService.hasEntity(ENTITY_NAME)).thenReturn(false);
 		Mockito.when(buildInfoService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
@@ -61,7 +60,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/build add jenkins.user");
 		executeCommand(from, "admin");
 		executeCommand(from, "/build add jenkins.jobUrl");
-		executeCommand(from, "Domain01");
+		executeCommand(from, ENTITY_URL);
 		executeCommand(from, "/build ADD /done");
 
 		Mockito.verify(bot, Mockito.times(5)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
@@ -70,7 +69,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.isPublic(false)
 						.jenkinsInfo(JenkinsInfoDto.builder()
-								.jobUrl("Domain01")
+								.jobUrl(ENTITY_URL)
 								.user("admin")
 								.password("")
 								.build())
@@ -81,6 +80,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 	public void failedSaveFlowTest() {
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
+		Mockito.when(databaseFactory.getDatabase(any(BuildInfoDto.class))).then(invocation -> buildInfoService);
 		Mockito.when(buildInfoService.hasEntity(ENTITY_NAME)).thenReturn(false);
 		Mockito.when(buildInfoService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
@@ -178,7 +178,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 	private Answer<Object> executeAddJobNameAndAssert() {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-			assertEquals(getUserInfoString("Domain01", "admin"), message.getMessageKey());
+			assertEquals(getUserInfoString(ENTITY_URL, "admin"), message.getMessageKey());
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
@@ -187,7 +187,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 
 	private String getUserInfoString(String jobUrl, String user) {
 		return String.format("Current repository info: \\n" +
-				"- label.field.build.repo.name: Repo01\n" +
+				"- label.field.build.repo.name: " + ENTITY_NAME + "\n" +
 				"- label.field.build.repo.public: false\n" +
 				"- label.field.build.jenkins.jobUrl: %s\n" +
 				"- label.field.build.jenkins.user: %s\n" +

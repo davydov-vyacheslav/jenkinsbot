@@ -2,9 +2,9 @@ package com.javanix.bot.jenkinsBot.command.common;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.ProgressableCommand;
-import com.javanix.bot.jenkinsBot.command.common.validation.EntityValidator;
 import com.javanix.bot.jenkinsBot.core.model.Entity;
 import com.javanix.bot.jenkinsBot.core.service.EntityService;
+import com.javanix.bot.jenkinsBot.core.validation.EntityValidator;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;

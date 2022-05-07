@@ -30,12 +30,11 @@ import static org.mockito.ArgumentMatchers.any;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class AddCommandTest extends AbstractCommandTestCase {
 
-	private static final String ENTITY_NAME = "Endpoint01";
-
 	@Test
 	public void okFlowTest() {
 		User from = new User(HealthCheckService.DEFAULT_CREATOR_ID);
 
+		Mockito.when(databaseFactory.getDatabase(any(HealthCheckInfoDto.class))).then(invocation -> healthCheckService);
 		Mockito.when(healthCheckService.hasEntity(ENTITY_NAME)).thenReturn(false);
 		Mockito.when(healthCheckService.getAvailableEndpoints(HealthCheckService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
@@ -56,7 +55,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/healthcheck add name");
 		executeCommand(from, ENTITY_NAME);
 		executeCommand(from, "/healthcheck add url");
-		executeCommand(from, "https://someul.com/");
+		executeCommand(from, ENTITY_URL);
 		executeCommand(from, "/healthcheck add public");
 		executeCommand(from, "true");
 		executeCommand(from, "/healthcheck ADD /done");
@@ -64,7 +63,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 		Mockito.verify(healthCheckService).save(HealthCheckInfoDto.builder()
 						.endpointName(ENTITY_NAME)
-						.endpointUrl("https://someul.com/")
+						.endpointUrl(ENTITY_URL)
 						.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
 						.isPublic(true)
 				.build());
@@ -74,6 +73,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 	public void failedSaveFlowTest() {
 		User from = new User(HealthCheckService.DEFAULT_CREATOR_ID);
 
+		Mockito.when(databaseFactory.getDatabase(any(HealthCheckInfoDto.class))).then(invocation -> healthCheckService);
 		Mockito.when(healthCheckService.hasEntity(ENTITY_NAME)).thenReturn(false);
 		Mockito.when(healthCheckService.getAvailableEndpoints(HealthCheckService.DEFAULT_CREATOR_ID)).thenReturn(Collections.emptyList());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
@@ -158,7 +158,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 	private Answer<Object> executeAddUrlAndAssert() {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-			assertEquals(getUserInfoString("https://someul.com/", "false"), message.getMessageKey());
+			assertEquals(getUserInfoString(ENTITY_URL, "false"), message.getMessageKey());
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
@@ -168,7 +168,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 	private Answer<Object> executeAddPublicAndAssert() {
 		return invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-			assertEquals(getUserInfoString("https://someul.com/", "true"), message.getMessageKey());
+			assertEquals(getUserInfoString(ENTITY_URL, "true"), message.getMessageKey());
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;

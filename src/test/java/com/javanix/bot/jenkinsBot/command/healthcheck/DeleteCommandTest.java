@@ -28,8 +28,6 @@ import static org.mockito.ArgumentMatchers.any;
 @ContextConfiguration(classes = CommandTestConfiguration.class)
 public class DeleteCommandTest extends AbstractCommandTestCase {
 
-	private static final String ENTITY_NAME = "Endpoint01";
-
 	@Test
 	public void delete_noParams() {
 		String commandText = "/healthcheck delete";
@@ -88,7 +86,7 @@ public class DeleteCommandTest extends AbstractCommandTestCase {
 		Mockito.when(healthCheckService.getOwnedEntityByName(ENTITY_NAME, HealthCheckService.DEFAULT_CREATOR_ID)).thenReturn(
 				Optional.of(HealthCheckInfoDto.builder()
 						.endpointName(ENTITY_NAME)
-						.endpointUrl("https://someul.com/")
+						.endpointUrl(ENTITY_URL)
 						.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
 						.isPublic(true)
 						.build()));

@@ -29,8 +29,4 @@ public class HealthCheckInfoDto implements Entity {
 		return endpointName;
 	}
 
-	@Override
-	public EntityType getEntityType() {
-		return EntityType.HEALTH_CHECK;
-	}
 }

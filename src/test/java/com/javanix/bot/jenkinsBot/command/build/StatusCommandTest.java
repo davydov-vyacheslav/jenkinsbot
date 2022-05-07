@@ -46,12 +46,12 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 		Mockito.when(buildInfoService.getAvailableRepository("", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(null);
 		Mockito.when(buildInfoService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Arrays.asList(
 				BuildInfoDto.builder()
-						.repoName("repo1")
+						.repoName(ENTITY_NAME)
 						.isPublic(true)
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.build(),
 				BuildInfoDto.builder()
-						.repoName("repo2")
+						.repoName(ENTITY_NAME_2)
 						.isPublic(false)
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.build()));
@@ -60,8 +60,8 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.build.common.wrongTeam", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton(ICON_PUBLIC + "repo1").callbackData("/build status repo1"),
-					new InlineKeyboardButton(ICON_PRIVATE + "repo2").callbackData("/build status repo2"),
+					new InlineKeyboardButton(ICON_PUBLIC + ENTITY_NAME).callbackData("/build status " + ENTITY_NAME),
+					new InlineKeyboardButton(ICON_PRIVATE + ENTITY_NAME_2).callbackData("/build status " + ENTITY_NAME_2),
 					new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
@@ -83,12 +83,12 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 		Mockito.when(buildInfoService.getAvailableRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(null);
 		Mockito.when(buildInfoService.getAvailableRepositories(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Arrays.asList(
 				BuildInfoDto.builder()
-						.repoName("repo1")
+						.repoName(ENTITY_NAME)
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.isPublic(true)
 						.build(),
 				BuildInfoDto.builder()
-						.repoName("repo2")
+						.repoName(ENTITY_NAME_2)
 						.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
 						.isPublic(false)
 						.build()));
@@ -97,8 +97,8 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.build.common.wrongTeam", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton(ICON_PUBLIC + "repo1").callbackData("/build status repo1"),
-					new InlineKeyboardButton(ICON_PRIVATE + "repo2").callbackData("/build status repo2"),
+					new InlineKeyboardButton(ICON_PUBLIC + ENTITY_NAME).callbackData("/build status " + ENTITY_NAME),
+					new InlineKeyboardButton(ICON_PRIVATE + ENTITY_NAME_2).callbackData("/build status " + ENTITY_NAME_2),
 					new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);

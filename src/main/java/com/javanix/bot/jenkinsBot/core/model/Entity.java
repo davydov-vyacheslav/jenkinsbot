@@ -6,5 +6,4 @@ public interface Entity {
 
 	String getName();
 
-	EntityType getEntityType();
 }
