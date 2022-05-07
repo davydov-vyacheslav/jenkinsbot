@@ -1,19 +1,17 @@
 # On push to master - perform full build with docker updates
 
-name: JenkinsBot-Full
+name: JenkinsBot-Deploy
 
 on:
   push:
     branches: [ master ]
-
-permissions:
-  contents: read
-
+  workflow_run:
+    workflows: ['JenkinsBot-Build']
+    types:
+      - completed
 jobs:
-  build:
-
+  docker-deploy:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 8
@@ -57,8 +55,5 @@ jobs:
 #    branches: [ master ]
 #  pull_request:
 #    branches: [ master ]
-#  workflow_run:
-#    workflows: ['JenkinsBot / Build']
-#    types:
-#      - completed
+
 #
