@@ -71,7 +71,7 @@ public class ValidatorTest {
 		Mockito.when(buildInfoService.hasEntity("non-exist")).thenReturn(false);
 		uniqueValidator.validate(BuildInfoDto.builder().repoName("exists").build(), errors, "invalid.entity");
 		uniqueValidator.validate(BuildInfoDto.builder().repoName("non-exists").build(), errors, "valid.entity");
-		Assertions.assertThat(errors).containsExactlyInAnyOrder("invalid.entity");
+		Assertions.assertThat(errors).containsExactlyInAnyOrder("inv2alid.entity");
 	}
 
 	@TestConfiguration
