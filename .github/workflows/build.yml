@@ -26,3 +26,44 @@ jobs:
         uses: gradle/gradle-build-action@v2.1.5
         with:
           arguments: bootJar
+
+
+
+
+#######PR head branch: .github/workflows/ci.yml
+#
+#name: 'CI'
+#on:
+#  pull_request:
+#jobs:
+#  build-test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2         # checkout the repo
+#      - run: npm ci                       # install packages
+#      - run: npm test                     # run tests (configured to use jest-junit reporter)
+#      - uses: actions/upload-artifact@v2  # upload test results
+#        if: success() || failure()        # run this step even if previous step failed
+#        with:
+#          name: test-results
+#          path: jest-junit.xml
+
+
+######## default branch: .github/workflows/test-report.yml
+#
+#name: 'Test Report'
+#on:
+#  workflow_run:
+#    workflows: ['CI']                     # runs after CI workflow
+#    types:
+#      - completed
+#jobs:
+#  report:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: dorny/test-reporter@v1
+#        with:
+#          artifact: test-results            # artifact name
+#          name: JEST Tests                  # Name of the check run which will be created
+#          path: '*.xml'                     # Path to test results (inside artifact .zip)
+#          reporter: jest-junit              # Format of test results

@@ -5,9 +5,9 @@ on:
   pull_request:
     branches: [ master ]
 
-permissions:
-  contents: read
-
+#permissions:
+#  contents: read
+#
 jobs:
   build:
     name: "Test Runner"
@@ -32,3 +32,4 @@ jobs:
           name: jUnit Tests
           path: build/test-results/test/TEST-*.xml
           reporter: java-junit
+          token: ${{ secrets.GH_TOKEN }}
