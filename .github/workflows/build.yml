@@ -1,9 +1,9 @@
-# On push to master - perform full build with docker updates
+# On pull-request - perform build with unit tests
 
-name: JenkinsBot - Main
+name: JenkinsBot - PullRequest handler
 
 on:
-  push:
+  pull_request:
     branches: [ master ]
 
 permissions:
@@ -11,9 +11,8 @@ permissions:
 
 jobs:
   build:
-
+    name: "Build / PR"
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 8
@@ -21,17 +20,9 @@ jobs:
         with:
           java-version: '8'
           distribution: 'adopt'
-      - name: Docker Login
-        uses: docker/login-action@v2.0.0
-        with:
-          registry: docker.io
-          username: ${{ secrets.DOCKERHUB_LOGIN }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1.0.4
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2.1.5
         with:
-          arguments: release
-
-# TODO: depends on testing phase
+          arguments: bootJar

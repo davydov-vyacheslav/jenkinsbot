@@ -1,16 +1,17 @@
-# On pull-request - perform build with unit tests
-
-name: JenkinsBot - PullRequest handler
-
+name: "Test Runner"
 on:
-  pull_request:
+  push:
     branches: [ master ]
+  pull_request:
+    branches:
+      - '*'
 
 permissions:
   contents: read
 
 jobs:
   build:
+    name: "Run Unit Tests"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
