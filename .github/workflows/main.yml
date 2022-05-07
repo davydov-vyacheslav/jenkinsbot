@@ -37,8 +37,9 @@ jobs:
         uses: mikepenz/action-junit-report@v3
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
+          password: ${{ secrets.TOKEN }}
       - name: Archive Jacoco reports
         uses: actions/upload-artifact@v3
         with:
           name: jacoco-reports
-          path: "build/reports/jacoco/jacocoTestReport.xml"
+          path: "build/reports/jacoco/test/jacocoTestReport.xml"
