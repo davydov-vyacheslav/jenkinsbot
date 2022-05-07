@@ -32,4 +32,14 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2.1.5
         with:
-          arguments: release
+          arguments: build release
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: "build/test-results/**/*.xml"
+      - name: Publish coverage results
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.2
+        with:
+          paths: "build/reports/jacoco/test/jacocoTestCoverage.xml"

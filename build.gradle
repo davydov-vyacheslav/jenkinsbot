@@ -3,6 +3,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id "io.freefair.lombok" version "6.4.3"
     id "com.palantir.docker" version "0.13.0"
+    id 'jacoco'
     id 'java'
 }
 
@@ -27,6 +28,7 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
 
 
@@ -59,3 +61,14 @@ tasks.whenTaskAdded { task ->
     }
 }
 
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = false
+    }
+}
