@@ -1,5 +1,7 @@
 # Jenkins bot
 
+![Coverage](.github/badges/jacoco.svg)
+
 Goals:
 - get Jenkins Build's status info (especially failed unit tests statistics)
 - get endpoints health-check status
