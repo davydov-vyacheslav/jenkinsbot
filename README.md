@@ -54,29 +54,22 @@ TODO: description
   * TBD
   * FIXME: what to do with non-latest versions like 0.0.5, 0.0.6
 
-## TODO list
+## TODO: unclassified
 
-TODO in 0.0.7:
 - screenshot / gif / video based description + features in new versions
   - /healthcheck
   - /buildinfo
-- Optimize database-related unit tests by having single configuration they are running within
-- source code documentation
-- Validators: https://github.com/davydov-vyacheslav/jenkinsbot/issues/4
-- Progressing moving to CI/CD: https://github.com/davydov-vyacheslav/jenkinsbot/issues/5
-
-- -----
-
-## TODO: unclassified
-
 - Event sourcing
 - Database
   - (daily) mongo database backups
   - database fallback to local datasource if mongo is unavailable / choose database type in config
 - webhooks
+- source code documentation
 - test containers
 - Common Project files: CONTRIBUTING.md, SUPPORT.md, ACKNOWLEDGMENTS, CONTRIBUTORS
 - Unit Tests: cover with unit tests constructable messages that are greyed
   - label.field.*.*
   - label.welcome.field.*.*
   - DirtiesContext for CommandTests
+  - Optimize database-related unit tests by having single configuration they are running within
+- Bump dependency versions from time to time (ones per week?) + dependency bot

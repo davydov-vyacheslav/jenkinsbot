@@ -2,7 +2,11 @@
 use jenkinsbot;
 db.BuildInfo.updateMany(
   {'jenkinsInfo.domain' : { $not: { $regex : /^http/ } }},
-  [{ $set : { "jobUrl0006" : { $concat: [ "http://", "$jenkinsInfo.domain", ":7331/job/", "$jenkinsInfo.jobName" ]} }}]
+  [{ $set : { "jenkinsInfo.jobUrl" : { $concat: [ "http://", "$jenkinsInfo.domain", ":7331/job/", "$jenkinsInfo.jobName" ]} }}]
+);
+db.BuildInfo.updateMany(
+  {'jenkinsInfo.domain' : { $not: { $regex : /^http/ } }},
+  { $unset : { "jenkinsInfo.domain" : "", "jenkinsInfo.jobName": ""}}
 );
 db.Settings.update(
     {'key' : 'dbVersion'},
