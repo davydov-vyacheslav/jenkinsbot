@@ -25,11 +25,6 @@ jobs:
           ./gradlew properties -q | grep "version:" | awk '{print $2}'
           ./gradlew properties -q | grep "version:" | awk '{print $2}' | xargs -n1 -I{} echo "project_version="{}  >> $GITHUB_ENV
           cat $GITHUB_ENV
-
-  test-env:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
       - name: "Output env"
         run: |
           echo '$project_version'
