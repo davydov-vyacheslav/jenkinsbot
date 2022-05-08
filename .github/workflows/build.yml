@@ -25,11 +25,6 @@ jobs:
         uses: gradle/gradle-build-action@v2.1.5
         with:
           arguments: bootJar
-      - name: Upload output file
-        uses: actions/upload-artifact@v3
-        with:
-          name: jenkinsBot.jar
-          path: "./build/libs/*.jar"
 
   coverage:
     needs: build
@@ -51,13 +46,13 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: jacoco-report
-          path: build/reports/tests/html
+          path: build/reports/jacoco/test/html
       - name: Upload Unit Tests result
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: jacoco-report
-          path: build/reports/jacoco/test/html
+          name: junit-report
+          path: build/reports/tests/test
       - uses: codecov/codecov-action@v1
         with:
           file: ./build/reports/jacoco/test/jacocoTestReport.xml
@@ -68,7 +63,6 @@ jobs:
           name: jUnit Tests Results
           path: build/test-results/test/TEST-*.xml
           reporter: java-junit
-# TODO: upload junit, jacoco results (despite on status of testing)
 
   deploy:
     name: Deployment
@@ -110,7 +104,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: davs87/jenkinsbot:latest000,davs87/jenkinsbot:0.0.0
+          tags: davs87/jenkinsbot:latest,davs87/jenkinsbot:${{ env.project_version }}
           context: .
 
 #      - name: Generate changelog
@@ -133,15 +127,14 @@ jobs:
           prerelease: false
           tag_name: ${{ env.project_version }}
           name: ${{ env.project_version }}
-      # TODO: docker push :env.project_version ; latest
 
       - if: contains(env.project_version, '-SNAPSHOT')
         run: |
           echo 'SNAPSHOT version processing'
       - name: Docker Build and push latest
-#FIXME        if: "contains(env.project_version, '-SNAPSHOT')"
+        if: "contains(env.project_version, '-SNAPSHOT')"
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: davs87/jenkinsbot:latest001
+          tags: davs87/jenkinsbot:latest
           context: .
