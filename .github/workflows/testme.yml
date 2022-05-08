@@ -16,7 +16,7 @@ jobs:
           echo ${{ env.version }}
       - if: !contains(env.version, '-SNAPSHOT')
         run: |
-          echo "Release version"
+          echo 'Release version'
       - if: contains(env.version, '-SNAPSHOT')
         run: |
-          echo SNAPSHOT version
+          echo 'SNAPSHOT version'
