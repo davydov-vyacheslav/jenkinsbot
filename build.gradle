@@ -79,6 +79,7 @@ jacocoTestReport {
                     "com/javanix/bot/jenkinsBot/cli/*",
                     "com/javanix/bot/jenkinsBot/Main.class",
                     "com/javanix/bot/jenkinsBot/JenkinsBotConfiguration.class",
+                    "com/javanix/bot/jenkinsBot/TelegramBotWrapper.class",
                     "com/javanix/bot/jenkinsBot/CacheService.class"
             ])
         }))

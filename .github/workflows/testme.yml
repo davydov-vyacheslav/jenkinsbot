@@ -13,10 +13,10 @@ jobs:
     steps:
       - name: "Output env"
         run: |
-          echo "${{ env.version }}"
+          echo ${{ env.version }}
       - if: !contains(env.version, '-SNAPSHOT')
         run: |
           echo "Release version"
       - if: contains(env.version, '-SNAPSHOT')
         run: |
-          echo "SNAPSHOT version"
+          echo SNAPSHOT version
