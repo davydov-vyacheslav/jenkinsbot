@@ -7,13 +7,35 @@ on:
     workflows: ['JenkinsBot-Build']
     types:
       - completed
+
+
+
 jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1.0.4
+      - name: Collect Project version
+        run: |
+          ./gradlew properties -q | grep "version:" | awk '{print $2}' | xargs -n1 -I{} echo "version2="{}  >> $GITHUB_ENV
+
   test-env:
     runs-on: ubuntu-latest
     steps:
       - name: "Output env"
         run: |
+          echo '$VERSION'
+          echo ${{ env.version2 }}
           echo ${{ env.version }}
+          echo '$VERSION2'
       - if: !contains(env.version, '-SNAPSHOT')
         run: |
           echo 'Release version'
