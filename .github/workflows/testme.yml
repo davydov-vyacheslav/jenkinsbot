@@ -28,6 +28,7 @@ jobs:
 
   test-env:
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: "Output env"
         run: |
