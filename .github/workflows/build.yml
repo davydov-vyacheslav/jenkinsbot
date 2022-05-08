@@ -25,7 +25,9 @@ jobs:
         uses: gradle/gradle-build-action@v2.1.5
         with:
           arguments: bootJar
-
+      - name: Collect Project version
+        run: |
+          ./gradlew properties -q | grep "version:" | awk '{print $2}' | xargs -n1 -I{} echo "version="{}  >> $GITHUB_ENV
   coverage:
     needs: build
     name: Run Unit tests and perform Code Coverage

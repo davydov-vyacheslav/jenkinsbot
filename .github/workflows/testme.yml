@@ -1,0 +1,19 @@
+# On push to master - perform full build with docker updates
+
+name: JenkinsBot-Test
+
+on:
+  workflow_run:
+    workflows: ['JenkinsBot-Build']
+    types:
+      - completed
+jobs:
+  test-env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Output env"
+        run: echo "${{ env.version }}"
+      - if: !contains(env.version, '-SNAPSHOT')
+        run: echo "Release version"
+      - if: contains(env.version, '-SNAPSHOT')
+        run: echo "SNAPSHOT version"
