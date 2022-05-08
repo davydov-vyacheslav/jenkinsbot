@@ -30,10 +30,6 @@ jobs:
         with:
           name: jenkinsBot.jar
           path: "./build/libs/*.jar"
-#TODO: remo ve m???
-      - name: Collect Project version
-        run: |
-          ./gradlew properties -q | grep "version:" | awk '{print $2}' | xargs -n1 -I{} echo "project_version="{}  >> $GITHUB_ENV
 
   coverage:
     needs: build
@@ -60,6 +56,7 @@ jobs:
           name: jUnit Tests Results
           path: build/test-results/test/TEST-*.xml
           reporter: java-junit
+# TODO: upload junit, jacoco results (despite on status of testing)
 
   deploy:
     name: Deployment
@@ -144,19 +141,12 @@ jobs:
           registry: docker.io
           username: ${{ secrets.DOCKERHUB_LOGIN }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: "Trace: Output env"
-        run: |
-          echo ${{ env.project_version }}
-      - name: Download bootJar
-        uses: actions/download-artifact@v3
-        with:
-          name: jenkinsBot.jar
 
       - name: Build and push latest
         uses: docker/build-push-action@v3
         with:
-#          push: true
-          tags: davs87/jenkinsbot:latest
+          push: true
+          tags: davs87/jenkinsbot:latest000,davs87/jenkinsbot:0.0.0
           context: .
 
 # TODO: push to docker:latest; push davs87/jenkinsbot:0.x.x if no SNAPSHOT
