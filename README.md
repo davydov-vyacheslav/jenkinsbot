@@ -1,6 +1,6 @@
 # Jenkins bot
 
-[![Build Status](https://github.com/davydov-vyacheslav/jenkinsbot/workflows/build/badge.svg)](https://github.com/davydov-vyacheslav/jenkinsbot/actions)
+[![Build Status](https://github.com/davydov-vyacheslav/jenkinsbot/actions/workflows/build.yml/badge.svg)](https://github.com/davydov-vyacheslav/jenkinsbot/actions)
 [![codecov](https://codecov.io/gh/davydov-vyacheslav/jenkinsbot/branch/master/graph/badge.svg?token=Ntc7Kn0qXz)](https://codecov.io/gh/davydov-vyacheslav/jenkinsbot)
 [![versionjava](https://img.shields.io/badge/jdk-8-brightgreen.svg?logo=java)](https://www.oracle.com/technetwork/java/javase/downloads/index.html)
 
