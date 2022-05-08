@@ -12,8 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Output env"
-        run: echo "${{ env.version }}"
+        run: |
+          echo "${{ env.version }}"
       - if: !contains(env.version, '-SNAPSHOT')
-        run: echo "Release version"
+        run: |
+          echo "Release version"
       - if: contains(env.version, '-SNAPSHOT')
-        run: echo "SNAPSHOT version"
+        run: |
+          echo "SNAPSHOT version"
