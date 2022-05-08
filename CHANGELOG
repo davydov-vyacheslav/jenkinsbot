@@ -1,6 +1,10 @@
 What's new / Changelog
 ~~~~~~~~~~~~~~~~~~~~~~
 
+- 0.0.7
+  - BuildInfoModelChange to contain full jobUrl: https://github.com/davydov-vyacheslav/jenkinsbot/issues/3
+  - GitHub CI/CD improvements
+
 - 0.0.6
   - added i18n
   - added build status icons
