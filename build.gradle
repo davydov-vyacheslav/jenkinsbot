@@ -69,6 +69,18 @@ jacocoTestReport {
     reports {
         xml.required = true
         csv.required = true
-        html.required = false
+        html.required = true
+    }
+
+    // Exclude startup classes / configurations / CLI (aka external services)
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "com/javanix/bot/jenkinsBot/cli/*",
+                    "com/javanix/bot/jenkinsBot/Main.class",
+                    "com/javanix/bot/jenkinsBot/JenkinsBotConfiguration.class",
+                    "com/javanix/bot/jenkinsBot/CacheService.class"
+            ])
+        }))
     }
 }
