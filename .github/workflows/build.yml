@@ -1,4 +1,4 @@
-# Perform build with unit tests
+# Perform full build-test-deploy process for the JenkinsBot
 
 name: "JenkinsBot-Build"
 
@@ -68,7 +68,7 @@ jobs:
     name: Deployment
     needs: coverage
     runs-on: ubuntu-latest
-#FIXME    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 8
@@ -100,7 +100,7 @@ jobs:
           echo 'Release version processing'
 
       - name: Docker Build and push version and latest
-#FIXME        if: "!contains(env.project_version, '-SNAPSHOT')"
+        if: "!contains(env.project_version, '-SNAPSHOT')"
         uses: docker/build-push-action@v3
         with:
           push: true

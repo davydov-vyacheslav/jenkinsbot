@@ -72,4 +72,4 @@ TODO: description
   - label.welcome.field.*.*
   - DirtiesContext for CommandTests
   - Optimize database-related unit tests by having single configuration they are running within
-- Bump dependency versions from time to time (ones per week?) + dependency bot
+- immutable objects
