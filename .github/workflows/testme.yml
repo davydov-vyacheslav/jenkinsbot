@@ -3,11 +3,8 @@
 name: JenkinsBot-Test
 
 on:
-  workflow_run:
-    workflows: ['JenkinsBot-Build']
-    types:
-      - completed
-
+  pull_request:
+    branches: [ master ]
 
 
 jobs:
@@ -25,20 +22,19 @@ jobs:
         uses: gradle/wrapper-validation-action@v1.0.4
       - name: Collect Project version
         run: |
-          ./gradlew properties -q | grep "version:" | awk '{print $2}' | xargs -n1 -I{} echo "version2="{}  >> $GITHUB_ENV
+          ./gradlew properties -q | grep "version:" | awk '{print $2}' | xargs -n1 -I{} echo "project_version="{}  >> $GITHUB_ENV
 
   test-env:
     runs-on: ubuntu-latest
     steps:
       - name: "Output env"
         run: |
-          echo '$VERSION'
-          echo ${{ env.version2 }}
-          echo ${{ env.version }}
-          echo '$VERSION2'
-      - if: "!contains(env.version, '-SNAPSHOT')"
+          echo '$project_version'
+          echo '$PROJECT_VERSION'
+          echo ${{ env.project_version }}
+      - if: "!contains(env.project_version, '-SNAPSHOT')"
         run: |
           echo 'Release version'
-      - if: contains(env.version, '-SNAPSHOT')
+      - if: contains(env.project_version, '-SNAPSHOT')
         run: |
           echo 'SNAPSHOT version'
