@@ -22,7 +22,9 @@ jobs:
         uses: gradle/wrapper-validation-action@v1.0.4
       - name: Collect Project version
         run: |
+          ./gradlew properties -q | grep "version:" | awk '{print $2}'
           ./gradlew properties -q | grep "version:" | awk '{print $2}' | xargs -n1 -I{} echo "project_version="{}  >> $GITHUB_ENV
+          cat $GITHUB_ENV
 
   test-env:
     runs-on: ubuntu-latest
