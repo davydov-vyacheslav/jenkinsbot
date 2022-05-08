@@ -19,7 +19,6 @@ jobs:
         with:
           java-version: '8'
           distribution: 'adopt'
-#          cache: gradle
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1.0.4
       - name: Build with Gradle
@@ -125,7 +124,6 @@ jobs:
 # TODO: remove me
   test-deploy:
     name: Test Deployment
-    needs: coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -136,6 +134,10 @@ jobs:
           distribution: 'adopt'
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1.0.4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
       - name: Docker Login
         uses: docker/login-action@v2.0.0
         with:
@@ -152,7 +154,7 @@ jobs:
         with:
 #          push: true
           tags: davs87/jenkinsbot:latest
-          context: "build/libs/"
+          context: .
 
 # TODO: push to docker:latest; push davs87/jenkinsbot:0.x.x if no SNAPSHOT
 #      - name: Build and push
