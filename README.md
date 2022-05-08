@@ -1,6 +1,8 @@
 # Jenkins bot
 
-![Coverage](.github/badges/jacoco.svg)
+[![Build Status](https://github.com/davydov-vyacheslav/jenkinsbot/workflows/build/badge.svg)](https://github.com/codecentric/cxf-spring-boot-starter/actions)
+[![codecov](https://codecov.io/gh/davydov-vyacheslav/jenkinsbot/branch/master/graph/badge.svg?token=Ntc7Kn0qXz)](https://codecov.io/gh/davydov-vyacheslav/jenkinsbot)
+[![versionjava](https://img.shields.io/badge/jdk-8-brightgreen.svg?logo=java)](https://www.oracle.com/technetwork/java/javase/downloads/index.html)
 
 Goals:
 - get Jenkins Build's status info (especially failed unit tests statistics)

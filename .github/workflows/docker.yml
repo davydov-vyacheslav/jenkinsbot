@@ -33,8 +33,17 @@ jobs:
           arguments: release
 
 # TODO: push to docker:latest
+#      - name: Build and push
+#        uses: docker/build-push-action@v3
+#        with:
+#          push: true
+#          tags: davs87/jenkinsbot:latest
+#          context: "{{defaultContext}}:mysubdir"
 
 # TODO: depends on testing phase
+
+# TODO: push davs87/jenkinsbot:0.x.x if no SNAPSHOT
+
 # TODO: publish artifact .. on new version
 #      - name: Upload output file
 #        uses: actions/upload-artifact@v3
