@@ -45,6 +45,12 @@ jobs:
         with:
           file: ./build/reports/jacoco/test/jacocoTestReport.xml
           name: codecov
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        with:
+          name: jUnit Tests Results
+          path: build/test-results/test/TEST-*.xml
+          reporter: java-junit
 
 
 #
@@ -54,13 +60,6 @@ jobs:
 #          name: unit-tests-jacoco
 #          path: exportJacoco/jacoco-fast.exec
 
-#      - name: Test Report
-#        uses: dorny/test-reporter@v1
-#        if: success() || failure()
-#        with:
-#          name: jUnit Tests Results
-#          path: build/test-results/test/TEST-*.xml
-#          reporter: java-junit
 #      - name: Add JaCoCo coverage to PR
 #        id: jacoco
 #        uses: madrapps/jacoco-report@v1.2
