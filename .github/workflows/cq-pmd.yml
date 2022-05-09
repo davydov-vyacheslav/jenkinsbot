@@ -1,0 +1,28 @@
+name: "JenkinsBot-CodeQuality"
+
+on:
+  pull_request:
+    branches: [ '*' ]
+  push:
+    branches: [ master ]
+
+jobs:
+  pmd:
+    name: PMD Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      - uses: pmd/pmd-github-action@v1
+        id: pmd
+        with:
+          version: '6.40.0' # FIXME: dependabot (6.45.0)
+          sourcePath: 'src'
+          rulesets: '${{ github.workspace }}/src/main/resources/pmd/jenkinsbot.xml'
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: pmd-report.sarif

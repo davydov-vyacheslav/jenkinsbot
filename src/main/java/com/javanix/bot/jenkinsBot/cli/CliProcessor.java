@@ -49,13 +49,12 @@ public class CliProcessor {
 		String userCredentials = jenkinsInfo.getUser() + ":" + jenkinsInfo.getPassword();
 		String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
 		httpcon.setRequestProperty ("Authorization", basicAuth);
-		InputStream in = httpcon.getInputStream();
 
-		ReadableByteChannel readableByteChannel = Channels.newChannel(in);
-		try (FileOutputStream fileOutputStream = new FileOutputStream(tempFile)) {
+		try (InputStream in = httpcon.getInputStream();
+			 ReadableByteChannel readableByteChannel = Channels.newChannel(in);
+				FileOutputStream fileOutputStream = new FileOutputStream(tempFile)) {
 			fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
 		}
-		readableByteChannel.close();
 
 		JenkinsBuildDetails details = JenkinsBuildDetails.builder()
 				.failedTestsCapacity(count)

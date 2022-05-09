@@ -13,12 +13,9 @@ public interface BuildInfoService extends EntityService<BuildInfoDto> {
 	 */
 	List<BuildInfoDto> getAvailableRepositories(Long ownerId);
 
-	boolean isDatabaseEmpty();
-
 	/**
 	 * Get repository by name, case-insensitive, available for specific user for view (e.g. public or owned)
 	 */
 	BuildInfoDto getAvailableRepository(String name, Long ownerId);
 
-	List<BuildInfoDto> allRepositories();
 }

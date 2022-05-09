@@ -18,7 +18,7 @@ public abstract class AbstractEntityCommand implements TelegramCommand {
 		EntityActionType buildType = null;
 		String buildArguments = "";
 		if (m.find()) {
-			buildType = getBuildType(m.group(1));
+			buildType = EntityActionType.of(m.group(1));
 			buildArguments = m.group(2);
 		}
 
@@ -28,13 +28,4 @@ public abstract class AbstractEntityCommand implements TelegramCommand {
 	protected abstract Pattern getCommandPattern();
 	protected abstract EntityCommandFactory getCommandFactory();
 
-	protected EntityActionType getBuildType(String message) {
-		EntityActionType type = null;
-		try {
-			type = EntityActionType.valueOf(message.trim().split(" ")[0].toUpperCase());
-		} catch (IllegalArgumentException iae) {
-			// no op
-		}
-		return type;
-	}
 }

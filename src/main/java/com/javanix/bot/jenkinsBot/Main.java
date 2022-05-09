@@ -33,10 +33,10 @@ public class Main implements CommandLineRunner {
                 CallbackQuery callbackQuery = update.callbackQuery();
                 User from = null;
                 String text = null;
-                if (message != null) {
+                if (hasMessage(message)) {
                     text = message.text();
                     from = message.from();
-                } else if (callbackQuery != null) {
+                } else if (isCallbackMessage(callbackQuery)) {
                     text = callbackQuery.data();
                     from = callbackQuery.from();
                 }
@@ -44,10 +44,10 @@ public class Main implements CommandLineRunner {
                     text = "";
                 }
 
-                if (message == null && callbackQuery != null) {
+                if (!hasMessage(message) && isCallbackMessage(callbackQuery)) {
                     message = callbackQuery.message();
                 }
-                if (message != null) {
+                if (hasMessage(message)) {
                     try {
                         commonCommandFactory.getCommand(text).process(message.chat(), from, text);
                     } catch (Exception e) {
@@ -58,6 +58,13 @@ public class Main implements CommandLineRunner {
             });
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
         });
+    }
 
+    private boolean hasMessage(Message message) {
+        return message != null;
+    }
+
+    private boolean isCallbackMessage(CallbackQuery callbackQuery) {
+        return callbackQuery != null;
     }
 }

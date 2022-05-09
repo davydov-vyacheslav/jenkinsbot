@@ -38,6 +38,7 @@ class DeleteBuildCommand implements BuildSubCommand {
 		}
 	}
 
+	@Override
 	public EntityActionType getCommandType() {
 		return EntityActionType.DELETE;
 	}

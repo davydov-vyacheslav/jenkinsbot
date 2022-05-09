@@ -19,7 +19,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
     implementation 'commons-io:commons-io:2.11.0'
-    implementation 'com.github.pengrad:java-telegram-bot-api:5.7.0'
+    implementation 'com.github.pengrad:java-telegram-bot-api:6.0.1'
 
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

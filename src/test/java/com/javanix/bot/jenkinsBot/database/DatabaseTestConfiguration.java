@@ -20,21 +20,21 @@ import java.net.UnknownHostException;
 public class DatabaseTestConfiguration {
 
 	private static final String CONNECTION_STRING = "mongodb://%s:%d";
-	private static final String ip = "localhost";
-	private static final int port = 27017;
+	private static final String IP = "localhost";
+	private static final int PORT = 27017;
 
 	@Bean
 	public ImmutableMongodConfig getImmutableMongodConfig() throws UnknownHostException {
 		return MongodConfig
 				.builder()
 				.version(Version.Main.PRODUCTION)
-				.net(new Net(ip, port, Network.localhostIsIPv6()))
+				.net(new Net(IP, PORT, Network.localhostIsIPv6()))
 				.build();
 	}
 
 	@Bean
 	public MongoTemplate mongoTemplate() {
-		return new MongoTemplate(MongoClients.create(String.format(CONNECTION_STRING, ip, port)), "test");
+		return new MongoTemplate(MongoClients.create(String.format(CONNECTION_STRING, IP, PORT)), "test");
 	}
 
 

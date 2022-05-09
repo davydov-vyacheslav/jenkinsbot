@@ -62,6 +62,7 @@ class StatusHealthCheckCommand implements HealthCheckSubCommand {
 		return message.toString();
 	}
 
+	@Override
 	public EntityActionType getCommandType() {
 		return EntityActionType.STATUS;
 	}

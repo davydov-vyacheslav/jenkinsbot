@@ -27,8 +27,9 @@ class StatusBuildCommand implements BuildSubCommand {
     private final CliProcessor cliProcessor;
     private final BuildInfoService database;
     private final TelegramBotWrapper bot;
-    private static final int failedTestsCount = 20;
-    private static final Pattern failedTestsPattern = Pattern.compile(".*\\[junit] TEST (.*)\\.(.*Test) FAILED");
+
+    private static final int FAILED_TESTS_COUNT = 20;
+    private static final Pattern FAILED_TESTS_PATTERN = Pattern.compile(".*\\[junit] TEST (.*)\\.(.*Test) FAILED");
 
     @Override
     public void process(Chat chat, User from, String buildCommandArguments) {
@@ -42,7 +43,7 @@ class StatusBuildCommand implements BuildSubCommand {
         log.info(from.username() + " is getting status build for team: " + repository.getRepoName());
         JenkinsInfoDto jenkinsInfo = repository.getJenkinsInfo();
 
-        JenkinsBuildDetails currentBuildDetails = cliProcessor.getCurrentBuildJenkinsBuildDetails(repository.getJenkinsInfo(), failedTestsCount);
+        JenkinsBuildDetails currentBuildDetails = cliProcessor.getCurrentBuildJenkinsBuildDetails(repository.getJenkinsInfo(), FAILED_TESTS_COUNT);
         JenkinsBuildDetails lastBuildDetails = cliProcessor.getPreviousBuildJenkinsBuildDetails(repository.getJenkinsInfo());
 
         String failedTestsOutputWithLinks = convertFailedTestsOutputToLinks(currentBuildDetails.getTopFailedTests(), jenkinsInfo);
@@ -71,7 +72,7 @@ class StatusBuildCommand implements BuildSubCommand {
     // - [%s](http://domain:7331/job/job-name/ws/output/reports/TEST-testFullName.xml/*view*/)
     private String convertFailedTestsOutputToLinks(List<String> origin, JenkinsInfoDto jenkinsInfo) {
         String result = String.join("\n", origin);
-        Matcher m = failedTestsPattern.matcher(result);
+        Matcher m = FAILED_TESTS_PATTERN.matcher(result);
         if (m.find()) {
             result = m.replaceAll(
                     String.format("- [%s](%s/ws/output/reports/TEST-%s.xml/*view*/)", "$2", jenkinsInfo.getJobUrl(), "$1.$2")
@@ -81,6 +82,7 @@ class StatusBuildCommand implements BuildSubCommand {
         return result;
     }
 
+    @Override
     public EntityActionType getCommandType() {
         return EntityActionType.STATUS;
     }

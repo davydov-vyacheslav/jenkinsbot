@@ -33,7 +33,7 @@ class MyReposBuildCommand implements BuildSubCommand {
 				.build(), EntityType.BUILD_INFO);
 	}
 
-
+	@Override
 	public EntityActionType getCommandType() {
 		return EntityActionType.MY_LIST;
 	}

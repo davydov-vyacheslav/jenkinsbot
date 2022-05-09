@@ -43,11 +43,6 @@ class BuildInfoServiceImpl implements BuildInfoService {
 	}
 
 	@Override
-	public boolean isDatabaseEmpty() {
-		return repository.count() == 0;
-	}
-
-	@Override
 	public Optional<BuildInfoDto> getOwnedEntityByName(String name, Long ownerId) {
 		return repository.getByRepoNameIgnoreCaseAndCreatorId(name, ownerId)
 				.map(this::convertEntityToDto);
@@ -65,14 +60,6 @@ class BuildInfoServiceImpl implements BuildInfoService {
 	@Override
 	public boolean hasEntity(String name) {
 		return repository.getByRepoNameIgnoreCase(name).isPresent();
-	}
-
-	@Override
-	public List<BuildInfoDto> allRepositories() {
-		return repository.findAll()
-				.stream()
-				.map(this::convertEntityToDto)
-				.collect(Collectors.toList());
 	}
 
 	private BuildInfoDto convertEntityToDto(BuildInfoEntity buildInfoEntity) {

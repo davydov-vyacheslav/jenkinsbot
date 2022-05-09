@@ -21,6 +21,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static org.mockito.AdditionalAnswers.returnsArgAt;
@@ -60,6 +62,12 @@ public abstract class AbstractCommandTestCase {
 	@Autowired
 	protected CommonCommandFactory factory;
 
+	private static final Map<String, String> I18N_MAP = new ConcurrentHashMap<String, String>() {{
+		put("message.command.build.common.status.prefix", "Current repository info: \\n{0}");
+		put("message.command.healthcheck.common.status.prefix", "Current Endpoint info: \\n{0}");
+		put("button.common.setFieldValue", "Set `{0}`");
+	}};
+
 	@BeforeEach
 	public void setup() {
 		// FIXME: make bean?
@@ -68,20 +76,14 @@ public abstract class AbstractCommandTestCase {
 		Mockito.when(bot.getI18nMessage(any(), any())).then(returnsArgAt(ReturnsArgumentAt.LAST_ARGUMENT));
 		Mockito.when(bot.getI18nMessage(any(), any(), any())).then(invocation -> {
 			String key = invocation.getArgument(1);
-			if (key.equals("message.command.build.common.status.prefix")) {
-				key = "Current repository info: \\n{0}";
-			} else if (key.equalsIgnoreCase("message.command.healthcheck.common.status.prefix")) {
-				key = "Current Endpoint info: \\n{0}";
-			} else if (key.equals("button.common.setFieldValue")) {
-				key = "Set `{0}`";
-			}
+			key = I18N_MAP.getOrDefault(key, key);
 			return new MessageFormat(key).format(invocation.getArgument(2));
 		});
 	}
 
 	protected List<InlineKeyboardButton> getInlineKeyboardButtons(TelegramBotWrapper.MessageInfo message) {
-		InlineKeyboardMarkup reply_markup = message.getKeyboard();
-		InlineKeyboardButton[][] buttons = reply_markup == null ? new InlineKeyboardButton[0][0] : reply_markup.inlineKeyboard();
+		InlineKeyboardMarkup replyMarkup = message.getKeyboard();
+		InlineKeyboardButton[][] buttons = replyMarkup == null ? new InlineKeyboardButton[0][0] : replyMarkup.inlineKeyboard();
 		return Arrays.stream(buttons).flatMap(Arrays::stream).collect(Collectors.toList());
 	}
 

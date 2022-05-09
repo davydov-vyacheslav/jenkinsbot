@@ -14,6 +14,7 @@ public class BuildEntityCommandFactory implements EntityCommandFactory {
     private final Set<BuildSubCommand> commands;
     private final DefaultBuildCommand defaultCommand;
 
+    @Override
     public BuildSubCommand getCommand(EntityActionType buildType) {
         return commands.stream().filter(command ->
                 command.getCommandType() == buildType).findAny().orElse(defaultCommand);
