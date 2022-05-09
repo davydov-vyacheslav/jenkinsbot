@@ -1,0 +1,26 @@
+name: "JenkinsBot-CodeQuality"
+
+on:
+  pull_request:
+    branches: [ '*' ]
+  push:
+    branches: [ master ]
+
+jobs:
+  pmd:
+    name: PMD Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      - uses: pmd/pmd-github-action@v1
+        id: pmd
+        with:
+          version: '6.40.0' # FIXME: dependabot (6.45.0)
+          sourcePath: 'src'
+          rulesets: 'src/main/resources/pmd/jenkinsbot.xml'
+#      - name: Fail build if there a violations
+#        if: steps.pmd.outputs.violations != 0
+#        run: exit 1

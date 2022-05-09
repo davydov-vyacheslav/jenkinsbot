@@ -18,7 +18,7 @@ public class CacheService {
 
 	private final UserService userService;
 
-	@Cacheable(value = "userLocale")
+	@Cacheable("userLocale")
 	public Locale getUserLocale(Long userId) {
 		log.info(">> User locale triggered: " + userId);
 		return userService.getUser(userId).getLocale().getLocale();

@@ -33,6 +33,7 @@ class MyHealthChecksCommand implements HealthCheckSubCommand {
 				.build(), EntityType.HEALTH_CHECK);
 	}
 
+	@Override
 	public EntityActionType getCommandType() {
 		return EntityActionType.MY_LIST;
 	}

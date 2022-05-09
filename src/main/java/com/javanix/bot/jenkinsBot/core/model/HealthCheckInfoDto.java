@@ -9,8 +9,8 @@ public class HealthCheckInfoDto implements Entity {
 	private String endpointName;
 	private String endpointUrl;
 	private Boolean isPublic;
-	private Long creatorId;
-	private String creatorFullName;
+	private final Long creatorId;
+	private final String creatorFullName;
 
 	public static HealthCheckInfoDto.HealthCheckInfoDtoBuilder emptyEntityBuilder() {
 		return HealthCheckInfoDto.builder()

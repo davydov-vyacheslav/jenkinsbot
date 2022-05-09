@@ -17,7 +17,7 @@ public enum LocaleType {
 
 	public static LocaleType of(String localeType) {
 		LocaleType result = EN;
-		if (localeType.equalsIgnoreCase("ru")) {
+		if ("ru".equalsIgnoreCase(localeType)) {
 			result = RU;
 		}
 		return result;

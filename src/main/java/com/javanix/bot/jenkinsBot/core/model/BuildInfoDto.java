@@ -9,8 +9,8 @@ public class BuildInfoDto implements Entity {
 	private String repoName;
 	private JenkinsInfoDto jenkinsInfo;
 	private Boolean isPublic;
-	private Long creatorId;
-	private String creatorFullName;
+	private final Long creatorId;
+	private final String creatorFullName;
 
 	public static BuildInfoDto.BuildInfoDtoBuilder emptyEntityBuilder() {
 		return BuildInfoDto.builder()

@@ -12,30 +12,30 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public abstract class AbstractModifyEntityCommand<DTO extends Entity> implements EntitySubCommand<DTO>, ProgressableCommand {
+public abstract class AbstractModifyEntityCommand<T extends Entity> implements EntitySubCommand<T>, ProgressableCommand {
 
 	private static final String ACTION_DONE = "/done";
 	public static final String ICON_NA = "\uD83D\uDEAB";
 
-	protected final EntityService<DTO> database;
+	protected final EntityService<T> database;
 	protected final UserEntityContext userContext;
-	protected final EntitySubCommand<DTO> defaultCommand;
-	protected final EntityValidator<DTO> validator;
+	protected final EntitySubCommand<T> defaultCommand;
+	protected final EntityValidator<T> validator;
 	protected final TelegramBotWrapper bot;
 
-	protected final Map<Long, StatedEntity<DTO>> usersInProgress = new HashMap<>();
+	protected final Map<Long, StatedEntity<T>> usersInProgress = new ConcurrentHashMap<>();
 
-	protected abstract List<? extends EntityState<DTO>> fieldsToModify();
+	protected abstract List<? extends EntityState<T>> fieldsToModify();
 
 	protected abstract void processOnStart(Chat chat, User from, String command);
 
-	protected abstract List<? extends EntityState<DTO>> getFieldsToDisplay();
+	protected abstract List<? extends EntityState<T>> getFieldsToDisplay();
 
 	protected void showMenu(Chat chat, User from, String repoBuildInformationKey, Object[] messageArgs) {
 		userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
@@ -54,7 +54,7 @@ public abstract class AbstractModifyEntityCommand<DTO extends Entity> implements
 			return;
 		}
 
-		DTO repo = usersInProgress.get(currentId).getEntityDto();
+		T repo = usersInProgress.get(currentId).getEntityDto();
 		if (ACTION_DONE.equalsIgnoreCase(command)) {
 			List<String> errors = new ArrayList<>();
 			if (validator.validate(repo, errors, getCommandType())) {
@@ -81,7 +81,7 @@ public abstract class AbstractModifyEntityCommand<DTO extends Entity> implements
 
 	@Override
 	public void cancelProgress(Chat chat, User from) {
-		EntityState<DTO> state = usersInProgress.get(from.id()).getState();
+		EntityState<T> state = usersInProgress.get(from.id()).getState();
 
 		String currentAction;
 
@@ -107,10 +107,12 @@ public abstract class AbstractModifyEntityCommand<DTO extends Entity> implements
 
 	@Override
 	public void progress(Chat chat, User from, String value) {
-		StatedEntity<DTO> repoBuildInformation = usersInProgress.get(from.id());
-		DTO repo = repoBuildInformation.getEntityDto();
-		EntityState<DTO> state = repoBuildInformation.getState();
-		state.updateField(repo, value);
+		StatedEntity<T> repoBuildInformation = usersInProgress.get(from.id());
+		T repo = repoBuildInformation.getEntityDto();
+		EntityState<T> state = repoBuildInformation.getState();
+		if (state != null) {
+			state.updateField(repo, value);
+		}
 		showMenu(chat, from, getEntityDetails(from, repo), null);
 		repoBuildInformation.setState(null);
 	}
@@ -125,7 +127,7 @@ public abstract class AbstractModifyEntityCommand<DTO extends Entity> implements
 		int pageSize = 2;
 
 
-		List<? extends EntityState<DTO>> fields = fieldsToModify();
+		List<? extends EntityState<T>> fields = fieldsToModify();
 		splitListByNElements(pageSize, fields)
 				.forEach(fieldsValues -> inlineKeyboardMarkup.addRow(
 						fieldsValues.stream()
@@ -141,14 +143,14 @@ public abstract class AbstractModifyEntityCommand<DTO extends Entity> implements
 		return inlineKeyboardMarkup;
 	}
 
-	private InlineKeyboardButton getInlineKeyboardButton(User from, EntityState<DTO> fieldsValue) {
+	private InlineKeyboardButton getInlineKeyboardButton(User from, EntityState<T> fieldsValue) {
 		String fieldName = bot.getI18nMessage(from, getFieldLabelKey(fieldsValue.getFieldKey()));
 		String action = String.format("/%s %s %s", getMainCommandName(), getCommandType(), fieldsValue.getFieldKey());
 		return new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.setFieldValue", new Object[]{fieldName}))
 				.callbackData(action);
 	}
 
-	public String getEntityDetails(User from, DTO repo) {
+	public String getEntityDetails(User from, T repo) {
 		String fieldsInfo = getFieldsToDisplay().stream()
 				.map(stateType -> "- "
 						+ bot.getI18nMessage(from, getFieldLabelKey(stateType.getFieldKey()))

@@ -119,7 +119,7 @@ public class CommandTest extends AbstractCommandTestCase {
 		command.process(chat, from, commandText);
 		Mockito.verify(bot).sendI18nMessage(Mockito.eq(from), Mockito.eq(chat),
 				 argThat((TelegramBotWrapper.MessageInfo messageInfo) ->
-						messageInfo.getMessageKey().equals("message.command.defaultInProgress.progress")
+						 "message.command.defaultInProgress.progress".equals(messageInfo.getMessageKey())
 						&& Arrays.equals(messageInfo.getMessageArgs(), new Object[]{"some text"})
 				)
 		);

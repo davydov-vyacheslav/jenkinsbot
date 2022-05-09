@@ -32,14 +32,6 @@ class HealthCheckServiceImpl implements HealthCheckService {
 	}
 
 	@Override
-	public List<HealthCheckInfoDto> allEndpoints() {
-		return repository.findAll()
-				.stream()
-				.map(this::convertEntityToDto)
-				.collect(Collectors.toList());
-	}
-
-	@Override
 	public Optional<HealthCheckInfoDto> getOwnedEntityByName(String name, Long ownerId) {
 		return repository.getByEndpointNameIgnoreCaseAndCreatorId(name, ownerId)
 				.map(this::convertEntityToDto);
@@ -60,11 +52,6 @@ class HealthCheckServiceImpl implements HealthCheckService {
 		return repository.getByCreatorId(ownerId).stream()
 				.map(this::convertEntityToDto)
 				.collect(Collectors.toList());
-	}
-
-	@Override
-	public boolean isDatabaseEmpty() {
-		return repository.count() == 0;
 	}
 
 	private HealthCheckInfoDto convertEntityToDto(HealthCheckEntity healthCheckEntity) {

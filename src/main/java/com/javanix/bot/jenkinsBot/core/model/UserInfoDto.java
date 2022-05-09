@@ -11,11 +11,11 @@ import java.util.Map;
 @Data
 @Builder
 public class UserInfoDto {
-	private Long userId;
+	private final Long userId;
 	private String userName;
 	private Map<EntityType, Integer> lastMessageIdMap;
 	private LocaleType locale;
-	private List<String> subscribedBuildRepositories;
+	private final List<String> subscribedBuildRepositories;
 
 	public static UserInfoDto.UserInfoDtoBuilder emptyEntityBuilder() {
 		return UserInfoDto.builder()

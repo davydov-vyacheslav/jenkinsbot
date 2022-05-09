@@ -38,6 +38,7 @@ class DeleteHealthCheckCommand implements HealthCheckSubCommand {
 		}
 	}
 
+	@Override
 	public EntityActionType getCommandType() {
 		return EntityActionType.DELETE;
 	}

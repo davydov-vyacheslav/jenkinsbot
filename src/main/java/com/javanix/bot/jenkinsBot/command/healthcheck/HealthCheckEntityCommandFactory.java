@@ -14,6 +14,7 @@ public class HealthCheckEntityCommandFactory implements EntityCommandFactory {
     private final Set<HealthCheckSubCommand> commands;
     private final DefaultHealthCheckCommand defaultCommand;
 
+    @Override
     public HealthCheckSubCommand getCommand(EntityActionType buildType) {
         return commands.stream().filter(command ->
                 command.getCommandType() == buildType).findAny().orElse(defaultCommand);
