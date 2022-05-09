@@ -109,6 +109,6 @@ Logic bases on return code:
     - label.welcome.field.*.*
   - DirtiesContext for CommandTests
   - Optimize database-related unit tests by having single configuration they are running within
-- there are should be: stage env, prod env
+- there are should be: stage env, prod env, dev (xxx) env
 - ?? add docker-compose.yml file?
 - ?? migrate docker registry to GH ?
