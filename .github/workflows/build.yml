@@ -25,7 +25,15 @@ jobs:
         uses: gradle/gradle-build-action@v2.1.5
         with:
           arguments: bootJar
-
+      - name: Generate changelog - snapshot
+        run: |
+          clog=$(sed "/^## $1$/,/^## ${{ env.project_version }}/!d;//d;/^$/d" CHANGELOG.md)
+          echo "$clog"
+          echo "project_changelog=$clog" >> $GITHUB_ENV
+      - name: Verify changelog - snapshot
+        run: |
+          echo "### Things that changed in this release"
+          echo "${{ env.project_changelog }}"
   coverage:
     needs: build
     name: Unit Testing
@@ -108,18 +116,6 @@ jobs:
           clog=$(sed "/^## $1$/,/^## ${{ env.project_version }}/!d;//d;/^$/d" CHANGELOG.md)
           echo "$clog"
           echo "project_changelog=$clog" >> $GITHUB_ENV
-      - name: Generate changelog - snapshot
-        if: "contains(env.project_version, '-SNAPSHOT')"
-        run: |
-          clog=$(sed "/^## $1$/,/^## ${{ env.project_version }}/!d;//d;/^$/d" CHANGELOG.md)
-          echo "$clog"
-          echo "project_changelog=$clog" >> $GITHUB_ENV
-      - name: Verify changelog - snapshot
-        if: "contains(env.project_version, '-SNAPSHOT')"
-        run: |
-          echo "### Things that changed in this release"
-          echo "${{ env.project_changelog }}"
-
       - name: Release
         if: "!contains(env.project_version, '-SNAPSHOT')"
         uses: softprops/action-gh-release@v1
