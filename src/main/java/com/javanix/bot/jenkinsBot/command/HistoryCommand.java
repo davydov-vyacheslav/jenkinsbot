@@ -22,7 +22,7 @@ class HistoryCommand implements TelegramCommand {
 	@SneakyThrows
 	public void process(Chat chat, User from, String message) {
 		String changelog = IOUtils.toString(
-				Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResourceAsStream("CHANGELOG")),
+				Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResourceAsStream("CHANGELOG.md")),
 				StandardCharsets.UTF_8);
 		bot.execute(new SendMessage(chat.id(), changelog.substring(0, Math.min(changelog.length(), 2000))));
 	}
