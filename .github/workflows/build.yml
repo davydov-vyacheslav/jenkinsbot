@@ -57,12 +57,6 @@ jobs:
         with:
           file: ./build/reports/jacoco/test/jacocoTestReport.xml
           name: codecov
-      - name: Test Report
-        uses: dorny/test-reporter@v1
-        with:
-          name: jUnit Tests Results
-          path: build/test-results/test/TEST-*.xml
-          reporter: java-junit
 
   deploy:
     name: Deployment
@@ -107,13 +101,25 @@ jobs:
           tags: davs87/jenkinsbot:latest,davs87/jenkinsbot:${{ env.project_version }}
           context: .
 
-# FIXME
-#      - name: Generate changelog
-#        if: "!contains(env.project_version, '-SNAPSHOT')"
-#        id: changelog
-#        uses: metcalfc/changelog-generator@v3.0.0
-#        with:
-#          myToken: ${{ secrets.GITHUB_TOKEN }}
+# TODO: verify me first
+      - name: Generate changelog
+        if: "!contains(env.project_version, '-SNAPSHOT')"
+        run: |
+          clog=$(sed "/^## $1$/,/^## ${{ env.project_version }}/!d;//d;/^$/d" CHANGELOG.md)
+          echo "$clog"
+          echo "project_changelog=$clog" >> $GITHUB_ENV
+      - name: Generate changelog - snapshot
+        if: "contains(env.project_version, '-SNAPSHOT')"
+        run: |
+          clog=$(sed "/^## $1$/,/^## ${{ env.project_version }}/!d;//d;/^$/d" CHANGELOG.md)
+          echo "$clog"
+          echo "project_changelog=$clog" >> $GITHUB_ENV
+      - name: Verify changelog - snapshot
+        if: "contains(env.project_version, '-SNAPSHOT')"
+        run: |
+          echo "### Things that changed in this release"
+          echo "${{ env.project_changelog }}"
+
       - name: Release
         if: "!contains(env.project_version, '-SNAPSHOT')"
         uses: softprops/action-gh-release@v1
@@ -121,9 +127,9 @@ jobs:
           files: ./build/libs/jenkinsBot-${{ env.project_version }}.jar
           body: |
             New version is available: ${{ env.project_version }}
-# TODO
-#            ### Things that changed in this release
-#            ${{ steps.changelog.outputs.changelog }}
+
+            ### Things that changed in this release
+            ${{ env.project_changelog }}
           draft: false
           prerelease: false
           tag_name: ${{ env.project_version }}
