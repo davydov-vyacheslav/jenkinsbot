@@ -1,12 +1,5 @@
 # What's new / Changelog
 
-## 0.0.8
-  - GitHub CI/CD improvements
-    - `TBD <TODO>`
-  - fixed issue when there were build infos with intersect names (e.g. repo0 and my-repo01)
-  - added configuration for jenkins console output processing
-  - i18n /start command menus
-  - cleanup README.md, extracted developers info to separate file
 ## 0.0.7
   - BuildInfoModelChange to contain full jobUrl: https://github.com/davydov-vyacheslav/jenkinsbot/issues/3
   - GitHub CI/CD improvements
@@ -18,7 +11,7 @@
   - added l10n support, based on UserInfoDto.locale value
   - During filling field value, there is now welcome message of what is requested (including sample if any)
   - added dockerization
-## 0.0.8-SNAPSHOT
+## 0.0.5
   - Cli processor: get rid of external utilities (usage: curl)
   - added build completion status info
   - fixed Link representation issue for short-typed domain names by adding `.perceptive.cloud` during migration
