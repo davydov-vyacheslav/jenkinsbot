@@ -32,7 +32,7 @@ jobs:
         run: |
           clog=$(sed -n '/## ${{ env.project_version }}/,/##/{s/^##.*//;p;}' CHANGELOG.md)
           echo "$clog"
-          echo "project_changelog=$clog" >> $GITHUB_ENV
+          echo "project_changelog=\"$clog\"" >> $GITHUB_ENV
       - name: Verify changelog - snapshot
         run: |
           echo "### Things that changed in this release"
