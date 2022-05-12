@@ -16,13 +16,12 @@ class StartCommand implements TelegramCommand {
 
 	@Override
 	public void process(Chat chat, User from, String message) {
-		// TODO: commands as i18n
 		bot.execute(new SetMyCommands(
-				new BotCommand("/help", "Show help message"),
-				new BotCommand("/cancel", "Cancel any in-progress action (e.g. creation)"),
-				new BotCommand("/start", "You already did that ;)"),
-				new BotCommand("/healthcheck", "HealthCheck for external services"),
-				new BotCommand("/build", "Build processing"))
+				new BotCommand("/help", bot.getI18nMessage(from, "text.command.help")),
+				new BotCommand("/cancel", bot.getI18nMessage(from, "text.command.cancel")),
+				new BotCommand("/start", bot.getI18nMessage(from, "text.command.start")),
+				new BotCommand("/healthcheck", bot.getI18nMessage(from, "text.command.healthcheck")),
+				new BotCommand("/build", bot.getI18nMessage(from, "text.command.build")))
 		);
 	}
 

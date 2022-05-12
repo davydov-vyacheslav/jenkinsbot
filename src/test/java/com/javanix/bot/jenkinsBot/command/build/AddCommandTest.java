@@ -4,6 +4,7 @@ import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
 import com.javanix.bot.jenkinsBot.command.CommandTestConfiguration;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
+import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
@@ -72,6 +73,9 @@ public class AddCommandTest extends AbstractCommandTestCase {
 								.jobUrl(ENTITY_URL)
 								.user("admin")
 								.password("")
+								.consoleOutputInfo(ConsoleOutputInfoDto.emptyEntityBuilder()
+										.name("default")
+										.build())
 								.build())
 				.build());
 	}
@@ -191,7 +195,8 @@ public class AddCommandTest extends AbstractCommandTestCase {
 				"- label.field.build.repo.public: false\n" +
 				"- label.field.build.jenkins.jobUrl: %s\n" +
 				"- label.field.build.jenkins.user: %s\n" +
-				"- label.field.build.jenkins.password: \uD83D\uDEAB", jobUrl, user);
+				"- label.field.build.jenkins.password: \uD83D\uDEAB\n" +
+				"- label.field.build.jenkins.console.type: default", jobUrl, user);
 	}
 
 	private List<InlineKeyboardButton> getExpectedInlineButtons() {
@@ -201,6 +206,7 @@ public class AddCommandTest extends AbstractCommandTestCase {
 				new InlineKeyboardButton("Set `label.field.build.jenkins.user`").callbackData("/build ADD jenkins.user"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.password`").callbackData("/build ADD jenkins.password"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.jobUrl`").callbackData("/build ADD jenkins.jobUrl"),
+				new InlineKeyboardButton("Set `label.field.build.jenkins.console.type`").callbackData("/build ADD jenkins.console.type"),
 				new InlineKeyboardButton("button.common.complete").callbackData("/build ADD /done"),
 				new InlineKeyboardButton("button.common.cancel").callbackData("/cancel")
 		);

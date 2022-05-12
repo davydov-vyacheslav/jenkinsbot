@@ -1,7 +1,9 @@
 package com.javanix.bot.jenkinsBot.database;
 
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
+import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
+import com.javanix.bot.jenkinsBot.core.service.ConsoleOutputConfigService;
 import com.javanix.bot.jenkinsBot.core.service.EntityService;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodStarter;
@@ -68,24 +70,27 @@ public class DatabaseBuildInfoTest extends AbstractDatabaseEntityTest<BuildInfoD
 		});
 	}
 
-	private static void dataSetup(BuildInfoService databaseService) {
-		databaseService.save(BuildInfoDto.builder()
+	private static void dataSetup(BuildInfoService databaseService, ConsoleOutputConfigService consoleOutputConfigService) {
+		consoleOutputConfigService.save(ConsoleOutputInfoDto.builder()
+				.name(ConsoleOutputInfoDto.DEFAULT_RESOLVER_NAME).build());
+		databaseService.save(BuildInfoDto.emptyEntityBuilder()
 				.repoName("owned-public").isPublic(true).creatorId(CURRENT_USER_ID).build());
-		databaseService.save(BuildInfoDto.builder()
+		databaseService.save(BuildInfoDto.emptyEntityBuilder()
 				.repoName("foreign-public").isPublic(true).creatorId(SOMEONE_USER_ID).build());
-		databaseService.save(BuildInfoDto.builder()
+		databaseService.save(BuildInfoDto.emptyEntityBuilder()
 				.repoName("owned-private").isPublic(false).creatorId(CURRENT_USER_ID).build());
-		databaseService.save(BuildInfoDto.builder()
+		databaseService.save(BuildInfoDto.emptyEntityBuilder()
 				.repoName("foreign-private").isPublic(false).creatorId(SOMEONE_USER_ID).build());
 	}
 
 	@BeforeAll
 	public static void init(@Autowired ImmutableMongodConfig mongodConfig,
-							@Autowired BuildInfoService databaseService) throws IOException {
+							@Autowired BuildInfoService databaseService,
+							@Autowired ConsoleOutputConfigService consoleOutputConfigService) throws IOException {
 		MongodStarter starter = MongodStarter.getDefaultInstance();
 		mongodExecutable = starter.prepare(mongodConfig);
 		mongodExecutable.start();
-		dataSetup(databaseService);
+		dataSetup(databaseService, consoleOutputConfigService);
 	}
 
 	@AfterAll

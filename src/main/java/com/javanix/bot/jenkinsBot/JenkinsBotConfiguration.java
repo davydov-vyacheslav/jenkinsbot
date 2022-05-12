@@ -17,7 +17,7 @@ public class JenkinsBotConfiguration {
 
 	@Bean
 	public CacheManager cacheManager() {
-		return new ConcurrentMapCacheManager("userLocale");
+		return new ConcurrentMapCacheManager("userLocale", "patterns");
 	}
 
 	@Bean

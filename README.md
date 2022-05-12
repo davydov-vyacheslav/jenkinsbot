@@ -15,6 +15,8 @@
 
 System is relying on Java/jUnit projects
 
+NOTE: Development info / Info for developers and project prerequisites located [here](./Developers.info.md).
+
 ## Why do we need this bot
 - Sometimes target system may locate within private network it isn't so easy to get access to (e.g., VM in AWS). Especially,
 if there are no direct way to access it (you need to log in to AWS, then go to your remote workstation, then remotely from 
@@ -29,12 +31,6 @@ what tests failed. This bot provides a list with failed tests and a link to part
 
 Allows you to monitor specific Jenkins Build for failed unit tests. 
 
-<p style="color: red; font-weight: bold">
- BEWARE: Current version supports only ANT jUnit Test results
-
-<p style="color: red; font-weight: bold">
- ASSUME that Test result output directory is : %project%/output/reports/TEST-%s.xml
-
 Flows:
 * `/build`: List of owned and public repositories with ability to get their status
 * `/build my_list`: List of owned repositories with ability to create/edit/delete ones
@@ -48,10 +44,12 @@ Logic:
 - Job Status logic is based on Jenkins final message: Finished: FAILURE, Finished: UNSTABLE, Finished: ABORTED, Finished: SUCCESS.
 If no such final message - assume that progress is still in progress
 - Approximate amount of tests is based on amount of tests (test files) processed in previous build
-- Failed test: 
-  - ant style: if there are a line which contains `<some>Test FAILED` 
-- Failed test location:
-  - ant style: assume that it is located as `%project%/output/reports/TEST-%s.xml`
+- Processed (Executed) test: Looking for the line matched regex, defined in `ConsoleOutputConfig.executedTestPattern` of current name (default - 'default') 
+- Failed test: Looking for the line matched regex, defined in `ConsoleOutputConfig.failedTestPattern` of current name (default - 'default')
+- Failed test location: Is aggregation to follow this pattern: `%jobUrl%/%unitTestsResultFilepathPrefix%%TestName%.xml`, where 
+  - JobUrl - link to jenkins Job, 
+  - unitTestsResultFilepathPrefix - prefix for tests like `build/test-results/test/TEST-`
+  - TestName - full qualified test name like `com.package.DatabaseTest`
 
 ![Build Status](./doc/assets/build_status.png)
 ![Build Add](./doc/assets/build_add.png)
@@ -72,43 +70,3 @@ Logic bases on return code:
 * Server isn't alive - DOWN (🔴)
 
 ![HealthCheck](./doc/assets/healthcheck.png)
-
-## Developer Info
-
-* Regular build: `./gradlew bootJar`
-* Release build (with push to docker.io): `./gradlew release`
-* Run local bootJar build
-  * `java -jar .\jenkinsBot-$version.jar --bot.token=<bot token> --spring.data.mongodb.uri=mongodb://admin:password@localhost:9999/jenkinsbot?authSource=admin`
-* Run build (from docker): 
-  * `docker pull davs87/jenkinsbot:<version>`
-  * `docker run -d \
-    -e BOT_TOKEN=<bottoken> \
-    -e SPRING_DATA_MONGODB_URI=mongodb://admin:password@localhost:9999/jenkinsbot?authSource=admin \
-    --name=jenkinsBot-<version> \
-    --restart unless-stopped \
-    jenkinsbot:<version>`
-* Restart Docker
-  * TBD
-* WatchTower configuration
-  * TBD
-  * FIXME: what to do with non-latest versions like 0.0.5, 0.0.6
-
-## TODO: unclassified
-
-- Event sourcing
-- Database
-  - (daily) mongo database backups
-  - database fallback to local datasource if mongo is unavailable / choose database type in config
-- webhooks
-- source code documentation
-- test containers
-- Common Project files: CONTRIBUTING.md, SUPPORT.md, ACKNOWLEDGMENTS, CONTRIBUTORS
-- Unit Tests: 
-  - cover with unit tests constructable messages that are greyed
-    - label.field.*.*
-    - label.welcome.field.*.*
-  - DirtiesContext for CommandTests
-  - Optimize database-related unit tests by having single configuration they are running within
-- there are should be: stage env, prod env, dev (xxx) env
-- ?? add docker-compose.yml file?
-- ?? migrate docker registry to GH ?

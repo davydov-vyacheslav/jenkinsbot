@@ -1,4 +1,4 @@
-package com.javanix.bot.jenkinsBot.cli;
+package com.javanix.bot.jenkinsBot.cli.jenkins;
 
 import java.util.Arrays;
 

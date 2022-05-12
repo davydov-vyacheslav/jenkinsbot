@@ -4,6 +4,7 @@ import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
 import com.javanix.bot.jenkinsBot.command.CommandTestConfiguration;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
+import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
@@ -44,6 +45,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 						.jobUrl(ENTITY_URL)
 						.user("")
 						.password("")
+						.consoleOutputInfo(ConsoleOutputInfoDto.emptyEntityBuilder().build())
 						.build())
 				.build();
 		Mockito.when(buildInfoService.getOwnedEntityByName(ENTITY_NAME, BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
@@ -71,6 +73,9 @@ public class EditCommandTest extends AbstractCommandTestCase {
 						.jobUrl(ENTITY_URL_2)
 						.user("")
 						.password("")
+						.consoleOutputInfo(ConsoleOutputInfoDto.emptyEntityBuilder()
+								.name("default")
+								.build())
 						.build())
 				.build());
 	}
@@ -87,6 +92,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 						.jobUrl(ENTITY_URL)
 						.user("")
 						.password("")
+						.consoleOutputInfo(ConsoleOutputInfoDto.emptyEntityBuilder().build())
 						.build())
 				.build();
 		Mockito.when(buildInfoService.getOwnedEntityByName(ENTITY_NAME, BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
@@ -130,6 +136,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 						.jobUrl(ENTITY_URL)
 						.user("")
 						.password("")
+						.consoleOutputInfo(ConsoleOutputInfoDto.emptyEntityBuilder().build())
 						.build())
 				.build();
 		Mockito.when(buildInfoService.getOwnedEntityByName(ENTITY_NAME, BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
@@ -189,7 +196,8 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				"- label.field.build.repo.public: false\n" +
 				"- label.field.build.jenkins.jobUrl: %s\n" +
 				"- label.field.build.jenkins.user: \uD83D\uDEAB\n" +
-				"- label.field.build.jenkins.password: \uD83D\uDEAB", domain);
+				"- label.field.build.jenkins.password: \uD83D\uDEAB\n" +
+				"- label.field.build.jenkins.console.type: default", domain);
 	}
 
 	private List<InlineKeyboardButton> getExpectedInlineButtons() {
@@ -198,6 +206,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 				new InlineKeyboardButton("Set `label.field.build.jenkins.user`").callbackData("/build EDIT jenkins.user"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.password`").callbackData("/build EDIT jenkins.password"),
 				new InlineKeyboardButton("Set `label.field.build.jenkins.jobUrl`").callbackData("/build EDIT jenkins.jobUrl"),
+				new InlineKeyboardButton("Set `label.field.build.jenkins.console.type`").callbackData("/build EDIT jenkins.console.type"),
 				new InlineKeyboardButton("button.common.complete").callbackData("/build EDIT /done"),
 				new InlineKeyboardButton("button.common.cancel").callbackData("/cancel")
 		);

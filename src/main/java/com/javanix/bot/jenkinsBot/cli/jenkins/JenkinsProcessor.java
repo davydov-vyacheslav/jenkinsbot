@@ -1,15 +1,16 @@
-package com.javanix.bot.jenkinsBot.cli;
+package com.javanix.bot.jenkinsBot.cli.jenkins;
 
+import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -17,27 +18,32 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Base64;
+import java.util.LinkedHashSet;
 import java.util.stream.Stream;
 
 @Component
 @Data
 @RequiredArgsConstructor
 @Log4j2
-public class CliProcessor {
+public class JenkinsProcessor {
 
-	public JenkinsBuildDetails getCurrentBuildJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo, int count) {
-		return getJenkinsBuildDetails(jenkinsInfo, "lastBuild", count);
+	private final ConsoleOutputResolver consoleOutputResolver;
+
+	public JenkinsBuildDetails getCurrentBuildJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo) {
+		return getJenkinsBuildDetails(jenkinsInfo, "lastBuild");
 	}
 
 	public JenkinsBuildDetails getPreviousBuildJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo) {
-		return getJenkinsBuildDetails(jenkinsInfo, "lastCompletedBuild", 0);
+		return getJenkinsBuildDetails(jenkinsInfo, "lastCompletedBuild");
 	}
 
-	// TODO: cache buildinfo results <info, File>
+	public String getTestDetailsUrl(JenkinsInfoDto jenkinsInfo, String testName) {
+		return String.format("%s/ws/%s%s.xml/*view*/", jenkinsInfo.getJobUrl(), jenkinsInfo.getConsoleOutputInfo().getUnitTestsResultFilepathPrefix(), testName);
+	}
+
 	@SneakyThrows
-	private JenkinsBuildDetails getJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo, String buildType, int count) {
+	private JenkinsBuildDetails getJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo, String buildType) {
 		File tempFile = File.createTempFile("jenkinsbot-", ".log");
 		tempFile.deleteOnExit();
 
@@ -46,9 +52,11 @@ public class CliProcessor {
 		log.info(String.format("Saving `%s` data to file: `%s`", url, tempFile.getAbsoluteFile()));
 
 		HttpURLConnection httpcon = (HttpURLConnection) new URL(url).openConnection();
-		String userCredentials = jenkinsInfo.getUser() + ":" + jenkinsInfo.getPassword();
-		String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
-		httpcon.setRequestProperty ("Authorization", basicAuth);
+		if (Strings.isNotBlank(jenkinsInfo.getUser())) {
+			String userCredentials = jenkinsInfo.getUser() + ":" + jenkinsInfo.getPassword();
+			String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
+			httpcon.setRequestProperty("Authorization", basicAuth);
+		}
 
 		try (InputStream in = httpcon.getInputStream();
 			 ReadableByteChannel readableByteChannel = Channels.newChannel(in);
@@ -57,19 +65,20 @@ public class CliProcessor {
 		}
 
 		JenkinsBuildDetails details = JenkinsBuildDetails.builder()
-				.failedTestsCapacity(count)
-				.failedTestsCount(0L)
 				.runTestsCount(0L)
 				.buildStatus(BuildStatus.IN_PROGRESS)
-				.topFailedTests(new ArrayList<>())
+				.failedTests(new LinkedHashSet<>())
 				.build();
 
-		// FIXME: encoding wtf'ka
-		try(Stream<String> lines = Files.lines(tempFile.toPath(), Charset.forName("windows-1252"))) {
+		ConsoleOutputInfoDto consoleOutputInfo = jenkinsInfo.getConsoleOutputInfo();
+
+		try(Stream<String> lines = Files.lines(tempFile.toPath(), Charset.forName(consoleOutputInfo.getFileEncoding()))) {
 			lines.forEach(s -> {
-				if (s.contains("Test FAILED")) {
-					details.addFailedTest(s);
-				} else if (s.contains("Tests run")) {
+				if (consoleOutputResolver.isFailedTest(consoleOutputInfo, s)) {
+					String failedTestName = consoleOutputResolver.convertFailedTestsOutputToFullClassName(consoleOutputInfo, s);
+					details.addFailedTest(failedTestName);
+				}
+				if (consoleOutputResolver.isExecutedTest(consoleOutputInfo, s)) {
 					details.incrementRunTestCount();
 				}
 				details.setBuildStatus(BuildStatus.of(s)); // TODO: use lastLine
@@ -77,20 +86,6 @@ public class CliProcessor {
 		}
 
 		return details;
-	}
-
-	@SneakyThrows
-	public HealthStatus getHealthStatusForUrl(String urlValue) {
-		URL url = new URL(urlValue);
-		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-		connection.setRequestMethod("GET"); // FIXME: HEAD ?
-		connection.setConnectTimeout(5000);
-		try {
-			connection.connect();
-		} catch (IOException ioe) {
-			return HealthStatus.DOWN;
-		}
-		return HealthStatus.of(connection.getResponseCode());
 	}
 
 }

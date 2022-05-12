@@ -9,4 +9,13 @@ public class JenkinsInfoDto {
 	private String jobUrl;
 	private String user;
 	private String password;
+	private ConsoleOutputInfoDto consoleOutputInfo;
+
+	public static JenkinsInfoDto.JenkinsInfoDtoBuilder emptyEntityBuilder() {
+		return JenkinsInfoDto.builder()
+				.user("")
+				.password("")
+				.jobUrl("")
+				.consoleOutputInfo(ConsoleOutputInfoDto.emptyEntityBuilder().build());
+	}
 }

@@ -1,11 +1,10 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.cli.CliProcessor;
-import com.javanix.bot.jenkinsBot.cli.JenkinsBuildDetails;
+import com.javanix.bot.jenkinsBot.cli.jenkins.JenkinsBuildDetails;
+import com.javanix.bot.jenkinsBot.cli.jenkins.JenkinsProcessor;
 import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
-import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
@@ -14,9 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -24,12 +21,11 @@ import java.util.regex.Pattern;
 class StatusBuildCommand implements BuildSubCommand {
 
     private final DefaultBuildCommand defaultBuildCommand;
-    private final CliProcessor cliProcessor;
+    private final JenkinsProcessor jenkinsProcessor;
     private final BuildInfoService database;
     private final TelegramBotWrapper bot;
 
     private static final int FAILED_TESTS_COUNT = 20;
-    private static final Pattern FAILED_TESTS_PATTERN = Pattern.compile(".*\\[junit] TEST (.*)\\.(.*Test) FAILED");
 
     @Override
     public void process(Chat chat, User from, String buildCommandArguments) {
@@ -41,14 +37,18 @@ class StatusBuildCommand implements BuildSubCommand {
         }
 
         log.info(from.username() + " is getting status build for team: " + repository.getRepoName());
-        JenkinsInfoDto jenkinsInfo = repository.getJenkinsInfo();
 
-        JenkinsBuildDetails currentBuildDetails = cliProcessor.getCurrentBuildJenkinsBuildDetails(repository.getJenkinsInfo(), FAILED_TESTS_COUNT);
-        JenkinsBuildDetails lastBuildDetails = cliProcessor.getPreviousBuildJenkinsBuildDetails(repository.getJenkinsInfo());
+        JenkinsBuildDetails currentBuildDetails = jenkinsProcessor.getCurrentBuildJenkinsBuildDetails(repository.getJenkinsInfo());
+        JenkinsBuildDetails lastBuildDetails = jenkinsProcessor.getPreviousBuildJenkinsBuildDetails(repository.getJenkinsInfo());
 
-        String failedTestsOutputWithLinks = convertFailedTestsOutputToLinks(currentBuildDetails.getTopFailedTests(), jenkinsInfo);
-        if (failedTestsOutputWithLinks.trim().isEmpty()) {
-            failedTestsOutputWithLinks = "N/A";
+        String failedTestsOutputWithLinks = "N/A";
+        if (!currentBuildDetails.getFailedTests().isEmpty()) {
+            failedTestsOutputWithLinks = currentBuildDetails.getFailedTests().stream()
+                    .limit(FAILED_TESTS_COUNT)
+                    .map(testName -> String.format("- [%s](%s)\n",
+                            testName.substring(testName.lastIndexOf(".") + 1),
+                            jenkinsProcessor.getTestDetailsUrl(repository.getJenkinsInfo(), testName)))
+                    .collect(Collectors.joining());
         }
 
         bot.sendI18nMessage(from, chat, TelegramBotWrapper.MessageInfo.builder()
@@ -58,28 +58,12 @@ class StatusBuildCommand implements BuildSubCommand {
                                 bot.getI18nMessage(from, currentBuildDetails.getBuildStatus().getMessageKey()),
                                 currentBuildDetails.getRunTestsCount(),
                                 lastBuildDetails.getRunTestsCount(),
-                                currentBuildDetails.getFailedTestsCapacity(),
-                                currentBuildDetails.getFailedTestsCount(),
+                                FAILED_TESTS_COUNT,
+                                currentBuildDetails.getFailedTests().size(),
                                 failedTestsOutputWithLinks})
                         .parseMode(ParseMode.Markdown)
                 .build());
         defaultBuildCommand.process(chat, from, "");
-    }
-
-    // convert
-    // [junit] TEST com.liquent.insight.manager.assembly.test.AssemblyExportTest FAILED
-    // to
-    // - [%s](http://domain:7331/job/job-name/ws/output/reports/TEST-testFullName.xml/*view*/)
-    private String convertFailedTestsOutputToLinks(List<String> origin, JenkinsInfoDto jenkinsInfo) {
-        String result = String.join("\n", origin);
-        Matcher m = FAILED_TESTS_PATTERN.matcher(result);
-        if (m.find()) {
-            result = m.replaceAll(
-                    String.format("- [%s](%s/ws/output/reports/TEST-%s.xml/*view*/)", "$2", jenkinsInfo.getJobUrl(), "$1.$2")
-            );
-        }
-
-        return result;
     }
 
     @Override

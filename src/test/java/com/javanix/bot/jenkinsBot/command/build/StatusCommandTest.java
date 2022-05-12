@@ -1,13 +1,14 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.cli.BuildStatus;
-import com.javanix.bot.jenkinsBot.cli.CliProcessor;
-import com.javanix.bot.jenkinsBot.cli.JenkinsBuildDetails;
+import com.javanix.bot.jenkinsBot.cli.jenkins.BuildStatus;
+import com.javanix.bot.jenkinsBot.cli.jenkins.JenkinsBuildDetails;
+import com.javanix.bot.jenkinsBot.cli.jenkins.JenkinsProcessor;
 import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
 import com.javanix.bot.jenkinsBot.command.CommandTestConfiguration;
 import com.javanix.bot.jenkinsBot.command.TelegramCommand;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
+import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
@@ -21,6 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import static com.javanix.bot.jenkinsBot.command.common.EntitySubCommand.ICON_PRIVATE;
@@ -36,7 +38,7 @@ import static org.mockito.Mockito.times;
 public class StatusCommandTest extends AbstractCommandTestCase {
 
 	@MockBean
-	private CliProcessor cliProcessor;
+	private JenkinsProcessor jenkinsProcessor;
 
 	@Test
 	public void status_noParams() {
@@ -115,6 +117,9 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 	public void status_ok() {
 		JenkinsInfoDto jenkinsInfo = JenkinsInfoDto.builder()
 				.jobUrl("https://domain:7331/job/project")
+				.consoleOutputInfo(ConsoleOutputInfoDto.builder()
+						.unitTestsResultFilepathPrefix("output/reports/TEST-")
+						.build())
 				.build();
 		BuildInfoDto team = BuildInfoDto.builder()
 				.repoName("xmen")
@@ -124,21 +129,20 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 				.build();
 		Mockito.when(buildInfoService.getAvailableRepository("xmen", BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(team);
 
-		Mockito.when(cliProcessor.getPreviousBuildJenkinsBuildDetails(jenkinsInfo)).thenReturn(
+		Mockito.when(jenkinsProcessor.getPreviousBuildJenkinsBuildDetails(jenkinsInfo)).thenReturn(
 				JenkinsBuildDetails.builder()
 						.runTestsCount(1000L)
 						.build());
-		Mockito.when(cliProcessor.getCurrentBuildJenkinsBuildDetails(jenkinsInfo, 20)).thenReturn(
+		Mockito.when(jenkinsProcessor.getCurrentBuildJenkinsBuildDetails(jenkinsInfo)).thenReturn(
 				JenkinsBuildDetails.builder()
 						.runTestsCount(500L)
-						.failedTestsCount(2L)
 						.buildStatus(BuildStatus.IN_PROGRESS)
-						.failedTestsCapacity(20)
-						.topFailedTests(Arrays.asList(
-								" [junit] TEST com.javanix.jenkinsbot.test.AssemblyExportTest FAILED",
-								" [junit] TEST com.javanix.jenkinsbot.test2.AnotherFailedTest FAILED"
-						))
+						.failedTests(new LinkedHashSet<String>() {{
+								add("com.javanix.jenkinsbot.test.AssemblyExportTest");
+								add("com.javanix.jenkinsbot.test2.AnotherFailedTest");
+						}})
 						.build());
+		Mockito.when(jenkinsProcessor.getTestDetailsUrl(any(JenkinsInfoDto.class), any(String.class))).thenCallRealMethod();
 
 		String commandText = "/build status xmen";
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
@@ -146,9 +150,9 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("message.command.build.status.repo", message.getMessageKey());
-			assertArrayEquals(new Object[] { "xmen", BuildStatus.IN_PROGRESS, BuildStatus.IN_PROGRESS.getMessageKey(), 500L, 1000L, 20, 2L,
+			assertArrayEquals(new Object[] { "xmen", BuildStatus.IN_PROGRESS, BuildStatus.IN_PROGRESS.getMessageKey(), 500L, 1000L, 20, 2,
 					"- [AssemblyExportTest](https://domain:7331/job/project/ws/output/reports/TEST-com.javanix.jenkinsbot.test.AssemblyExportTest.xml/*view*/)\n" +
-							"- [AnotherFailedTest](https://domain:7331/job/project/ws/output/reports/TEST-com.javanix.jenkinsbot.test2.AnotherFailedTest.xml/*view*/)" },
+							"- [AnotherFailedTest](https://domain:7331/job/project/ws/output/reports/TEST-com.javanix.jenkinsbot.test2.AnotherFailedTest.xml/*view*/)\n" },
 					message.getMessageArgs());
 			List<InlineKeyboardButton> expectedInlineButtons = Collections.emptyList();
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);

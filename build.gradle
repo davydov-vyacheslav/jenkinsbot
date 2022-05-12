@@ -28,8 +28,10 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
+    afterTest { desc, result ->
+        logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+    }
 }
-
 
 task copyReadMe(type: Copy, description: "Copy Project Info file to resources") {
     from project.projectDir

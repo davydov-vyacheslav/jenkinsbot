@@ -1,7 +1,7 @@
 package com.javanix.bot.jenkinsBot.command.healthcheck;
 
-import com.javanix.bot.jenkinsBot.cli.CliProcessor;
-import com.javanix.bot.jenkinsBot.cli.HealthStatus;
+import com.javanix.bot.jenkinsBot.cli.healthstatus.HealthCheckProcessor;
+import com.javanix.bot.jenkinsBot.cli.healthstatus.HealthStatus;
 import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
 import com.javanix.bot.jenkinsBot.command.CommandTestConfiguration;
 import com.javanix.bot.jenkinsBot.command.TelegramCommand;
@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 public class StatusCommandTest extends AbstractCommandTestCase {
 
 	@MockBean
-	private CliProcessor cliProcessor;
+	private HealthCheckProcessor healthCheckProcessor;
 
 	@Test
 	public void status_ok() {
@@ -45,8 +45,8 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 
 		Mockito.when(healthCheckService.getAvailableEndpoints(EntityService.DEFAULT_CREATOR_ID))
 				.thenReturn(Arrays.asList(endpoint1, endpoint2));
-		Mockito.when(cliProcessor.getHealthStatusForUrl(endpoint1.getEndpointUrl())).thenReturn(HealthStatus.SUCCESS);
-		Mockito.when(cliProcessor.getHealthStatusForUrl(endpoint2.getEndpointUrl())).thenReturn(HealthStatus.UNSTABLE);
+		Mockito.when(healthCheckProcessor.getHealthStatusForUrl(endpoint1.getEndpointUrl())).thenReturn(HealthStatus.SUCCESS);
+		Mockito.when(healthCheckProcessor.getHealthStatusForUrl(endpoint2.getEndpointUrl())).thenReturn(HealthStatus.UNSTABLE);
 
 		String commandText = "/healthcheck status";
 		User from = new User(HealthCheckService.DEFAULT_CREATOR_ID);

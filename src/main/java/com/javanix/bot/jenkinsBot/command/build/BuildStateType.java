@@ -23,6 +23,10 @@ enum BuildStateType implements EntityState<BuildInfoDto> {
 			"jenkins.user",
 			repo -> repo.getJenkinsInfo().getUser(),
 			(repo, value) -> repo.getJenkinsInfo().setUser(value)),
+	CONSOLE_OUTPUT_TYPE(
+			"jenkins.console.type",
+			repo -> repo.getJenkinsInfo().getConsoleOutputInfo().getName(),
+			(repo, value) -> repo.getJenkinsInfo().getConsoleOutputInfo().setName(value)),
 	REPO_NAME(
 			"repo.name",
 			BuildInfoDto::getRepoName,

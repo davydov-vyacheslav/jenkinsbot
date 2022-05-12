@@ -15,11 +15,7 @@ public class BuildInfoDto implements Entity {
 	public static BuildInfoDto.BuildInfoDtoBuilder emptyEntityBuilder() {
 		return BuildInfoDto.builder()
 				.repoName("")
-				.jenkinsInfo(JenkinsInfoDto.builder()
-						.jobUrl("")
-						.password("")
-						.user("")
-						.build())
+				.jenkinsInfo(JenkinsInfoDto.emptyEntityBuilder().build())
 				.isPublic(false);
 	}
 

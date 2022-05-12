@@ -1,4 +1,4 @@
-package com.javanix.bot.jenkinsBot.cli;
+package com.javanix.bot.jenkinsBot.cli.healthstatus;
 
 public enum HealthStatus {
 	SUCCESS("label.command.healthcheck.status.type.success"),

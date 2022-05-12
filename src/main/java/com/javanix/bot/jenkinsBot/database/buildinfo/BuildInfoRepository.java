@@ -15,7 +15,7 @@ interface BuildInfoRepository extends MongoRepository<BuildInfoEntity, String> {
 
 	Optional<BuildInfoEntity> getByRepoNameIgnoreCaseAndCreatorId(String name, Long ownerId);
 
-	@Query("{'repoName': {'$regex' : :#{#repoName}, '$options' : 'i'}, '$or':[ {'isPublic' : true}, {'creatorId' : :#{#ownerId}} ] }")
+	@Query("{'repoName': {'$regex' : '^:#{#repoName}$', '$options' : 'i'}, '$or':[ {'isPublic' : true}, {'creatorId' : :#{#ownerId}} ] }")
 	Optional<BuildInfoEntity> getByRepoNameIgnoreCaseAndIsPublicTrueOrCreatorId(@Param("repoName") String repoName, @Param("ownerId") Long ownerId);
 
 	Optional<BuildInfoEntity> getByRepoNameIgnoreCase(String repoName);

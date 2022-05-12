@@ -1,11 +1,14 @@
 package com.javanix.bot.jenkinsBot.database.buildinfo;
 
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
+import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
+import com.javanix.bot.jenkinsBot.core.service.ConsoleOutputConfigService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -14,6 +17,7 @@ import java.util.stream.Collectors;
 class BuildInfoServiceImpl implements BuildInfoService {
 
 	private final BuildInfoRepository repository;
+	private final ConsoleOutputConfigService consoleOutputConfigService;
 
 	@Override
 	public List<BuildInfoDto> getAvailableRepositories(Long ownerId) {
@@ -38,7 +42,25 @@ class BuildInfoServiceImpl implements BuildInfoService {
 	public void save(BuildInfoDto repo) {
 		Optional<BuildInfoEntity> repoInDb = repository.getByRepoNameIgnoreCase(repo.getRepoName());
 		BuildInfoEntity repoEntity = convertDtoToEntity(repo);
-		repoInDb.ifPresent(buildInfoEntity -> repoEntity.setId(buildInfoEntity.getId()));
+
+		ConsoleOutputInfoDto repoConsoleInfo = repoEntity.getJenkinsInfo().getConsoleOutputInfo();
+
+		if (repoInDb.isPresent()) {
+			BuildInfoEntity buildInfoEntity = repoInDb.get();
+			repoEntity.setId(buildInfoEntity.getId());
+			ConsoleOutputInfoDto consoleOutputInfo = buildInfoEntity.getJenkinsInfo().getConsoleOutputInfo();
+			if (consoleOutputInfo != null && !Objects.equals(consoleOutputInfo.getName(),
+					repoConsoleInfo.getName())) {
+				repoEntity.getJenkinsInfo().setConsoleOutputInfo(
+						consoleOutputConfigService.findByName(repoConsoleInfo.getName())
+				);
+			}
+		} else {
+			repoEntity.getJenkinsInfo().setConsoleOutputInfo(
+					consoleOutputConfigService.findByName(repoConsoleInfo == null ? "" : repoConsoleInfo.getName())
+			);
+		}
+
 		repository.save(repoEntity);
 	}
 
@@ -63,13 +85,17 @@ class BuildInfoServiceImpl implements BuildInfoService {
 	}
 
 	private BuildInfoDto convertEntityToDto(BuildInfoEntity buildInfoEntity) {
-		return BuildInfoDto.builder()
+		BuildInfoDto buildInfo = BuildInfoDto.builder()
 				.repoName(buildInfoEntity.getRepoName())
 				.creatorFullName(buildInfoEntity.getCreatorFullName())
 				.jenkinsInfo(buildInfoEntity.getJenkinsInfo())
 				.creatorId(buildInfoEntity.getCreatorId())
 				.isPublic(buildInfoEntity.getIsPublic())
 				.build();
+		if (buildInfo.getJenkinsInfo().getConsoleOutputInfo() == null) {
+			buildInfo.getJenkinsInfo().setConsoleOutputInfo(consoleOutputConfigService.findByName(ConsoleOutputInfoDto.DEFAULT_RESOLVER_NAME));
+		}
+		return buildInfo;
 	}
 
 	private BuildInfoEntity convertDtoToEntity(BuildInfoDto buildInfoEntity) {

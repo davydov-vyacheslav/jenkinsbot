@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import java.net.UnknownHostException;
 
 @TestConfiguration
-@ComponentScan(basePackages = {"com.javanix.bot.jenkinsBot.database"})
+@ComponentScan(basePackages = {"com.javanix.bot.jenkinsBot.database"}) // FIXME: lazyInit=true instead
 @EnableMongoRepositories(basePackages = "com.javanix.bot.jenkinsBot.database")
 public class DatabaseTestConfiguration {
 

@@ -40,12 +40,12 @@ class AddBuildCommand extends AbstractModifyEntityCommand<BuildInfoDto> implemen
 
 	@Override
 	protected List<BuildStateType> fieldsToModify() {
-		return Arrays.asList(BuildStateType.REPO_NAME, BuildStateType.PUBLIC, BuildStateType.JOB_URL, BuildStateType.USER, BuildStateType.PASSWORD);
+		return Arrays.asList(BuildStateType.REPO_NAME, BuildStateType.PUBLIC, BuildStateType.JOB_URL, BuildStateType.USER, BuildStateType.PASSWORD, BuildStateType.CONSOLE_OUTPUT_TYPE);
 	}
 
 	@Override
 	protected List<? extends EntityState<BuildInfoDto>> getFieldsToDisplay() {
-		return Arrays.asList(BuildStateType.REPO_NAME, BuildStateType.PUBLIC, BuildStateType.JOB_URL, BuildStateType.USER, BuildStateType.PASSWORD);
+		return Arrays.asList(BuildStateType.REPO_NAME, BuildStateType.PUBLIC, BuildStateType.JOB_URL, BuildStateType.USER, BuildStateType.PASSWORD, BuildStateType.CONSOLE_OUTPUT_TYPE);
 	}
 
 }

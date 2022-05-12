@@ -1,8 +1,8 @@
 package com.javanix.bot.jenkinsBot.command.healthcheck;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.cli.CliProcessor;
-import com.javanix.bot.jenkinsBot.cli.HealthStatus;
+import com.javanix.bot.jenkinsBot.cli.healthstatus.HealthCheckProcessor;
+import com.javanix.bot.jenkinsBot.cli.healthstatus.HealthStatus;
 import com.javanix.bot.jenkinsBot.command.common.EntityActionType;
 import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.HealthCheckService;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 class StatusHealthCheckCommand implements HealthCheckSubCommand {
 
-	private final CliProcessor cliProcessor;
+	private final HealthCheckProcessor healthCheckProcessor;
 	private final HealthCheckService database;
 	private final TelegramBotWrapper bot;
 
@@ -44,7 +44,7 @@ class StatusHealthCheckCommand implements HealthCheckSubCommand {
 		ExecutorService threadPool = Executors.newFixedThreadPool(4);
 		for (StatusCheckDto endpoint: endpoints) {
 			CompletableFuture.supplyAsync(() -> {
-				endpoint.setHealthStatus(cliProcessor.getHealthStatusForUrl(endpoint.getHealthCheckInfoDto().getEndpointUrl()));
+				endpoint.setHealthStatus(healthCheckProcessor.getHealthStatusForUrl(endpoint.getHealthCheckInfoDto().getEndpointUrl()));
 				return bot.execute(new EditMessageText(chat.id(), execute.message().messageId(), buildMessage(from, endpoints)));
 			}, threadPool);
 		}
