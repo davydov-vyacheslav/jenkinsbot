@@ -25,24 +25,6 @@ jobs:
         uses: gradle/gradle-build-action@v2.1.5
         with:
           arguments: bootJar
-      - name: Collect Project version
-        run: |
-          ./gradlew properties -q | grep "version:" | awk '{print $2}' | xargs -n1 -I{} echo "project_version="{}  >> $GITHUB_ENV
-      - name: Generate changelog - snapshot
-        run: |
-          clog=$(sed -n '/## ${{ env.project_version }}/,/##/{s/^##.*//;/^$/d;p;}' CHANGELOG.md)
-          echo "$clog"
-          echo "## New version is available: ${{ env.project_version }}" > CHANGELOG2.md
-          echo "### Things that changed in this release" >> CHANGELOG2.md
-          echo "$clog" >> CHANGELOG2.md
-      - name: Release (sbnapshot)
-        uses: softprops/action-gh-release@v1
-        with:
-          body_path: CHANGELOG2.md
-          draft: true
-          prerelease: false
-          tag_name: ${{ env.project_version }}
-          name: ${{ env.project_version }}
   coverage:
     needs: build
     name: Unit Testing
@@ -121,10 +103,11 @@ jobs:
       - name: Generate changelog
         if: "!contains(env.project_version, '-SNAPSHOT')"
         run: |
-          clog=$(sed "/^## $1$/,/^## ${{ env.project_version }}/!d;//d;/^$/d" CHANGELOG.md)
+          clog=$(sed -n '/## ${{ env.project_version }}/,/##/{s/^##.*//;/^$/d;p;}' CHANGELOG.md)
           echo "$clog"
-          echo "project_changelog=$clog" >> $GITHUB_ENV
-          # TODO: CHANGELOG2.md
+          echo "## New version is available: ${{ env.project_version }}" > CHANGELOG2.md
+          echo "### Things that changed in this release" >> CHANGELOG2.md
+          echo "$clog" >> CHANGELOG2.md
       - name: Release
         if: "!contains(env.project_version, '-SNAPSHOT')"
         uses: softprops/action-gh-release@v1
