@@ -35,9 +35,14 @@ jobs:
           echo "## New version is available: ${{ env.project_version }}" > CHANGELOG2.md
           echo "### Things that changed in this release" >> CHANGELOG2.md
           echo "$clog" >> CHANGELOG2.md
-      - name: Verify changelog - snapshot
-        run: |
-          cat CHANGELOG2.md
+      - name: Release (sbnapshot)
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: CHANGELOG2.md
+          draft: true
+          prerelease: false
+          tag_name: ${{ env.project_version }}
+          name: ${{ env.project_version }}
   coverage:
     needs: build
     name: Unit Testing
@@ -113,7 +118,6 @@ jobs:
           tags: davs87/jenkinsbot:latest,davs87/jenkinsbot:${{ env.project_version }}
           context: .
 
-# TODO: verify me first
       - name: Generate changelog
         if: "!contains(env.project_version, '-SNAPSHOT')"
         run: |
