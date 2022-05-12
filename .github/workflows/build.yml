@@ -32,11 +32,13 @@ jobs:
         run: |
           clog=$(sed -n '/## ${{ env.project_version }}/,/##/{s/^##.*//;p;}' CHANGELOG.md)
           echo "$clog"
-          echo "project_changelog=\"$clog\"" >> $GITHUB_ENV
+          echo "New version is available: ${{ env.project_version }}" > CHANGELOG2.md
+          echo "### Things that changed in this release" >> CHANGELOG2.md
+          echo "$clog" >> CHANGELOG2.md
       - name: Verify changelog - snapshot
         run: |
           echo "### Things that changed in this release"
-          echo "${{ env.project_changelog }}"
+          cat CHANGELOG2.md
   coverage:
     needs: build
     name: Unit Testing
@@ -119,16 +121,13 @@ jobs:
           clog=$(sed "/^## $1$/,/^## ${{ env.project_version }}/!d;//d;/^$/d" CHANGELOG.md)
           echo "$clog"
           echo "project_changelog=$clog" >> $GITHUB_ENV
+          # TODO: CHANGELOG2.md
       - name: Release
         if: "!contains(env.project_version, '-SNAPSHOT')"
         uses: softprops/action-gh-release@v1
         with:
           files: ./build/libs/jenkinsBot-${{ env.project_version }}.jar
-          body: |
-            New version is available: ${{ env.project_version }}
-
-            ### Things that changed in this release
-            ${{ env.project_changelog }}
+          body_path: CHANGELOG2.md
           draft: false
           prerelease: false
           tag_name: ${{ env.project_version }}
