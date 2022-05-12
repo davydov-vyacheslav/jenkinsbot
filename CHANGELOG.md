@@ -19,8 +19,6 @@
   - During filling field value, there is now welcome message of what is requested (including sample if any)
   - added dockerization
 ## 0.0.8-SNAPSHOT
-  - `FIXME`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  - - `FIXME`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!- `FIXME`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   - Cli processor: get rid of external utilities (usage: curl)
   - added build completion status info
   - fixed Link representation issue for short-typed domain names by adding `.perceptive.cloud` during migration
