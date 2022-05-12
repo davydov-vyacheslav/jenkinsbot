@@ -30,14 +30,13 @@ jobs:
           ./gradlew properties -q | grep "version:" | awk '{print $2}' | xargs -n1 -I{} echo "project_version="{}  >> $GITHUB_ENV
       - name: Generate changelog - snapshot
         run: |
-          clog=$(sed -n '/## ${{ env.project_version }}/,/##/{s/^##.*//;p;}' CHANGELOG.md)
+          clog=$(sed -n '/## ${{ env.project_version }}/,/##/{s/^##.*//;/^$/d;p;}' CHANGELOG.md)
           echo "$clog"
-          echo "New version is available: ${{ env.project_version }}" > CHANGELOG2.md
+          echo "## New version is available: ${{ env.project_version }}" > CHANGELOG2.md
           echo "### Things that changed in this release" >> CHANGELOG2.md
           echo "$clog" >> CHANGELOG2.md
       - name: Verify changelog - snapshot
         run: |
-          echo "### Things that changed in this release"
           cat CHANGELOG2.md
   coverage:
     needs: build
