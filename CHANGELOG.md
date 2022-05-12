@@ -38,7 +38,7 @@
   - Added `/start` command to show menu
   - `/help` command now shows content of README.md file
 ## 0.0.2
-    - Ability to add/delete repo (in-memory)
-    - Status output became more user-friendly
+  - Ability to add/delete repo (in-memory)
+  - Status output became more user-friendly
 ## 0.0.1
-    - PoC of idea
+  - PoC of idea
