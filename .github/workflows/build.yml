@@ -30,7 +30,7 @@ jobs:
           ./gradlew properties -q | grep "version:" | awk '{print $2}' | xargs -n1 -I{} echo "project_version="{}  >> $GITHUB_ENV
       - name: Generate changelog - snapshot
         run: |
-          clog=$(sed "/^## $1$/,/^## ${{ env.project_version }}/!d;//d;/^$/d" CHANGELOG.md)
+          clog=$(sed -n '/## ${{ env.project_version }}/,/##/{s/^##.*//;p;}' CHANGELOG.md)
           echo "$clog"
           echo "project_changelog=$clog" >> $GITHUB_ENV
       - name: Verify changelog - snapshot
