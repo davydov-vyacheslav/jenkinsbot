@@ -8,6 +8,7 @@ import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.HealthCheckService;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
+import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.EditMessageText;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
@@ -39,25 +40,29 @@ class StatusHealthCheckCommand implements HealthCheckSubCommand {
 				.map(status -> new StatusCheckDto(status, HealthStatus.NA))
 				.collect(Collectors.toList());
 
-		SendResponse execute = bot.execute(new SendMessage(chat.id(), buildMessage(from, endpoints)));
+		SendResponse execute = bot.execute(new SendMessage(chat.id(), buildMessage(from, endpoints)).parseMode(ParseMode.Markdown));
 
 		ExecutorService threadPool = Executors.newFixedThreadPool(4);
 		for (StatusCheckDto endpoint: endpoints) {
 			CompletableFuture.supplyAsync(() -> {
 				endpoint.setHealthStatus(healthCheckProcessor.getHealthStatusForUrl(endpoint.getHealthCheckInfoDto().getEndpointUrl()));
-				return bot.execute(new EditMessageText(chat.id(), execute.message().messageId(), buildMessage(from, endpoints)));
+				return bot.execute(new EditMessageText(chat.id(), execute.message().messageId(), buildMessage(from, endpoints)).parseMode(ParseMode.Markdown));
 			}, threadPool);
 		}
 	}
 
 	private String buildMessage(User from, List<StatusCheckDto> endpoints) {
 		StringBuilder message = new StringBuilder();
-		message.append(bot.getI18nMessage(from, "message.command.healthcheck.common.list.prefix")).append("\n");
+		message.append(bot.getI18nMessage(from, "message.command.healthcheck.common.list.prefix"));
+		if (endpoints.isEmpty()) {
+			message.append(bot.getI18nMessage(from, "message.command.healthcheck.common.list.empty"));
+		}
 		for (StatusCheckDto endpoint: endpoints) {
 			message.append(bot.getI18nMessage(from, "message.command.healthcheck.common.status.info",
-					new Object[] { endpoint.getHealthCheckInfoDto().getEndpointName(),
-							bot.getI18nMessage(from, endpoint.getHealthStatus().getMessageKey())}))
-					.append("\n");
+					new Object[] {
+							bot.getI18nMessage(from, endpoint.getHealthStatus().getMessageKey()),
+							endpoint.getHealthCheckInfoDto().getEndpointName(),
+							endpoint.getHealthCheckInfoDto().getEndpointUrl()}));
 		}
 		return message.toString();
 	}

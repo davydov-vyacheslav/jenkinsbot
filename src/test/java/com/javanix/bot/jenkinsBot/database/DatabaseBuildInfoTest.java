@@ -2,21 +2,13 @@ package com.javanix.bot.jenkinsBot.database;
 
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
+import com.javanix.bot.jenkinsBot.core.model.Entity;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.javanix.bot.jenkinsBot.core.service.ConsoleOutputConfigService;
-import com.javanix.bot.jenkinsBot.core.service.EntityService;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.ImmutableMongodConfig;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,13 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-@SpringJUnitConfig
-@ContextConfiguration(classes = DatabaseTestConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-// NOTE: DirtiesContext need to refresh mongoTemplate bean after each database down/up
-public class DatabaseBuildInfoTest extends AbstractDatabaseEntityTest<BuildInfoDto> {
+public class DatabaseBuildInfoTest extends AbstractDatabaseEntityTest {
 
-	private static MongodExecutable mongodExecutable;
+	@Autowired
+	ConsoleOutputConfigService consoleOutputConfigService;
 
 	@Autowired
 	BuildInfoService databaseService;
@@ -46,6 +35,13 @@ public class DatabaseBuildInfoTest extends AbstractDatabaseEntityTest<BuildInfoD
 				.containsExactlyInAnyOrderElementsOf(availableRepositories.stream().map(BuildInfoDto::getRepoName).collect(Collectors.toList()));
 	}
 
+	@Test
+	public void testGetOwnedEntities() {
+		List<BuildInfoDto> ownedEntities = databaseService.getOwnedEntities(CURRENT_USER_ID);
+		assertEquals(2, ownedEntities.size());
+		assertThat(Arrays.asList("owned-public", "owned-private"))
+				.containsExactlyInAnyOrderElementsOf(ownedEntities.stream().map(Entity::getName).collect(Collectors.toList()));
+	}
 
 	@Test
 	public void testGetAvailableRepository() {
@@ -70,7 +66,8 @@ public class DatabaseBuildInfoTest extends AbstractDatabaseEntityTest<BuildInfoD
 		});
 	}
 
-	private static void dataSetup(BuildInfoService databaseService, ConsoleOutputConfigService consoleOutputConfigService) {
+	@BeforeEach
+	public void dataSetup() {
 		consoleOutputConfigService.save(ConsoleOutputInfoDto.builder()
 				.name(ConsoleOutputInfoDto.DEFAULT_RESOLVER_NAME).build());
 		databaseService.save(BuildInfoDto.emptyEntityBuilder()
@@ -83,24 +80,4 @@ public class DatabaseBuildInfoTest extends AbstractDatabaseEntityTest<BuildInfoD
 				.repoName("foreign-private").isPublic(false).creatorId(SOMEONE_USER_ID).build());
 	}
 
-	@BeforeAll
-	public static void init(@Autowired ImmutableMongodConfig mongodConfig,
-							@Autowired BuildInfoService databaseService,
-							@Autowired ConsoleOutputConfigService consoleOutputConfigService) throws IOException {
-		MongodStarter starter = MongodStarter.getDefaultInstance();
-		mongodExecutable = starter.prepare(mongodConfig);
-		mongodExecutable.start();
-		dataSetup(databaseService, consoleOutputConfigService);
-	}
-
-	@AfterAll
-	public static void tearDown() {
-		mongodExecutable.stop();
-	}
-
-
-	@Override
-	protected EntityService<BuildInfoDto> getDatabaseService() {
-		return databaseService;
-	}
 }

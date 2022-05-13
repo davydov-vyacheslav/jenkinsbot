@@ -2,7 +2,6 @@ package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
-import com.javanix.bot.jenkinsBot.command.CommandTestConfiguration;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
@@ -13,9 +12,6 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,9 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
-@SpringJUnitConfig
-@ContextConfiguration(classes = CommandTestConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class AddCommandTest extends AbstractCommandTestCase {
 
 	@Test
@@ -99,6 +92,23 @@ public class AddCommandTest extends AbstractCommandTestCase {
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
+				})
+				.then(invocation -> {
+					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
+					assertEquals("message.command.common.cancel", message.getMessageKey());
+					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
+					assertThat(Collections.emptyList()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
+					return sendResponse;
+				})
+				.then(invocation -> {
+					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
+					assertEquals("message.command.build.default.mainList", message.getMessageKey());
+					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
+					List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
+							new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
+					);
+					assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
+					return sendResponse;
 				});
 
 		executeCommand(from, "/build add");
@@ -107,8 +117,9 @@ public class AddCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/build add jenkins.user");
 		executeCommand(from, "admin");
 		executeCommand(from, "/build ADD /done");
+		executeCommand(from, "/cancel"); // finalize process to remove user from session map
 
-		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(bot, Mockito.times(6)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 		Mockito.verify(buildInfoService, Mockito.times(0)).save(any());
 	}
 

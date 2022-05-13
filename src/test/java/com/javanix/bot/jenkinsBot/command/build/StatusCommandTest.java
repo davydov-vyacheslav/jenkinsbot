@@ -5,7 +5,6 @@ import com.javanix.bot.jenkinsBot.cli.jenkins.BuildStatus;
 import com.javanix.bot.jenkinsBot.cli.jenkins.JenkinsBuildDetails;
 import com.javanix.bot.jenkinsBot.cli.jenkins.JenkinsProcessor;
 import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
-import com.javanix.bot.jenkinsBot.command.CommandTestConfiguration;
 import com.javanix.bot.jenkinsBot.command.TelegramCommand;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
@@ -17,8 +16,6 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,8 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 
-@SpringJUnitConfig
-@ContextConfiguration(classes = CommandTestConfiguration.class)
 public class StatusCommandTest extends AbstractCommandTestCase {
 
 	@MockBean
@@ -131,11 +126,11 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 
 		Mockito.when(jenkinsProcessor.getPreviousBuildJenkinsBuildDetails(jenkinsInfo)).thenReturn(
 				JenkinsBuildDetails.builder()
-						.runTestsCount(1000L)
+						.runTestsCount(1000)
 						.build());
 		Mockito.when(jenkinsProcessor.getCurrentBuildJenkinsBuildDetails(jenkinsInfo)).thenReturn(
 				JenkinsBuildDetails.builder()
-						.runTestsCount(500L)
+						.runTestsCount(500)
 						.buildStatus(BuildStatus.IN_PROGRESS)
 						.failedTests(new LinkedHashSet<String>() {{
 								add("com.javanix.jenkinsbot.test.AssemblyExportTest");
@@ -150,7 +145,7 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("message.command.build.status.repo", message.getMessageKey());
-			assertArrayEquals(new Object[] { "xmen", BuildStatus.IN_PROGRESS, BuildStatus.IN_PROGRESS.getMessageKey(), 500L, 1000L, 20, 2,
+			assertArrayEquals(new Object[] { "xmen", BuildStatus.IN_PROGRESS, BuildStatus.IN_PROGRESS.getMessageKey(), 500, 1000, 20, 2,
 					"- [AssemblyExportTest](https://domain:7331/job/project/ws/output/reports/TEST-com.javanix.jenkinsbot.test.AssemblyExportTest.xml/*view*/)\n" +
 							"- [AnotherFailedTest](https://domain:7331/job/project/ws/output/reports/TEST-com.javanix.jenkinsbot.test2.AnotherFailedTest.xml/*view*/)\n" },
 					message.getMessageArgs());

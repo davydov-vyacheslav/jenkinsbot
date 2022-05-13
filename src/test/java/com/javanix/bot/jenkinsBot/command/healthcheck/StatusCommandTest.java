@@ -3,7 +3,6 @@ package com.javanix.bot.jenkinsBot.command.healthcheck;
 import com.javanix.bot.jenkinsBot.cli.healthstatus.HealthCheckProcessor;
 import com.javanix.bot.jenkinsBot.cli.healthstatus.HealthStatus;
 import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
-import com.javanix.bot.jenkinsBot.command.CommandTestConfiguration;
 import com.javanix.bot.jenkinsBot.command.TelegramCommand;
 import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.EntityService;
@@ -13,16 +12,12 @@ import com.pengrad.telegrambot.request.SendMessage;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
-@SpringJUnitConfig
-@ContextConfiguration(classes = CommandTestConfiguration.class)
 public class StatusCommandTest extends AbstractCommandTestCase {
 
 	@MockBean
@@ -53,9 +48,9 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 
 		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
 			SendMessage message = invocation.getArgument(0);
-			assertEquals("message.command.healthcheck.common.list.prefix\n" +
-					"message.command.healthcheck.common.status.info\n" +
-					"message.command.healthcheck.common.status.info\n", message.getParameters().get("text"));
+			assertEquals("message.command.healthcheck.common.list.prefix" +
+					"message.command.healthcheck.common.status.info" +
+					"message.command.healthcheck.common.status.info", message.getParameters().get("text"));
 			return sendResponse;
 		});
 

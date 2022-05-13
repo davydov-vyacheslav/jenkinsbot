@@ -4,18 +4,14 @@ import com.javanix.bot.jenkinsBot.core.model.EntityType;
 import com.javanix.bot.jenkinsBot.core.model.LocaleType;
 import com.javanix.bot.jenkinsBot.core.model.UserInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.UserService;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.ImmutableMongodConfig;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,16 +19,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringJUnitConfig
 @ContextConfiguration(classes = DatabaseTestConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-// NOTE: DirtiesContext need to refresh mongoTemplate bean after each database down/up
+@AutoConfigureDataMongo
 public class UserSettingsTest {
+
+	@Autowired
+	private MongoTemplate mongoTemplate;
 
 	public static final long USER_ID = 12L;
 	public static final String USER_NAME = "someuser";
 	public static final LocaleType USER_LOCALE = LocaleType.RU;
 	public static final int LAST_MESSAGE_BUILD = 11;
 	public static final int LAST_MESSAGE_HEATH = 12;
-	private static MongodExecutable mongodExecutable;
 
 	@Autowired
 	UserService databaseService;
@@ -69,17 +66,8 @@ public class UserSettingsTest {
 				.build();
 	}
 
-
-	@BeforeAll
-	public static void init(@Autowired ImmutableMongodConfig mongodConfig) throws IOException {
-		MongodStarter starter = MongodStarter.getDefaultInstance();
-		mongodExecutable = starter.prepare(mongodConfig);
-		mongodExecutable.start();
+	@AfterEach
+	void cleanUpDatabase() {
+		mongoTemplate.getDb().drop();
 	}
-
-	@AfterAll
-	public static void tearDown() {
-		mongodExecutable.stop();
-	}
-
 }

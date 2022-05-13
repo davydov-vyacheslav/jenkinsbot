@@ -2,7 +2,6 @@ package com.javanix.bot.jenkinsBot.command.healthcheck;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
-import com.javanix.bot.jenkinsBot.command.CommandTestConfiguration;
 import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.HealthCheckService;
 import com.pengrad.telegrambot.model.Chat;
@@ -11,9 +10,6 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,9 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
-@SpringJUnitConfig
-@ContextConfiguration(classes = CommandTestConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class EditCommandTest extends AbstractCommandTestCase {
 
 	@Test
@@ -94,14 +87,22 @@ public class EditCommandTest extends AbstractCommandTestCase {
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
+				})
+				.then(invocation -> {
+					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
+					assertEquals("message.command.common.cancel", message.getMessageKey());
+					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
+					assertThat(Collections.emptyList()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
+					return sendResponse;
 				});
 
 		executeCommand(from, "/healthcheck edit " + ENTITY_NAME);
 		executeCommand(from, "/healthcheck edit url");
 		executeCommand(from, "");
 		executeCommand(from, "/healthcheck edit /done");
+		executeCommand(from, "/cancel"); // finalize process to remove user from session map
 
-		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 		Mockito.verify(healthCheckService, Mockito.times(0)).save(any());
 	}
 

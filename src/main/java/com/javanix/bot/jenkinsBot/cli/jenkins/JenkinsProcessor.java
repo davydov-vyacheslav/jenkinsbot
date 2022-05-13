@@ -65,7 +65,7 @@ public class JenkinsProcessor {
 		}
 
 		JenkinsBuildDetails details = JenkinsBuildDetails.builder()
-				.runTestsCount(0L)
+				.runTestsCount(0)
 				.buildStatus(BuildStatus.IN_PROGRESS)
 				.failedTests(new LinkedHashSet<>())
 				.build();

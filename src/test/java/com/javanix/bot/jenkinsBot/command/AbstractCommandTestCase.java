@@ -17,6 +17,8 @@ import org.mockito.Mockito;
 import org.mockito.internal.stubbing.answers.ReturnsArgumentAt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -28,6 +30,8 @@ import java.util.stream.Collectors;
 import static org.mockito.AdditionalAnswers.returnsArgAt;
 import static org.mockito.ArgumentMatchers.any;
 
+@SpringJUnitConfig
+@ContextConfiguration(classes = CommandTestConfiguration.class)
 public abstract class AbstractCommandTestCase {
 
 	protected static final String ENTITY_NAME = "Entity Name";

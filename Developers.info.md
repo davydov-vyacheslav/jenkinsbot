@@ -72,12 +72,13 @@ Recommended to add following configuration to your gradle project:
 - test containers
 - Common Project files: CONTRIBUTING.md, SUPPORT.md, ACKNOWLEDGMENTS, CONTRIBUTORS
 - Unit Tests:
+    - refactor unit tests to extract common methods
     - cover with unit tests constructable messages that are greyed
         - label.field.*.*
         - label.welcome.field.*.*
-    - DirtiesContext for CommandTests
-    - Optimize database-related unit tests by having single configuration they are running within
 - there are should be: stage env, prod env, dev (xxx) env
+- Document :latest processing (with watchtower)
+- Document stable release build processing
 - ?? add docker-compose.yml file?
 - ?? migrate docker registry to GH ?
 

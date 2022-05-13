@@ -8,7 +8,7 @@ import java.util.Set;
 @Data
 @Builder
 public class JenkinsBuildDetails {
-	private Long runTestsCount;
+	private Integer runTestsCount;
 	private Set<String> failedTests;
 	private BuildStatus buildStatus;
 
