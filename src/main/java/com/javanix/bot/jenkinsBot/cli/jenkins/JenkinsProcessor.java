@@ -34,6 +34,7 @@ public class JenkinsProcessor {
 		return getJenkinsBuildDetails(jenkinsInfo, "lastBuild");
 	}
 
+	// TODO: cache me
 	public JenkinsBuildDetails getPreviousBuildJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo) {
 		return getJenkinsBuildDetails(jenkinsInfo, "lastCompletedBuild");
 	}

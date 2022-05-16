@@ -10,6 +10,7 @@ import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.ParseMode;
+import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
@@ -39,56 +40,42 @@ class StatusBuildCommand implements BuildSubCommand {
 
 		log.info(from.username() + " is getting status build for team: " + repository.getRepoName());
 
-		JenkinsBuildDetails currentBuildDetails = jenkinsProcessor.getCurrentBuildJenkinsBuildDetails(repository.getJenkinsInfo());
-		JenkinsBuildDetails lastBuildDetails = jenkinsProcessor.getPreviousBuildJenkinsBuildDetails(repository.getJenkinsInfo());
-
-		showRepositoryInfo(chat, from, repository, currentBuildDetails, lastBuildDetails);
+		showRepositoryInfo(chat, from, repository);
 		defaultBuildCommand.process(chat, from, "");
 	}
 
-	private void showRepositoryInfo(Chat chat, User from, BuildInfoDto repository, JenkinsBuildDetails currentBuildDetails, JenkinsBuildDetails lastBuildDetails) {
-		// TODO: remaster if-elseif-else
-		if (currentBuildDetails.getBuildStatus() == BuildStatus.COMPLETED_OK) {
-			// for stable build show shorter information
-			bot.sendI18nMessage(from, chat, TelegramBotWrapper.MessageInfo.builder()
-					.messageKey("message.command.build.status.repo_ok")
-					.messageArgs(new Object[]{repository.getRepoName(),
-							currentBuildDetails.getBuildStatus(),
-							bot.getI18nMessage(from, currentBuildDetails.getBuildStatus().getMessageKey()),
-							currentBuildDetails.getRunTestsCount()})
-					.parseMode(ParseMode.Markdown)
-					.build());
-		} else if (currentBuildDetails.getFailedTests().isEmpty()) {
-			bot.sendI18nMessage(from, chat, TelegramBotWrapper.MessageInfo.builder()
-					.messageKey("message.command.build.status.repo_nofails")
-					.messageArgs(new Object[]{repository.getRepoName(),
-							currentBuildDetails.getBuildStatus(),
-							bot.getI18nMessage(from, currentBuildDetails.getBuildStatus().getMessageKey()),
-							currentBuildDetails.getRunTestsCount(),
-							lastBuildDetails.getRunTestsCount()})
-					.parseMode(ParseMode.Markdown)
-					.build());
+	private void showRepositoryInfo(Chat chat, User from, BuildInfoDto repository) {
+
+		JenkinsBuildDetails currentBuildDetails = jenkinsProcessor.getCurrentBuildJenkinsBuildDetails(repository.getJenkinsInfo());
+
+		// TODO: make build info name as link to Jenkins job
+		String resultMessage = bot.getI18nMessage(from, "message.command.build.status.repo_ok", new Object[]{repository.getRepoName(),
+				bot.getI18nMessage(from, currentBuildDetails.getBuildStatus().getMessageKey()),
+				currentBuildDetails.getRunTestsCount()});
+
+		if (currentBuildDetails.getBuildStatus() == BuildStatus.IN_PROGRESS) {
+			JenkinsBuildDetails lastBuildDetails = jenkinsProcessor.getPreviousBuildJenkinsBuildDetails(repository.getJenkinsInfo());
+			resultMessage += bot.getI18nMessage(from, "message.command.build.status.repo.suffix.approx", new Object[] {	lastBuildDetails.getRunTestsCount() });
+		}
+
+		if (currentBuildDetails.getFailedTests().isEmpty()) {
+			resultMessage += bot.getI18nMessage(from, "message.command.build.status.repo.suffix.no_fails");
 		} else {
 			String failedTestsOutputWithLinks = currentBuildDetails.getFailedTests().stream()
-						.limit(FAILED_TESTS_COUNT)
-						.map(testName -> String.format("- [%s](%s)\n",
-								testName.substring(testName.lastIndexOf(".") + 1),
-								jenkinsProcessor.getTestDetailsUrl(repository.getJenkinsInfo(), testName)))
-						.collect(Collectors.joining());
+					.limit(FAILED_TESTS_COUNT)
+					.map(testName -> String.format("- [%s](%s)\n",
+							testName.substring(testName.lastIndexOf(".") + 1),
+							jenkinsProcessor.getTestDetailsUrl(repository.getJenkinsInfo(), testName)))
+					.collect(Collectors.joining());
 
-			bot.sendI18nMessage(from, chat, TelegramBotWrapper.MessageInfo.builder()
-					.messageKey("message.command.build.status.repo")
-					.messageArgs(new Object[]{repository.getRepoName(),
-							currentBuildDetails.getBuildStatus(),
-							bot.getI18nMessage(from, currentBuildDetails.getBuildStatus().getMessageKey()),
-							currentBuildDetails.getRunTestsCount(),
-							lastBuildDetails.getRunTestsCount(),
-							Integer.min(lastBuildDetails.getRunTestsCount(), FAILED_TESTS_COUNT),
-							currentBuildDetails.getFailedTests().size(),
-							failedTestsOutputWithLinks})
-					.parseMode(ParseMode.Markdown)
-					.build());
+			resultMessage += bot.getI18nMessage(from, "message.command.build.status.repo.suffix.fails", new Object[] {
+					Integer.min(currentBuildDetails.getFailedTests().size(), FAILED_TESTS_COUNT),
+					currentBuildDetails.getFailedTests().size(),
+					failedTestsOutputWithLinks
+			});
 		}
+
+		bot.execute(new SendMessage(chat.id(), resultMessage).parseMode(ParseMode.Markdown));
 	}
 
 	@Override
