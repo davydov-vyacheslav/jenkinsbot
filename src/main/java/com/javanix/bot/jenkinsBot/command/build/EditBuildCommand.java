@@ -29,7 +29,7 @@ class EditBuildCommand extends AbstractModifyEntityCommand<BuildInfoDto> impleme
 
 	@Override
 	protected void processOnStart(Chat chat, User from, String command) {
-		Optional<BuildInfoDto> repo = database.getOwnedEntityByName(command, from.id());
+		Optional<BuildInfoDto> repo = database.filter(database::getOwnedEntities, from.id(), command);
 		if (repo.isPresent()) {
 			BuildInfoDto repoDto = repo.get();
 			StatedEntity<BuildInfoDto> repoBuildInformation = new StatedEntity<>(repoDto, null);

@@ -6,6 +6,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Set;
+
 
 @Data
 @Builder
@@ -22,5 +24,6 @@ class HealthCheckEntity {
 	private Boolean isPublic;
 	private Long creatorId;
 	private String creatorFullName;
+	private Set<Long> referencedByUsers;
 
 }

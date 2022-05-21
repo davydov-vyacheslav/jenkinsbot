@@ -18,6 +18,11 @@ public abstract class AbstractDatabaseEntityTest {
 	protected static final Long CURRENT_USER_ID = 1L;
 	protected static final Long SOMEONE_USER_ID = 111L;
 
+	abstract void testGetOwnedEntities();
+	abstract void testGetAvailableEntitiesToReference();
+	abstract void testGetOwnedOrReferencedEntities();
+
+
 	@AfterEach
 	void cleanUpDatabase() {
 		mongoTemplate.getDb().drop();

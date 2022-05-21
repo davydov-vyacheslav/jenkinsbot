@@ -7,10 +7,9 @@ import com.javanix.bot.jenkinsBot.core.service.ConsoleOutputConfigService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -20,27 +19,8 @@ class BuildInfoServiceImpl implements BuildInfoService {
 	private final ConsoleOutputConfigService consoleOutputConfigService;
 
 	@Override
-	public List<BuildInfoDto> getAvailableRepositories(Long ownerId) {
-		return repository.getByCreatorIdOrIsPublicTrue(ownerId).stream()
-				.map(this::convertEntityToDto)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public void removeEntity(String repoName) {
-		repository.getByRepoNameIgnoreCase(repoName).ifPresent(repository::delete);
-	}
-
-	@Override
-	public List<BuildInfoDto> getOwnedEntities(Long ownerId) {
-		return repository.getByCreatorId(ownerId).stream()
-				.map(this::convertEntityToDto)
-				.collect(Collectors.toList());
-	}
-
-	@Override
 	public void save(BuildInfoDto repo) {
-		Optional<BuildInfoEntity> repoInDb = repository.getByRepoNameIgnoreCase(repo.getRepoName());
+		Optional<BuildInfoEntity> repoInDb = repository.getByRepoNameIgnoreCaseAndCreatorId(repo.getRepoName(), repo.getCreatorId());
 		BuildInfoEntity repoEntity = convertDtoToEntity(repo);
 
 		ConsoleOutputInfoDto repoConsoleInfo = repoEntity.getJenkinsInfo().getConsoleOutputInfo();
@@ -65,23 +45,31 @@ class BuildInfoServiceImpl implements BuildInfoService {
 	}
 
 	@Override
-	public Optional<BuildInfoDto> getOwnedEntityByName(String name, Long ownerId) {
-		return repository.getByRepoNameIgnoreCaseAndCreatorId(name, ownerId)
+	public void removeEntityInternal(Long ownerId, String name) {
+		repository.getByRepoNameIgnoreCaseAndCreatorId(name, ownerId).ifPresent(repository::delete);
+	}
+
+	@Override
+	public Stream<BuildInfoDto> getOwnedEntities(Long ownerId) {
+		return repository.getByCreatorId(ownerId).map(this::convertEntityToDto);
+	}
+
+	@Override
+	public Stream<BuildInfoDto> getAvailableEntitiesToReference(Long ownerId) {
+		return repository.getByIsPublicTrueAndCreatorIdNot(ownerId)
+				.filter(buildInfoEntity -> buildInfoEntity.getReferencedByUsers() == null || !buildInfoEntity.getReferencedByUsers().contains(ownerId))
 				.map(this::convertEntityToDto);
 	}
 
 	@Override
-	public BuildInfoDto getAvailableRepository(String name, Long ownerId) {
-		if (name.isEmpty()) {
-			return null;
-		}
-		return repository.getByRepoNameIgnoreCaseAndIsPublicTrueOrCreatorId(name, ownerId)
-				.map(this::convertEntityToDto).orElse(null);
+	public Stream<BuildInfoDto> getOwnedOrReferencedEntities(Long ownerId) {
+		return repository.getByCreatorIdIsOrReferencedByUsersContains(ownerId, ownerId)
+				.map(this::convertEntityToDto);
 	}
 
 	@Override
 	public boolean hasEntity(String name) {
-		return repository.getByRepoNameIgnoreCase(name).isPresent();
+		return repository.existsByRepoNameIgnoreCase(name);
 	}
 
 	private BuildInfoDto convertEntityToDto(BuildInfoEntity buildInfoEntity) {
@@ -91,6 +79,7 @@ class BuildInfoServiceImpl implements BuildInfoService {
 				.jenkinsInfo(buildInfoEntity.getJenkinsInfo())
 				.creatorId(buildInfoEntity.getCreatorId())
 				.isPublic(buildInfoEntity.getIsPublic())
+				.referencedByUsers(buildInfoEntity.getReferencedByUsers())
 				.build();
 		if (buildInfo.getJenkinsInfo().getConsoleOutputInfo() == null) {
 			buildInfo.getJenkinsInfo().setConsoleOutputInfo(consoleOutputConfigService.findByName(ConsoleOutputInfoDto.DEFAULT_RESOLVER_NAME));
@@ -105,6 +94,7 @@ class BuildInfoServiceImpl implements BuildInfoService {
 				.jenkinsInfo(buildInfoEntity.getJenkinsInfo())
 				.creatorId(buildInfoEntity.getCreatorId())
 				.isPublic(buildInfoEntity.isPublic())
+				.referencedByUsers(buildInfoEntity.getReferencedByUsers())
 				.build();
 	}
 

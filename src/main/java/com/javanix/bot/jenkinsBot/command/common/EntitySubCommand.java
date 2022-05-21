@@ -12,6 +12,7 @@ public interface EntitySubCommand<T extends Entity> extends Processable {
 
 	String ICON_PUBLIC = "\uD83C\uDF0E ";
 	String ICON_PRIVATE = "\uD83D\uDD12 ";
+	String ICON_REFERENCE = "\uD83D\uDD17 ";
 
 	EntityActionType getCommandType();
 
@@ -21,12 +22,16 @@ public interface EntitySubCommand<T extends Entity> extends Processable {
 
 	EntityType getEntityType();
 
-	default void groupEntitiesBy(List<? extends Entity> entities, int pageSize, InlineKeyboardMarkup inlineKeyboardMarkup, String callbackPrefix) {
+	default void groupEntitiesBy(List<? extends Entity> entities, Long ownerId, int pageSize, InlineKeyboardMarkup inlineKeyboardMarkup, String callbackPrefix) {
 		splitListByNElements(pageSize, entities)
 				.forEach(entityDtos -> inlineKeyboardMarkup.addRow(
 						entityDtos.stream()
 								.map(entityDto -> {
-									String repoName = (entityDto.isPublic() ? ICON_PUBLIC : ICON_PRIVATE) + entityDto.getName();
+									String repoName = (entityDto.isPublic() ? ICON_PUBLIC : ICON_PRIVATE);
+									if (!entityDto.getCreatorId().equals(ownerId)) {
+										repoName += ICON_REFERENCE;
+									}
+									repoName += entityDto.getName();
 									return new InlineKeyboardButton(repoName).callbackData(callbackPrefix + entityDto.getName());
 								})
 								.toArray(InlineKeyboardButton[]::new)));

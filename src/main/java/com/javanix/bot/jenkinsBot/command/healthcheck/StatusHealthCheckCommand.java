@@ -35,8 +35,7 @@ class StatusHealthCheckCommand implements HealthCheckSubCommand {
 	@Override
 	public void process(Chat chat, User from, String buildCommandArguments) {
 
-		List<StatusCheckDto> endpoints = database.getAvailableEndpoints(from.id())
-				.stream()
+		List<StatusCheckDto> endpoints = database.getOwnedOrReferencedEntities(from.id())
 				.map(status -> new StatusCheckDto(status, HealthStatus.NA))
 				.collect(Collectors.toList());
 

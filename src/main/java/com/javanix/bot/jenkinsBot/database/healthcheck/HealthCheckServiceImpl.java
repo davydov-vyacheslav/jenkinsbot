@@ -5,10 +5,8 @@ import com.javanix.bot.jenkinsBot.core.service.HealthCheckService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -17,41 +15,39 @@ class HealthCheckServiceImpl implements HealthCheckService {
 	private final HealthCheckRepository repository;
 
 	@Override
-	public Collection<HealthCheckInfoDto> getAvailableEndpoints(Long ownerId) {
-		return repository.getByCreatorIdOrIsPublicTrue(ownerId).stream()
-				.map(this::convertEntityToDto)
-				.collect(Collectors.toList());
-	}
-
-	@Override
 	public void save(HealthCheckInfoDto endpoint) {
-		Optional<HealthCheckEntity> endpointInDb = repository.getByEndpointNameIgnoreCase(endpoint.getEndpointName());
+		Optional<HealthCheckEntity> endpointInDb = repository.getByEndpointNameIgnoreCaseAndCreatorId(endpoint.getEndpointName(), endpoint.getCreatorId());
 		HealthCheckEntity endpointEntity = convertDtoToEntity(endpoint);
 		endpointInDb.ifPresent(endpointInfoEntity -> endpointEntity.setId(endpointInfoEntity.getId()));
 		repository.save(endpointEntity);
 	}
 
 	@Override
-	public Optional<HealthCheckInfoDto> getOwnedEntityByName(String name, Long ownerId) {
-		return repository.getByEndpointNameIgnoreCaseAndCreatorId(name, ownerId)
+	public void removeEntityInternal(Long ownerId, String name) {
+		repository.getByEndpointNameIgnoreCaseAndCreatorId(name, ownerId).ifPresent(repository::delete);
+	}
+
+	@Override
+	public Stream<HealthCheckInfoDto> getOwnedEntities(Long ownerId) {
+		return repository.getByCreatorId(ownerId).map(this::convertEntityToDto);
+	}
+
+	@Override
+	public Stream<HealthCheckInfoDto> getAvailableEntitiesToReference(Long ownerId) {
+		return repository.getByIsPublicTrueAndCreatorIdNot(ownerId)
+				.filter(entity -> entity.getReferencedByUsers() == null || !entity.getReferencedByUsers().contains(ownerId))
+				.map(this::convertEntityToDto);
+	}
+
+	@Override
+	public Stream<HealthCheckInfoDto> getOwnedOrReferencedEntities(Long ownerId) {
+		return repository.getByCreatorIdIsOrReferencedByUsersContains(ownerId, ownerId)
 				.map(this::convertEntityToDto);
 	}
 
 	@Override
 	public boolean hasEntity(String name) {
-		return repository.getByEndpointNameIgnoreCase(name).isPresent();
-	}
-
-	@Override
-	public void removeEntity(String name) {
-		repository.getByEndpointNameIgnoreCase(name).ifPresent(repository::delete);
-	}
-
-	@Override
-	public List<HealthCheckInfoDto> getOwnedEntities(Long ownerId) {
-		return repository.getByCreatorId(ownerId).stream()
-				.map(this::convertEntityToDto)
-				.collect(Collectors.toList());
+		return repository.existsByEndpointNameIgnoreCase(name);
 	}
 
 	private HealthCheckInfoDto convertEntityToDto(HealthCheckEntity healthCheckEntity) {
@@ -61,6 +57,7 @@ class HealthCheckServiceImpl implements HealthCheckService {
 				.creatorFullName(healthCheckEntity.getCreatorFullName())
 				.creatorId(healthCheckEntity.getCreatorId())
 				.isPublic(healthCheckEntity.getIsPublic())
+				.referencedByUsers(healthCheckEntity.getReferencedByUsers())
 				.build();
 	}
 
@@ -71,6 +68,7 @@ class HealthCheckServiceImpl implements HealthCheckService {
 				.creatorFullName(healthCheckInfoDto.getCreatorFullName())
 				.creatorId(healthCheckInfoDto.getCreatorId())
 				.isPublic(healthCheckInfoDto.isPublic())
+				.referencedByUsers(healthCheckInfoDto.getReferencedByUsers())
 				.build();
 	}
 

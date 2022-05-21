@@ -3,19 +3,24 @@ package com.javanix.bot.jenkinsBot.core.model;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Data
 @Builder
 public class HealthCheckInfoDto implements Entity {
 	private String endpointName;
 	private String endpointUrl;
 	private Boolean isPublic;
-	private final Long creatorId;
-	private final String creatorFullName;
+	private Long creatorId;
+	private String creatorFullName;
+	private Set<Long> referencedByUsers;
 
 	public static HealthCheckInfoDto.HealthCheckInfoDtoBuilder emptyEntityBuilder() {
 		return HealthCheckInfoDto.builder()
 				.endpointName("")
 				.endpointUrl("")
+				.referencedByUsers(new HashSet<>())
 				.isPublic(false);
 	}
 
@@ -29,4 +34,8 @@ public class HealthCheckInfoDto implements Entity {
 		return endpointName;
 	}
 
+	@Override
+	public Set<Long> getReferences() {
+		return referencedByUsers;
+	}
 }

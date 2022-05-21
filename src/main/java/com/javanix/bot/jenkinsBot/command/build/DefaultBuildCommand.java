@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ class DefaultBuildCommand implements BuildSubCommand {
 
 	@Override
 	public void process(Chat chat, User from, String defaultMessageKey) {
-		List<BuildInfoDto> availableRepositories = database.getAvailableRepositories(from.id());
+		List<BuildInfoDto> availableRepositories = database.getOwnedOrReferencedEntities(from.id()).collect(Collectors.toList());
 
 		userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
 				.messageKey(defaultMessageKey.isEmpty() ? "message.command.build.default.mainList" : defaultMessageKey)
@@ -41,9 +42,9 @@ class DefaultBuildCommand implements BuildSubCommand {
 	private InlineKeyboardMarkup buildMainMenuMarkup(User from, List<BuildInfoDto> availableRepositories) {
 
 		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-		groupEntitiesBy(availableRepositories, 2, inlineKeyboardMarkup, "/build status ");
+		groupEntitiesBy(availableRepositories, from.id(), 2, inlineKeyboardMarkup, "/build status ");
 		inlineKeyboardMarkup.addRow(
-				new InlineKeyboardButton(bot.getI18nMessage(from, "button.build.modifyMyItems")).callbackData("/build my_list")
+				new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.modifyMyItems")).callbackData("/build my_list")
 		);
 
 		return inlineKeyboardMarkup;

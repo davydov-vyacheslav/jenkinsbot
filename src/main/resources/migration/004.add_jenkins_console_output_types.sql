@@ -12,6 +12,14 @@ db.ConsoleOutputConfig.insertMany(
     'unitTestsResultFilepathPrefix': 'build/test-results/test/TEST-',
     'fileEncoding': 'UTF-8'}]
 );
+db.Endpoint.updateMany(
+  { referencedByUsers : { $exists: false } },
+  [{ $set : { "referencedByUsers" : [] }}]
+);
+db.BuildInfo.updateMany(
+  { referencedByUsers : { $exists: false } },
+  [{ $set : { "referencedByUsers" : [] }}]
+);
 db.Settings.update(
     {'key' : 'dbVersion'},
     { $set : {'value' : '004'}}

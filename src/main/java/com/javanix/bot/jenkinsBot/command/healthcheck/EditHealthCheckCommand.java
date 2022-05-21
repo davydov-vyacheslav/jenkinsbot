@@ -28,7 +28,7 @@ class EditHealthCheckCommand extends AbstractModifyEntityCommand<HealthCheckInfo
 
 	@Override
 	protected void processOnStart(Chat chat, User from, String command) {
-		Optional<HealthCheckInfoDto> entity = database.getOwnedEntityByName(command, from.id());
+		Optional<HealthCheckInfoDto> entity = database.filter(database::getOwnedEntities, from.id(), command);
 		if (entity.isPresent()) {
 			HealthCheckInfoDto entityDto = entity.get();
 			StatedEntity<HealthCheckInfoDto> entityBuildInformation = new StatedEntity<>(entityDto, null);

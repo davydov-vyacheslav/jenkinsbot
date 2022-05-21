@@ -6,3 +6,4 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost/jenkinsbot?authSource=admin
+      auto-index-creation: true

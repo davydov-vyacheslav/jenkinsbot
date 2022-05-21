@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ class MyReposBuildCommand implements BuildSubCommand {
 
 	@Override
 	public void process(Chat chat, User from, String defaultMessage) {
-		List<BuildInfoDto> availableRepositories = database.getOwnedEntities(from.id());
+		List<BuildInfoDto> availableRepositories = database.getOwnedOrReferencedEntities(from.id()).collect(Collectors.toList());
 		InlineKeyboardMarkup inlineKeyboard = buildMyRepoListMarkup(from, availableRepositories);
 		userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
 				.messageKey(defaultMessage.isEmpty() ? "message.command.build.myRepos.title" : defaultMessage)
@@ -41,10 +42,13 @@ class MyReposBuildCommand implements BuildSubCommand {
 	private InlineKeyboardMarkup buildMyRepoListMarkup(User from, List<BuildInfoDto> availableRepositories) {
 
 		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-		groupEntitiesBy(availableRepositories, 2, inlineKeyboardMarkup, "/build edit ");
+		groupEntitiesBy(availableRepositories, from.id(), 2, inlineKeyboardMarkup, "/build edit ");
 		inlineKeyboardMarkup.addRow(
-				new InlineKeyboardButton(bot.getI18nMessage(from, "button.build.backToActionList")).callbackData("/build"),
 				new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.add")).callbackData("/build add"),
+				new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.add.reference")).callbackData("/build add_reference")
+		);
+		inlineKeyboardMarkup.addRow(
+				new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.backToActionList")).callbackData("/build"),
 				new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.delete")).switchInlineQueryCurrentChat("/build delete ")
 		);
 

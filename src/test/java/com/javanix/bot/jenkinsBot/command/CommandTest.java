@@ -54,7 +54,7 @@ public class CommandTest extends AbstractCommandTestCase {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("message.command.build.default.mainList", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
-					new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
+					new InlineKeyboardButton("button.common.modifyMyItems").callbackData("/build my_list")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
@@ -76,7 +76,7 @@ public class CommandTest extends AbstractCommandTestCase {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("message.command.build.default.mainList", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
-					new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
+					new InlineKeyboardButton("button.common.modifyMyItems").callbackData("/build my_list")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);

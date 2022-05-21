@@ -3,6 +3,8 @@ package com.javanix.bot.jenkinsBot.command.healthcheck;
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
 import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
+import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
+import com.javanix.bot.jenkinsBot.core.service.EntityService;
 import com.javanix.bot.jenkinsBot.core.service.HealthCheckService;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
@@ -10,11 +12,13 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.javanix.bot.jenkinsBot.command.common.AbstractModifyEntityCommand.ICON_NA;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,26 +28,17 @@ import static org.mockito.ArgumentMatchers.any;
 
 public class EditCommandTest extends AbstractCommandTestCase {
 
+	@MockBean
+	private DefaultHealthCheckCommand defaultHealthCheckCommand;
+
 	@Test
 	public void okFlowTest() {
-		User from = new User(HealthCheckService.DEFAULT_CREATOR_ID);
+		User from = new User(EntityService.DEFAULT_CREATOR_ID);
 
-		HealthCheckInfoDto hcInit = HealthCheckInfoDto.builder()
-				.endpointName(ENTITY_NAME)
-				.endpointUrl(ENTITY_URL)
-				.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
-				.isPublic(true)
-				.build();
-
-		Mockito.when(healthCheckService.getOwnedEntityByName(ENTITY_NAME, HealthCheckService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(hcInit));
+		Mockito.when(healthCheckService.getOwnedEntities(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Stream.of(getHealthCheckEntity1()));
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
-				.then(executeEditDomainAndAssert())
-				.then(invocation -> {
-					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.healthcheck.list.title", message.getMessageKey());
-					return sendResponse;
-				});
+				.then(executeEditDomainAndAssert());
 
 		executeCommand(from, "/healthcheck edit " + ENTITY_NAME);
 		executeCommand(from, "/healthcheck edit url");
@@ -51,10 +46,12 @@ public class EditCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/healthcheck edit /done");
 
 		Mockito.verify(bot, Mockito.times(2)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(defaultHealthCheckCommand).process(chat, from, "");
 
 		Mockito.verify(healthCheckService).save(HealthCheckInfoDto.builder()
 				.endpointName(ENTITY_NAME)
 				.endpointUrl(ENTITY_URL_2)
+				.referencedByUsers(new HashSet<>())
 				.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
 				.isPublic(true)
 				.build());
@@ -62,15 +59,9 @@ public class EditCommandTest extends AbstractCommandTestCase {
 
 	@Test
 	public void failedSaveFlowTest() {
-		User from = new User(HealthCheckService.DEFAULT_CREATOR_ID);
+		User from = new User(EntityService.DEFAULT_CREATOR_ID);
 
-		HealthCheckInfoDto repoInit = HealthCheckInfoDto.builder()
-				.endpointName(ENTITY_NAME)
-				.endpointUrl(ENTITY_URL)
-				.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
-				.isPublic(true)
-				.build();
-		Mockito.when(healthCheckService.getOwnedEntityByName(ENTITY_NAME, HealthCheckService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
+		Mockito.when(healthCheckService.getOwnedEntities(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Stream.of(getHealthCheckEntity1()));
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
 				.then(invocation -> {
@@ -109,15 +100,9 @@ public class EditCommandTest extends AbstractCommandTestCase {
 
 	@Test
 	public void cancelledFlowTest() {
-		User from = new User(HealthCheckService.DEFAULT_CREATOR_ID);
+		User from = new User(EntityService.DEFAULT_CREATOR_ID);
 
-		HealthCheckInfoDto repoInit = HealthCheckInfoDto.builder()
-				.endpointName(ENTITY_NAME)
-				.endpointUrl(ENTITY_URL)
-				.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
-				.isPublic(true)
-				.build();
-		Mockito.when(healthCheckService.getOwnedEntityByName(ENTITY_NAME, HealthCheckService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
+		Mockito.when(healthCheckService.getOwnedEntities(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Stream.of(getHealthCheckEntity1()));
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
 				.then(executeEditDomainAndAssert())
@@ -125,13 +110,6 @@ public class EditCommandTest extends AbstractCommandTestCase {
 					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 					assertEquals("message.command.common.cancel", message.getMessageKey());
 					assertArrayEquals(new Object[] {"label.field.common.edit"}, message.getMessageArgs());
-					return sendResponse;
-				}).then(invocation -> {
-					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.healthcheck.list.title", message.getMessageKey());
-					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
-					List<InlineKeyboardButton> expectedInlineButtons = Collections.emptyList();
-					assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
 				});
 
@@ -141,6 +119,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/cancel");
 
 		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(defaultHealthCheckCommand).process(chat, from, "");
 		Mockito.verify(healthCheckService, Mockito.times(0)).save(any());
 	}
 
@@ -182,7 +161,4 @@ public class EditCommandTest extends AbstractCommandTestCase {
 		);
 	}
 
-	private void executeCommand(User from, String command) {
-		factory.getCommand(command).process(chat, from, command);
-	}
 }

@@ -15,7 +15,7 @@ class BuildCommand extends AbstractEntityCommand {
 
 	private final BuildEntityCommandFactory buildCommandFactory;
 
-	private static final Pattern BUILD_COMMAND_PATTERN = Pattern.compile(".*/build.?(add|edit|status|delete|my_list).?(.*)", CASE_INSENSITIVE);
+	private static final Pattern BUILD_COMMAND_PATTERN = Pattern.compile(".*/build.?(add_reference|add|edit|status|delete|my_list).?(.*)", CASE_INSENSITIVE);
 
 	@Override
 	public String getCommandName() {

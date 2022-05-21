@@ -6,17 +6,20 @@ import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.BuildInfoService;
+import com.javanix.bot.jenkinsBot.core.service.EntityService;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.javanix.bot.jenkinsBot.command.common.AbstractModifyEntityCommand.ICON_NA;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,50 +29,37 @@ import static org.mockito.ArgumentMatchers.any;
 
 public class EditCommandTest extends AbstractCommandTestCase {
 
+	@MockBean
+	private DefaultBuildCommand defaultCommand;
+
 	@Test
 	public void okFlowTest() {
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		BuildInfoDto repoInit = BuildInfoDto.builder()
-				.repoName(ENTITY_NAME)
-				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
-				.isPublic(false)
-				.jenkinsInfo(JenkinsInfoDto.builder()
-						.jobUrl(ENTITY_URL)
-						.user("")
-						.password("")
-						.consoleOutputInfo(ConsoleOutputInfoDto.emptyEntityBuilder().build())
-						.build())
-				.build();
-		Mockito.when(buildInfoService.getOwnedEntityByName(ENTITY_NAME, BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
+		Mockito.when(buildInfoService.getOwnedEntities(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Stream.of(getBuildInfoEntity1()));
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
-				.then(executeEditDomainAndAssert())
-				.then(invocation -> {
-					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.build.default.mainList", message.getMessageKey());
-					return sendResponse;
-				});
+				.then(executeEditDomainAndAssert());
 
 		executeCommand(from, "/build edit " + ENTITY_NAME);
 		executeCommand(from, "/build edit jenkins.jobUrl");
 		executeCommand(from, ENTITY_URL_2);
 		executeCommand(from, "/build edit /done");
 
-		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
-
+		Mockito.verify(bot, Mockito.times(2)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(defaultCommand).process(chat, from, "");
 		Mockito.verify(buildInfoService).save(BuildInfoDto.builder()
 				.repoName(ENTITY_NAME)
 				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
-				.isPublic(false)
+				.isPublic(true)
 				.jenkinsInfo(JenkinsInfoDto.builder()
 						.jobUrl(ENTITY_URL_2)
-						.user("")
-						.password("")
-						.consoleOutputInfo(ConsoleOutputInfoDto.emptyEntityBuilder()
+						.consoleOutputInfo(ConsoleOutputInfoDto.builder()
 								.name("default")
+								.unitTestsResultFilepathPrefix("output/reports/TEST-")
 								.build())
 						.build())
+				.referencedByUsers(new HashSet<>())
 				.build());
 	}
 
@@ -77,18 +67,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 	public void failedSaveFlowTest() {
 		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
 
-		BuildInfoDto repoInit = BuildInfoDto.builder()
-				.repoName(ENTITY_NAME)
-				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
-				.isPublic(false)
-				.jenkinsInfo(JenkinsInfoDto.builder()
-						.jobUrl(ENTITY_URL)
-						.user("")
-						.password("")
-						.consoleOutputInfo(ConsoleOutputInfoDto.emptyEntityBuilder().build())
-						.build())
-				.build();
-		Mockito.when(buildInfoService.getOwnedEntityByName(ENTITY_NAME, BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
+		Mockito.when(buildInfoService.getOwnedEntities(BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Stream.of(getBuildInfoEntity1()));
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
 				.then(invocation -> {
@@ -112,16 +91,6 @@ public class EditCommandTest extends AbstractCommandTestCase {
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(Collections.emptyList()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
-				})
-				.then(invocation -> {
-					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.build.default.mainList", message.getMessageKey());
-					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
-					List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
-							new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
-					);
-					assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
-					return sendResponse;
 				});
 
 		executeCommand(from, "/build edit " + ENTITY_NAME);
@@ -130,27 +99,17 @@ public class EditCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/build edit /done");
 		executeCommand(from, "/cancel"); // finalize process to remove user from session map
 
-		Mockito.verify(bot, Mockito.times(5)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(defaultCommand).process(chat, from, "");
 		Mockito.verify(buildInfoService, Mockito.times(0)).save(any());
 	}
 
 
 	@Test
 	public void cancelledFlowTest() {
-		User from = new User(BuildInfoService.DEFAULT_CREATOR_ID);
+		User from = new User(EntityService.DEFAULT_CREATOR_ID);
 
-		BuildInfoDto repoInit = BuildInfoDto.builder()
-				.repoName(ENTITY_NAME)
-				.creatorId(BuildInfoService.DEFAULT_CREATOR_ID)
-				.isPublic(false)
-				.jenkinsInfo(JenkinsInfoDto.builder()
-						.jobUrl(ENTITY_URL)
-						.user("")
-						.password("")
-						.consoleOutputInfo(ConsoleOutputInfoDto.emptyEntityBuilder().build())
-						.build())
-				.build();
-		Mockito.when(buildInfoService.getOwnedEntityByName(ENTITY_NAME, BuildInfoService.DEFAULT_CREATOR_ID)).thenReturn(Optional.of(repoInit));
+		Mockito.when(buildInfoService.getOwnedEntities(EntityService.DEFAULT_CREATOR_ID)).thenReturn(Stream.of(getBuildInfoEntity1()));
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class)))
 				.then(executeEditIntroAndAssert())
 				.then(executeEditDomainAndAssert())
@@ -159,23 +118,15 @@ public class EditCommandTest extends AbstractCommandTestCase {
 					assertEquals("message.command.common.cancel", message.getMessageKey());
 					assertArrayEquals(new Object[] {"label.field.common.edit"}, message.getMessageArgs());
 					return sendResponse;
-				}).then(invocation -> {
-					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.build.default.mainList", message.getMessageKey());
-					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
-					List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
-							new InlineKeyboardButton("button.build.modifyMyItems").callbackData("/build my_list")
-					);
-					assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
-					return sendResponse;
 				});
 
 		executeCommand(from, "/build edit " + ENTITY_NAME);
 		executeCommand(from, "/build edit jenkins.jobUrl");
 		executeCommand(from, ENTITY_URL_2);
-		executeCommand(from, "/cancel");
+		executeCommand(from, "/cancel"); // TODO: move me to afterclass
 
-		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(defaultCommand).process(chat, from, "");
 		Mockito.verify(buildInfoService, Mockito.times(0)).save(any());
 	}
 
@@ -204,7 +155,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 	private String getUserInfoString(String domain) {
 		return String.format("Current repository info: \\n" +
 				"- label.field.build.repo.name: " + ENTITY_NAME + "\n" +
-				"- label.field.build.repo.public: false\n" +
+				"- label.field.build.repo.public: true\n" +
 				"- label.field.build.jenkins.jobUrl: %s\n" +
 				"- label.field.build.jenkins.user: \uD83D\uDEAB\n" +
 				"- label.field.build.jenkins.password: \uD83D\uDEAB\n" +
@@ -223,7 +174,4 @@ public class EditCommandTest extends AbstractCommandTestCase {
 		);
 	}
 
-	private void executeCommand(User from, String command) {
-		factory.getCommand(command).process(chat, from, command);
-	}
 }

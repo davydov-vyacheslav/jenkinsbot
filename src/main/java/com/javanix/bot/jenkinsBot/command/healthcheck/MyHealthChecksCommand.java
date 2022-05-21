@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ class MyHealthChecksCommand implements HealthCheckSubCommand {
 
 	@Override
 	public void process(Chat chat, User from, String defaultMessage) {
-		List<HealthCheckInfoDto> availableRepositories = database.getOwnedEntities(from.id());
+		List<HealthCheckInfoDto> availableRepositories = database.getOwnedOrReferencedEntities(from.id()).collect(Collectors.toList());
 		InlineKeyboardMarkup inlineKeyboard = buildMyEntitiesListMarkup(from, availableRepositories);
 		userContext.executeCommandAndSaveMessageId(chat, from, TelegramBotWrapper.MessageInfo.builder()
 				.messageKey(defaultMessage.isEmpty() ? "message.command.healthcheck.list.title" : defaultMessage)
@@ -41,9 +42,10 @@ class MyHealthChecksCommand implements HealthCheckSubCommand {
 	private InlineKeyboardMarkup buildMyEntitiesListMarkup(User from, List<HealthCheckInfoDto> availableEntities) {
 
 		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-		groupEntitiesBy(availableEntities, 2, inlineKeyboardMarkup, "/healthcheck edit ");
+		groupEntitiesBy(availableEntities, from.id(), 2, inlineKeyboardMarkup, "/healthcheck edit ");
 		inlineKeyboardMarkup.addRow(
 				new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.add")).callbackData("/healthcheck add"),
+				new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.add.reference")).callbackData("/healthcheck add_reference"),
 				new InlineKeyboardButton(bot.getI18nMessage(from, "button.common.delete")).switchInlineQueryCurrentChat("/healthcheck delete ")
 		);
 

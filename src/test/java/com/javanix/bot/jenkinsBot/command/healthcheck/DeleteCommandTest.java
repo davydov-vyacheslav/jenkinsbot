@@ -3,18 +3,19 @@ package com.javanix.bot.jenkinsBot.command.healthcheck;
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
 import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
 import com.javanix.bot.jenkinsBot.command.TelegramCommand;
-import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
-import com.javanix.bot.jenkinsBot.core.service.HealthCheckService;
+import com.javanix.bot.jenkinsBot.core.service.EntityService;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -23,23 +24,20 @@ import static org.mockito.ArgumentMatchers.any;
 
 public class DeleteCommandTest extends AbstractCommandTestCase {
 
+	@MockBean
+	private DefaultHealthCheckCommand defaultHealthCheckCommand;
+
 	@Test
 	public void delete_noParams() {
 		String commandText = "/healthcheck delete";
 		User from = new User(123L);
 
-		Mockito.when(healthCheckService.getOwnedEntityByName("", 123L)).thenReturn(Optional.empty());
+		Mockito.when(healthCheckService.getOwnedEntities(123L)).thenReturn(Stream.empty());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.healthcheck.delete", message.getMessageKey());
-
-			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton("button.common.add").callbackData("/healthcheck add"),
-					new InlineKeyboardButton("button.common.delete").switchInlineQueryCurrentChat("/healthcheck delete ")
-			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
-			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
-
+			assertThat(getExpectedInlineKeyboardButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
 		});
 
@@ -53,18 +51,12 @@ public class DeleteCommandTest extends AbstractCommandTestCase {
 		String commandText = "/healthcheck delete " + ENTITY_NAME;
 		User from = new User(123L);
 
-		Mockito.when(healthCheckService.getOwnedEntityByName(ENTITY_NAME, 123L)).thenReturn(Optional.empty());
+		Mockito.when(healthCheckService.getOwnedEntities(123L)).thenReturn(Stream.empty());
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.healthcheck.delete", message.getMessageKey());
-
-			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton("button.common.add").callbackData("/healthcheck add"),
-					new InlineKeyboardButton("button.common.delete").switchInlineQueryCurrentChat("/healthcheck delete ")
-			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
-			assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
-
+			assertThat(getExpectedInlineKeyboardButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 			return sendResponse;
 		});
 
@@ -76,15 +68,10 @@ public class DeleteCommandTest extends AbstractCommandTestCase {
 	@Test
 	public void delete_okParams() {
 		String commandText = "/healthcheck delete " + ENTITY_NAME;
-		User from = new User(HealthCheckService.DEFAULT_CREATOR_ID);
+		User from = new User(EntityService.DEFAULT_CREATOR_ID);
 
-		Mockito.when(healthCheckService.getOwnedEntityByName(ENTITY_NAME, HealthCheckService.DEFAULT_CREATOR_ID)).thenReturn(
-				Optional.of(HealthCheckInfoDto.builder()
-						.endpointName(ENTITY_NAME)
-						.endpointUrl(ENTITY_URL)
-						.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
-						.isPublic(true)
-						.build()));
+		Mockito.when(healthCheckService.removeEntity(EntityService.DEFAULT_CREATOR_ID, ENTITY_NAME)).thenReturn(true);
+		Mockito.when(healthCheckService.getOwnedEntities(EntityService.DEFAULT_CREATOR_ID)).thenReturn(Stream.of(getHealthCheckEntity1()));
 
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
@@ -98,7 +85,18 @@ public class DeleteCommandTest extends AbstractCommandTestCase {
 
 		TelegramCommand command = factory.getCommand(commandText);
 		command.process(chat, from, commandText);
+		Mockito.verify(defaultHealthCheckCommand).process(chat, from, "");
 		Mockito.verify(bot, Mockito.times(1)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+	}
+
+
+	@NotNull
+	private List<InlineKeyboardButton> getExpectedInlineKeyboardButtons() {
+		return Arrays.asList(
+				new InlineKeyboardButton("button.common.add").callbackData("/healthcheck add"),
+				new InlineKeyboardButton("button.common.add.reference").callbackData("/healthcheck add_reference"),
+				new InlineKeyboardButton("button.common.delete").switchInlineQueryCurrentChat("/healthcheck delete ")
+		);
 	}
 
 }

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,12 +25,7 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 
 	@Test
 	public void status_ok() {
-		HealthCheckInfoDto endpoint1 = HealthCheckInfoDto.builder()
-				.endpointName(ENTITY_NAME)
-				.endpointUrl(ENTITY_URL)
-				.creatorId(HealthCheckService.DEFAULT_CREATOR_ID)
-				.isPublic(true)
-				.build();
+		HealthCheckInfoDto endpoint1 = getHealthCheckEntity1();
 		HealthCheckInfoDto endpoint2 = HealthCheckInfoDto.builder()
 				.endpointName(ENTITY_NAME_2)
 				.endpointUrl(ENTITY_URL_2)
@@ -38,8 +33,8 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 				.isPublic(true)
 				.build();
 
-		Mockito.when(healthCheckService.getAvailableEndpoints(EntityService.DEFAULT_CREATOR_ID))
-				.thenReturn(Arrays.asList(endpoint1, endpoint2));
+		Mockito.when(healthCheckService.getOwnedOrReferencedEntities(EntityService.DEFAULT_CREATOR_ID))
+				.thenReturn(Stream.of(endpoint1, endpoint2));
 		Mockito.when(healthCheckProcessor.getHealthStatusForUrl(endpoint1.getEndpointUrl())).thenReturn(HealthStatus.SUCCESS);
 		Mockito.when(healthCheckProcessor.getHealthStatusForUrl(endpoint2.getEndpointUrl())).thenReturn(HealthStatus.UNSTABLE);
 

@@ -37,6 +37,7 @@ Flows:
 * `/build status <buildInfo>`: Get status of specific build. If provided value is empty or invalid, you will be provided with
 list of applicable ones (see `/build`)
 * `/build add`: Create new build info
+* `/build add_reference`. Add link to existing public repo
 * `/build edit <buildInfo>`: Edit specific build info. If provided value is empty or invalid, you will be provided with 
 list of applicable ones (see `/build my_list`)
 
@@ -62,6 +63,7 @@ Allows you to monitor status of external resources: web-servers, microservice he
 Flows:
 * `/healthcheck`: get status check for all owned and public external resources
 * `/healthcheck add`: add new resource
+* `/healthcheck add_reference`: Add link to existing public resource
 * `/healthcheck edit`: menu for add/edit/delete owned external resources
 
 Logic bases on return code: 

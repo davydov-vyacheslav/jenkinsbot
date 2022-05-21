@@ -14,7 +14,7 @@ import static java.util.regex.Pattern.CASE_INSENSITIVE;
 class HealthCheckCommand extends AbstractEntityCommand {
 
 	private final HealthCheckEntityCommandFactory healthCheckCommandFactory;
-	private static final Pattern HEALTH_CHECK_COMMAND_PATTERN = Pattern.compile(".*/healthcheck.?(add|edit|status|delete|my_list).?(.*)", CASE_INSENSITIVE);
+	private static final Pattern HEALTH_CHECK_COMMAND_PATTERN = Pattern.compile(".*/healthcheck.?(add_reference|add|edit|status|delete|my_list).?(.*)", CASE_INSENSITIVE);
 
 	@Override
 	public String getCommandName() {

@@ -31,8 +31,7 @@ class StatusBuildCommand implements BuildSubCommand {
 
 	@Override
 	public void process(Chat chat, User from, String buildCommandArguments) {
-		BuildInfoDto repository = database.getAvailableRepository(buildCommandArguments, from.id());
-
+		BuildInfoDto repository = database.filter(database::getOwnedOrReferencedEntities, from.id(), buildCommandArguments).orElse(null);
 		if (repository == null) {
 			defaultBuildCommand.process(chat, from, "error.command.build.common.wrongTeam");
 			return;
