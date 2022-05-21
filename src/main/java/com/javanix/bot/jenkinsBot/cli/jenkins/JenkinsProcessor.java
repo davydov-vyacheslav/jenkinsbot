@@ -1,17 +1,23 @@
 package com.javanix.bot.jenkinsBot.cli.jenkins;
 
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -30,11 +36,49 @@ public class JenkinsProcessor {
 
 	private final ConsoleOutputResolver consoleOutputResolver;
 
+	public BuildStatus getBuildStatus(JenkinsInfoDto jenkinsInfo) {
+
+		BuildStatus buildStatus = BuildStatus.IN_PROGRESS;
+
+		try {
+			HttpURLConnection httpConnection = configureUrlConnection(jenkinsInfo, jenkinsInfo.getJobUrl() + "/api/json");
+			StringWriter sw = new StringWriter();
+			try (InputStream in = httpConnection.getInputStream()) {
+				IOUtils.copy(in, sw, jenkinsInfo.getConsoleOutputInfo().getFileEncoding());
+			}
+
+			JsonObject jsonObject = JsonParser.parseString(sw.toString()).getAsJsonObject();
+			int lastBuildObject = getBuildNumber(jsonObject, "lastBuild");
+			int lastStableBuildObject = getBuildNumber(jsonObject, "lastStableBuild");
+			int lastFailedBuildObject = getBuildNumber(jsonObject, "lastFailedBuild");
+			int lastUnstableBuildObject = getBuildNumber(jsonObject, "lastUnstableBuild");
+			int lastUnsuccessfulBuildObject = getBuildNumber(jsonObject, "lastUnsuccessfulBuild");
+
+			if (lastBuildObject == lastStableBuildObject) {
+				buildStatus = BuildStatus.COMPLETED_OK;
+			} else if (lastBuildObject == lastFailedBuildObject) {
+				buildStatus = BuildStatus.COMPLETED_FAIL;
+			} else if (lastBuildObject == lastUnstableBuildObject) {
+				buildStatus = BuildStatus.COMPLETED_UNSTABLE;
+			} else if (lastBuildObject == lastUnsuccessfulBuildObject) {
+				buildStatus = BuildStatus.COMPLETED_ABORTED;
+			}
+		} catch (IOException e) {
+			buildStatus = BuildStatus.BROKEN;
+		}
+
+		return buildStatus;
+
+	}
+
+	private int getBuildNumber(JsonObject jsonObject, String property) {
+		return JsonNull.INSTANCE.equals(jsonObject.get(property)) ? 0 : jsonObject.getAsJsonObject(property).getAsJsonPrimitive("number").getAsInt();
+	}
+
 	public JenkinsBuildDetails getCurrentBuildJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo) {
 		return getJenkinsBuildDetails(jenkinsInfo, "lastBuild");
 	}
 
-	// TODO: cache me
 	public JenkinsBuildDetails getPreviousBuildJenkinsBuildDetails(JenkinsInfoDto jenkinsInfo) {
 		return getJenkinsBuildDetails(jenkinsInfo, "lastCompletedBuild");
 	}
@@ -52,14 +96,9 @@ public class JenkinsProcessor {
 
 		log.info(String.format("Saving `%s` data to file: `%s`", url, tempFile.getAbsoluteFile()));
 
-		HttpURLConnection httpcon = (HttpURLConnection) new URL(url).openConnection();
-		if (Strings.isNotBlank(jenkinsInfo.getUser())) {
-			String userCredentials = jenkinsInfo.getUser() + ":" + jenkinsInfo.getPassword();
-			String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
-			httpcon.setRequestProperty("Authorization", basicAuth);
-		}
+		HttpURLConnection httpConnection = configureUrlConnection(jenkinsInfo, url);
 
-		try (InputStream in = httpcon.getInputStream();
+		try (InputStream in = httpConnection.getInputStream();
 			 ReadableByteChannel readableByteChannel = Channels.newChannel(in);
 				FileOutputStream fileOutputStream = new FileOutputStream(tempFile)) {
 			fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
@@ -82,11 +121,21 @@ public class JenkinsProcessor {
 				if (consoleOutputResolver.isExecutedTest(consoleOutputInfo, s)) {
 					details.incrementRunTestCount();
 				}
-				details.setBuildStatus(BuildStatus.of(s)); // TODO: use lastLine
 			});
 		}
 
+		details.setBuildStatus(getBuildStatus(jenkinsInfo));
 		return details;
+	}
+
+	private HttpURLConnection configureUrlConnection(JenkinsInfoDto jenkinsInfo, String url) throws IOException {
+		HttpURLConnection httpConnection = (HttpURLConnection) new URL(url).openConnection();
+		if (Strings.isNotBlank(jenkinsInfo.getUser())) {
+			String userCredentials = jenkinsInfo.getUser() + ":" + jenkinsInfo.getPassword();
+			String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
+			httpConnection.setRequestProperty("Authorization", basicAuth);
+		}
+		return httpConnection;
 	}
 
 }

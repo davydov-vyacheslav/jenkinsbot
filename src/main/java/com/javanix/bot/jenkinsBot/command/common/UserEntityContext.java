@@ -27,7 +27,7 @@ public class UserEntityContext {
 		}
 	}
 
-	public void executeCommandAndSaveMessageId(Chat chat, User from, TelegramBotWrapper.MessageInfo messageInfo, EntityType entityType) {
+	public Integer executeCommandAndSaveMessageId(Chat chat, User from, TelegramBotWrapper.MessageInfo messageInfo, EntityType entityType) {
 		UserInfoDto user = userService.getUser(from.id());
 		if (user.getLastMessageIdMap() == null) {
 			user.setLastMessageIdMap(new HashMap<>());
@@ -37,5 +37,6 @@ public class UserEntityContext {
 		user.setUserName(from.username());
 		user.getLastMessageIdMap().put(entityType, execute.message().messageId());
 		userService.saveUser(user);
+		return execute.message().messageId();
 	}
 }

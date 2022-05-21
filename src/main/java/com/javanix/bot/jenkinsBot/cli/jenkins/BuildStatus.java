@@ -1,19 +1,18 @@
 package com.javanix.bot.jenkinsBot.cli.jenkins;
 
-import java.util.Arrays;
-
 public enum BuildStatus {
-	IN_PROGRESS("", "label.command.build.status.type.in_progress"),
-	COMPLETED_FAIL("Finished: FAILURE", "label.command.build.status.type.failed"),
-	COMPLETED_UNSTABLE("Finished: UNSTABLE", "label.command.build.status.type.unstable"),
-	COMPLETED_ABORTED("Finished: ABORTED", "label.command.build.status.type.aborted"),
-	COMPLETED_OK("Finished: SUCCESS", "label.command.build.status.type.success");
+	NA("label.command.build.status.type.na"),
+	BROKEN("label.command.build.status.type.broken"),
 
-	private final String finalMessage;
+	IN_PROGRESS("label.command.build.status.type.in_progress"),
+	COMPLETED_FAIL("label.command.build.status.type.failed"),
+	COMPLETED_UNSTABLE("label.command.build.status.type.unstable"),
+	COMPLETED_ABORTED("label.command.build.status.type.aborted"),
+	COMPLETED_OK("label.command.build.status.type.success");
+
 	private final String messageKey;
 
-	BuildStatus(String finalMessage, String messageKey) {
-		this.finalMessage = finalMessage;
+	BuildStatus(String messageKey) {
 		this.messageKey = messageKey;
 	}
 
@@ -21,7 +20,4 @@ public enum BuildStatus {
 		return messageKey;
 	}
 
-	public static BuildStatus of(String message) {
-		return Arrays.stream(values()).filter(buildStatus -> buildStatus.finalMessage.equals(message)).findAny().orElse(IN_PROGRESS);
-	}
 }

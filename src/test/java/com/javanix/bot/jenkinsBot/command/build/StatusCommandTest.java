@@ -51,8 +51,9 @@ public class StatusCommandTest extends AbstractCommandTestCase<BuildInfoDto> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.build.common.wrongTeam", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton(ICON_PUBLIC + ENTITY_NAME).callbackData("/build status " + ENTITY_NAME),
-					new InlineKeyboardButton(ICON_PRIVATE + ENTITY_NAME_2).callbackData("/build status " + ENTITY_NAME_2),
+					new InlineKeyboardButton(ICON_PUBLIC + "label.command.build.status.type.na " + ENTITY_NAME).callbackData("/build status " + ENTITY_NAME),
+					new InlineKeyboardButton(ICON_PRIVATE + "label.command.build.status.type.na " + ENTITY_NAME_2).callbackData("/build status " + ENTITY_NAME_2),
+					new InlineKeyboardButton("button.common.refresh_list").callbackData("/build"),
 					new InlineKeyboardButton("button.common.modifyMyItems").callbackData("/build my_list")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
@@ -84,8 +85,9 @@ public class StatusCommandTest extends AbstractCommandTestCase<BuildInfoDto> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("error.command.build.common.wrongTeam", message.getMessageKey());
 			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
-					new InlineKeyboardButton(ICON_PUBLIC + ENTITY_NAME).callbackData("/build status " + ENTITY_NAME),
-					new InlineKeyboardButton(ICON_PRIVATE + ENTITY_NAME_2).callbackData("/build status " + ENTITY_NAME_2),
+					new InlineKeyboardButton(ICON_PUBLIC + "label.command.build.status.type.na " + ENTITY_NAME).callbackData("/build status " + ENTITY_NAME),
+					new InlineKeyboardButton(ICON_PRIVATE + "label.command.build.status.type.na " + ENTITY_NAME_2).callbackData("/build status " + ENTITY_NAME_2),
+					new InlineKeyboardButton("button.common.refresh_list").callbackData("/build"),
 					new InlineKeyboardButton("button.common.modifyMyItems").callbackData("/build my_list")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);

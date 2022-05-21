@@ -13,7 +13,6 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,7 +52,8 @@ public class CommandTest extends AbstractCommandTestCase {
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("message.command.build.default.mainList", message.getMessageKey());
-			List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
+			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
+					new InlineKeyboardButton("button.common.refresh_list").callbackData("/build"),
 					new InlineKeyboardButton("button.common.modifyMyItems").callbackData("/build my_list")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
@@ -75,7 +75,8 @@ public class CommandTest extends AbstractCommandTestCase {
 		Mockito.when(bot.sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class))).then(invocation -> {
 			TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
 			assertEquals("message.command.build.default.mainList", message.getMessageKey());
-			List<InlineKeyboardButton> expectedInlineButtons = Collections.singletonList(
+			List<InlineKeyboardButton> expectedInlineButtons = Arrays.asList(
+					new InlineKeyboardButton("button.common.refresh_list").callbackData("/build"),
 					new InlineKeyboardButton("button.common.modifyMyItems").callbackData("/build my_list")
 			);
 			List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
