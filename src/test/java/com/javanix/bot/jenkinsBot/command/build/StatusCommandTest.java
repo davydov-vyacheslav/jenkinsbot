@@ -105,7 +105,7 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 
 		Mockito.when(jenkinsProcessor.getPreviousBuildJenkinsBuildDetails(buildInfoEntity1.getJenkinsInfo())).thenReturn(
 				JenkinsBuildDetails.builder()
-						.runTestsCount(1000)
+						.runTestsCount(999)
 						.build());
 		Mockito.when(jenkinsProcessor.getCurrentBuildJenkinsBuildDetails(buildInfoEntity1.getJenkinsInfo())).thenReturn(
 				JenkinsBuildDetails.builder()
@@ -124,7 +124,7 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 		Mockito.when(bot.execute(any(SendMessage.class))).then(invocation -> {
 			SendMessage message = invocation.getArgument(0);
 			assertEquals("Build status for `" + ENTITY_NAME + "` repo:\n" +
-					"label.command.build.status.type.in_progress Run tests: 500/1 000\n" +
+					"label.command.build.status.type.in_progress Run tests: 500/999\n" +
 					"Top 2 Failed tests (of 2):\n" +
 					"- [AssemblyExportTest](https://domain.com/ws/output/reports/TEST-com.javanix.jenkinsbot.test.AssemblyExportTest.xml/*view*/)\n" +
 					"- [AnotherFailedTest](https://domain.com/ws/output/reports/TEST-com.javanix.jenkinsbot.test2.AnotherFailedTest.xml/*view*/)\n", message.getParameters().get("text"));
