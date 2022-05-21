@@ -19,7 +19,6 @@ jobs:
       - uses: pmd/pmd-github-action@v1
         id: pmd
         with:
-          version: '6.45.0' # FIXME: dependabot (6.45.0+)
           sourcePath: 'src'
           rulesets: '${{ github.workspace }}/src/main/resources/pmd/jenkinsbot.xml'
       - name: Upload SARIF file
