@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
-public class AddReferenceCommandTest extends AbstractCommandTestCase  {
+public class AddReferenceCommandTest extends AbstractCommandTestCase<HealthCheckInfoDto>  {
 
 	@MockBean
 	private DefaultHealthCheckCommand defaultHealthCheckCommand;

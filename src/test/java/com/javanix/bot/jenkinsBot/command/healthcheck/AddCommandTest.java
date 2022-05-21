@@ -13,7 +13,6 @@ import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -23,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
-public class AddCommandTest extends AbstractCommandTestCase {
+public class AddCommandTest extends AbstractCommandTestCase<HealthCheckInfoDto> {
 
 	@MockBean
 	private DefaultHealthCheckCommand defaultHealthCheckCommand;
@@ -73,22 +72,14 @@ public class AddCommandTest extends AbstractCommandTestCase {
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(expectedInlineButtons).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
-				})
-				.then(invocation -> {
-					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.common.cancel", message.getMessageKey());
-					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
-					assertThat(Collections.emptyList()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
-					return sendResponse;
 				});
 
 		executeCommand(from, "/healthcheck add");
 		executeCommand(from, "/healthcheck add name");
 		executeCommand(from, ENTITY_NAME);
 		executeCommand(from, "/healthcheck ADD /done");
-		executeCommand(from, "/cancel"); // finalize process to remove user from session map
 
-		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
+		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 		Mockito.verify(healthCheckService, Mockito.times(0)).save(any());
 	}
 

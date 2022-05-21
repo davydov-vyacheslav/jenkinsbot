@@ -16,7 +16,6 @@ import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Stream;
@@ -27,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
-public class EditCommandTest extends AbstractCommandTestCase {
+public class EditCommandTest extends AbstractCommandTestCase<BuildInfoDto> {
 
 	@MockBean
 	private DefaultBuildCommand defaultCommand;
@@ -84,23 +83,14 @@ public class EditCommandTest extends AbstractCommandTestCase {
 					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
 					assertThat(getExpectedInlineButtons()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
 					return sendResponse;
-				})
-				.then(invocation -> {
-					TelegramBotWrapper.MessageInfo message = invocation.getArgument(2);
-					assertEquals("message.command.common.cancel", message.getMessageKey());
-					List<InlineKeyboardButton> actualInlineButtons = getInlineKeyboardButtons(message);
-					assertThat(Collections.emptyList()).containsExactlyInAnyOrderElementsOf(actualInlineButtons);
-					return sendResponse;
 				});
 
 		executeCommand(from, "/build edit " + ENTITY_NAME);
 		executeCommand(from, "/build edit jenkins.jobUrl");
 		executeCommand(from, "");
 		executeCommand(from, "/build edit /done");
-		executeCommand(from, "/cancel"); // finalize process to remove user from session map
 
-		Mockito.verify(bot, Mockito.times(4)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
-		Mockito.verify(defaultCommand).process(chat, from, "");
+		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 		Mockito.verify(buildInfoService, Mockito.times(0)).save(any());
 	}
 
@@ -123,7 +113,7 @@ public class EditCommandTest extends AbstractCommandTestCase {
 		executeCommand(from, "/build edit " + ENTITY_NAME);
 		executeCommand(from, "/build edit jenkins.jobUrl");
 		executeCommand(from, ENTITY_URL_2);
-		executeCommand(from, "/cancel"); // TODO: move me to afterclass
+		executeCommand(from, "/cancel");
 
 		Mockito.verify(bot, Mockito.times(3)).sendI18nMessage(Mockito.eq(from), any(Chat.class), any(TelegramBotWrapper.MessageInfo.class));
 		Mockito.verify(defaultCommand).process(chat, from, "");
