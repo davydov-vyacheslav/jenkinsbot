@@ -2,11 +2,8 @@ package com.javanix.bot.jenkinsBot.command;
 
 import com.javanix.bot.jenkinsBot.CacheService;
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.command.common.AbstractModifyEntityCommand;
-import com.javanix.bot.jenkinsBot.command.common.StatedEntity;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
-import com.javanix.bot.jenkinsBot.core.model.Entity;
 import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.UserInfoDto;
@@ -21,7 +18,6 @@ import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.response.SendResponse;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.mockito.internal.stubbing.answers.ReturnsArgumentAt;
@@ -29,14 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -45,7 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 @SpringJUnitConfig
 @ContextConfiguration(classes = CommandTestConfiguration.class)
-public abstract class AbstractCommandTestCase<T extends Entity> {
+public abstract class AbstractCommandTestCase {
 
 	protected static final String ENTITY_NAME = "Entity Name";
 	protected static final String ENTITY_NAME_2 = "Another Entity Name";
@@ -79,9 +73,6 @@ public abstract class AbstractCommandTestCase<T extends Entity> {
 	@Autowired
 	protected CommonCommandFactory factory;
 
-	@Autowired
-	protected List<AbstractModifyEntityCommand<T>> modifyEntityCommands;
-
 	private static final Map<String, String> I18N_MAP = new ConcurrentHashMap<String, String>() {{
 		put("message.command.build.common.status.prefix", "Current repository info: \\n{0}");
 		put("message.command.healthcheck.common.status.prefix", "Current Endpoint info: \\n{0}");
@@ -104,13 +95,6 @@ public abstract class AbstractCommandTestCase<T extends Entity> {
 			key = I18N_MAP.getOrDefault(key, key);
 			return new MessageFormat(key).format(invocation.getArgument(2));
 		});
-	}
-
-	@AfterEach
-	public void tearDown() {
-		for (AbstractModifyEntityCommand<T> modifyEntityCommand : modifyEntityCommands) {
-			((Map<Long, StatedEntity<T>>) Objects.requireNonNull(ReflectionTestUtils.getField(modifyEntityCommand, "usersInProgress"))).clear();
-		}
 	}
 
 	protected List<InlineKeyboardButton> getInlineKeyboardButtons(TelegramBotWrapper.MessageInfo message) {

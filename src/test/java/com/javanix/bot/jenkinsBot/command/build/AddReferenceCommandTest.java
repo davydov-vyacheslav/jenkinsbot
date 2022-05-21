@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
-public class AddReferenceCommandTest extends AbstractCommandTestCase<BuildInfoDto>  {
+public class AddReferenceCommandTest extends AbstractCommandTestCase  {
 
 	@MockBean
 	private DefaultBuildCommand defaultCommand;

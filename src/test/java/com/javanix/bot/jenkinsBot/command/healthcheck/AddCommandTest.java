@@ -1,7 +1,7 @@
 package com.javanix.bot.jenkinsBot.command.healthcheck;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
+import com.javanix.bot.jenkinsBot.command.AbstractProgressableCommandTest;
 import com.javanix.bot.jenkinsBot.core.model.HealthCheckInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.EntityService;
 import com.pengrad.telegrambot.model.Chat;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
-public class AddCommandTest extends AbstractCommandTestCase<HealthCheckInfoDto> {
+public class AddCommandTest extends AbstractProgressableCommandTest<HealthCheckInfoDto> {
 
 	@MockBean
 	private DefaultHealthCheckCommand defaultHealthCheckCommand;

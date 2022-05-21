@@ -1,7 +1,7 @@
 package com.javanix.bot.jenkinsBot.command.build;
 
 import com.javanix.bot.jenkinsBot.TelegramBotWrapper;
-import com.javanix.bot.jenkinsBot.command.AbstractCommandTestCase;
+import com.javanix.bot.jenkinsBot.command.AbstractProgressableCommandTest;
 import com.javanix.bot.jenkinsBot.core.model.BuildInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.ConsoleOutputInfoDto;
 import com.javanix.bot.jenkinsBot.core.model.JenkinsInfoDto;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
-public class EditCommandTest extends AbstractCommandTestCase<BuildInfoDto> {
+public class EditCommandTest extends AbstractProgressableCommandTest<BuildInfoDto> {
 
 	@MockBean
 	private DefaultBuildCommand defaultCommand;
