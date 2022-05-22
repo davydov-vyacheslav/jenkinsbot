@@ -1,5 +1,17 @@
 # What's new / Changelog
 
+## 0.0.8
+  - GitHub CI/CD improvements: added generated changelog information from CHANGELOG.md
+  - fixed issue when there were build infos with intersect names (e.g. repo0 and my-repo01)
+  - i18n /start command menus
+  - cleanup README.md, extracted developers info to separate file
+  - unit test cleanup and optimization
+  - repository status message UI/UX improvement + performance improvement
+  - endpoint status message UI/UX improvement
+  - (#18) added configuration for jenkins console output processing
+  - (#25) remaster ownership relations. Added ability to reference foreign public entity. This make your list more flexible
+  - (#24) main build list shows brief status of execution + amount of failed tests for in-progress state
+  - (#2) User settings. Localization
 ## 0.0.7
   - BuildInfoModelChange to contain full jobUrl: https://github.com/davydov-vyacheslav/jenkinsbot/issues/3
   - GitHub CI/CD improvements

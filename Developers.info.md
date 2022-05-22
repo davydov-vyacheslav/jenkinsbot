@@ -77,8 +77,16 @@ Recommended to add following configuration to your gradle project:
         - label.field.*.*
         - label.welcome.field.*.*
 - there are should be: stage env, prod env, dev (xxx) env
-- Document :latest processing (with watchtower)
+- Document :latest processing (with watchtower). No way to verify and make docs
 - Document stable release build processing
 - ?? add docker-compose.yml file?
 - ?? migrate docker registry to GH ?
+- Parse errors for non-Java/junit projects. E.g. - get Database build errors (Oracle, based on ORA- messages)
+- Execute Jenkins build
+- auto-upgrade gradle: https://api.github.com/repos/gradle/gradle/releases/latest : (https://github.com/dependabot/dependabot-core/issues/2223)
+- Jenkins' info and ETA to complete build
+- i18n coverage and editor plugin
+- In further need to add constraints for entities . Now it is impossible as
+  - user may want to rename referenced entities
+  - no uniqueness between reference name and entity name: `@CompoundIndex(name = "unique_idx", def = "{'repoName': 1, 'creatorId': 1}", unique = true)`
 
