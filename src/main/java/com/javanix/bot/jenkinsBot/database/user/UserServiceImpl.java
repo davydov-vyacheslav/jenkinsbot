@@ -1,10 +1,13 @@
 package com.javanix.bot.jenkinsBot.database.user;
 
+import com.javanix.bot.jenkinsBot.CacheService;
+import com.javanix.bot.jenkinsBot.core.model.LocaleType;
 import com.javanix.bot.jenkinsBot.core.model.UserInfoDto;
 import com.javanix.bot.jenkinsBot.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -12,6 +15,7 @@ import java.util.Optional;
 class UserServiceImpl implements UserService {
 
 	private final UserRepository repository;
+	private final CacheService cacheService;
 
 	@Override
 	public UserInfoDto getUser(Long telegramId) {
@@ -27,6 +31,26 @@ class UserServiceImpl implements UserService {
 		UserEntity entity = convertDtoToEntity(user);
 		foundUser.ifPresent(userEntity -> entity.setId(userEntity.getId()));
 		repository.save(entity);
+	}
+
+	@Override
+	public Locale getUserLocale(long telegramId) {
+		Locale result = cacheService.getUserLocale(telegramId);
+		if (result == null) {
+			result = getUser(telegramId).getLocale().getLocale();
+			cacheService.updateUserLocale(telegramId, result);
+		}
+		return result;
+	}
+
+	@Override
+	public void updateUserLocale(long telegramId, LocaleType locale) {
+		Optional<UserEntity> foundUser = repository.findByUserId(telegramId);
+		foundUser.ifPresent(userEntity -> {
+			foundUser.get().setLocale(locale);
+			repository.save(foundUser.get());
+			cacheService.updateUserLocale(telegramId, locale.getLocale());
+		});
 	}
 
 	private UserInfoDto convertEntityToDto(UserEntity userEntity) {

@@ -72,3 +72,10 @@ Logic bases on return code:
 * Server isn't alive - DOWN (🔴)
 
 ![HealthCheck](./doc/assets/healthcheck.png)
+
+### Flow /my_settings
+
+Allows you to configure personal settings.
+
+Flows:
+* `/my_settings language` - ability to set UI language. Note, that this functionality is badly supports as need resources for translation and maintenance ;) 

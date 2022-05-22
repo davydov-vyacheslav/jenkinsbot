@@ -21,6 +21,7 @@ class StartCommand implements TelegramCommand {
 				new BotCommand("/cancel", bot.getI18nMessage(from, "text.command.cancel")),
 				new BotCommand("/start", bot.getI18nMessage(from, "text.command.start")),
 				new BotCommand("/healthcheck", bot.getI18nMessage(from, "text.command.healthcheck")),
+				new BotCommand("/my_settings", bot.getI18nMessage(from, "text.command.my_settings")),
 				new BotCommand("/build", bot.getI18nMessage(from, "text.command.build")))
 		);
 	}

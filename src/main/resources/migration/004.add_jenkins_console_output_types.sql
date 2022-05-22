@@ -20,6 +20,10 @@ db.BuildInfo.updateMany(
   { referencedByUsers : { $exists: false } },
   [{ $set : { "referencedByUsers" : [] }}]
 );
+db.Users.updateMany(
+  { lastMessageIdMap : { $exists: false } },
+  [{ $set : { "lastMessageIdMap" : {} }}]
+);
 db.Settings.update(
     {'key' : 'dbVersion'},
     { $set : {'value' : '004'}}

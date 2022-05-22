@@ -11,8 +11,6 @@ import com.pengrad.telegrambot.response.SendResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-
 @Component
 @RequiredArgsConstructor
 public class UserEntityContext {
@@ -29,14 +27,15 @@ public class UserEntityContext {
 
 	public Integer executeCommandAndSaveMessageId(Chat chat, User from, TelegramBotWrapper.MessageInfo messageInfo, EntityType entityType) {
 		UserInfoDto user = userService.getUser(from.id());
-		if (user.getLastMessageIdMap() == null) {
-			user.setLastMessageIdMap(new HashMap<>());
-		}
 		removeLastMessage(user, chat, entityType);
-		SendResponse execute = bot.sendI18nMessage(from, chat, messageInfo);
+		Integer returnMessageId = null;
+		if (messageInfo != null) {
+			SendResponse execute = bot.sendI18nMessage(from, chat, messageInfo);
+			returnMessageId = execute.message().messageId();
+		}
 		user.setUserName(from.username());
-		user.getLastMessageIdMap().put(entityType, execute.message().messageId());
+		user.getLastMessageIdMap().put(entityType, returnMessageId);
 		userService.saveUser(user);
-		return execute.message().messageId();
+		return returnMessageId;
 	}
 }

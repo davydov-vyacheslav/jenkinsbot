@@ -1,9 +1,12 @@
 package com.javanix.bot.jenkinsBot.core.model;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 public enum LocaleType {
-	EN(Locale.ENGLISH), RU(new Locale("ru"));
+	EN(Locale.forLanguageTag("")),
+	RU(Locale.forLanguageTag("ru")),
+	UK(Locale.forLanguageTag("uk"));
 
 	private final Locale locale;
 
@@ -16,10 +19,9 @@ public enum LocaleType {
 	}
 
 	public static LocaleType of(String localeType) {
-		LocaleType result = EN;
-		if ("ru".equalsIgnoreCase(localeType)) {
-			result = RU;
-		}
-		return result;
+		return Arrays.stream(values())
+				.filter(lt -> lt.toString().equalsIgnoreCase(localeType))
+				.findAny()
+				.orElse(EN);
 	}
 }

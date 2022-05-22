@@ -59,7 +59,7 @@ public abstract class AbstractCommandTestCase {
 	private CacheService cacheService;
 
 	@MockBean
-	private UserService userService;
+	protected UserService userService;
 
 	@MockBean
 	protected HealthCheckService healthCheckService;

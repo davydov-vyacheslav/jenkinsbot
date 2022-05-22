@@ -1,5 +1,6 @@
 package com.javanix.bot.jenkinsBot;
 
+import com.javanix.bot.jenkinsBot.core.service.UserService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Chat;
@@ -25,7 +26,7 @@ public class TelegramBotWrapper {
 
 	private final TelegramBot bot;
 	private final MessageSource messageSource;
-	private final CacheService cacheService;
+	private final UserService userService;
 
 	public void setUpdatesListener(UpdatesListener listener) {
 		bot.setUpdatesListener(listener);
@@ -53,7 +54,7 @@ public class TelegramBotWrapper {
 	}
 
 	public String getI18nMessage(User from, String messageKey, Object[] messageArgs) {
-		Locale locale = cacheService.getUserLocale(from.id());
+		Locale locale = userService.getUserLocale(from.id());
 		return messageSource.getMessage(messageKey, messageArgs, messageKey, locale);
 	}
 

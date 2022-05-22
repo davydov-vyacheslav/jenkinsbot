@@ -131,7 +131,7 @@ public class CommandTest extends AbstractCommandTestCase {
 			List<String> actualCommandList = Arrays.stream(((BotCommand[])((SetMyCommands)invocation.getArgument(0)).getParameters().get("commands")))
 					.map(BotCommand::command)
 					.collect(Collectors.toList());
-			List<String> expectedValues = Arrays.asList("/help", "/cancel", "/start", "/build", "/healthcheck");
+			List<String> expectedValues = Arrays.asList("/help", "/cancel", "/start", "/build", "/healthcheck", "/my_settings");
 			assertThat(actualCommandList).containsExactlyInAnyOrderElementsOf(expectedValues);
 			return null;
 		});
