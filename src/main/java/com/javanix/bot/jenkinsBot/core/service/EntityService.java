@@ -26,12 +26,12 @@ public interface EntityService<T extends Entity> {
 		}
 		// if entity is mine and there are no references -> remove at, otherwise transfer ownership to default user
 		// (don't make subscribed users argue of lost record)
-		if (!ownedOrReferencedEntity.getReferences().isEmpty()) {
+		if (ownedOrReferencedEntity.getReferences().isEmpty()) {
+			removeEntityInternal(ownerId, name);
+		} else {
 			ownedOrReferencedEntity.setCreatorId(DEFAULT_CREATOR_ID);
 			ownedOrReferencedEntity.setCreatorFullName("Orphan");
 			save(ownedOrReferencedEntity);
-		} else {
-			removeEntityInternal(ownerId, name);
 		}
 		return true;
 	}

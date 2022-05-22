@@ -27,12 +27,12 @@ public interface EntitySubCommand<T extends Entity> extends Processable {
 				.forEach(entityDtos -> inlineKeyboardMarkup.addRow(
 						entityDtos.stream()
 								.map(entityDto -> {
-									String repoName = (entityDto.isPublic() ? ICON_PUBLIC : ICON_PRIVATE);
+									StringBuilder repoNameBuilder = new StringBuilder(entityDto.isPublic() ? ICON_PUBLIC : ICON_PRIVATE);
 									if (!entityDto.getCreatorId().equals(ownerId)) {
-										repoName += ICON_REFERENCE;
+										repoNameBuilder.append(ICON_REFERENCE);
 									}
-									repoName += entityDto.getName();
-									return new InlineKeyboardButton(repoName).callbackData(callbackPrefix + entityDto.getName());
+									repoNameBuilder.append(entityDto.getName());
+									return new InlineKeyboardButton(repoNameBuilder.toString()).callbackData(callbackPrefix + entityDto.getName());
 								})
 								.toArray(InlineKeyboardButton[]::new)));
 	}

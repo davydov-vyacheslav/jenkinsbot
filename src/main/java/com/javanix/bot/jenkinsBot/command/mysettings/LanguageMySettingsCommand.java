@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 @Component
 @MySettingsQualifier
@@ -44,7 +45,7 @@ class LanguageMySettingsCommand implements NonEntitySubCommand {
 		inlineKeyboardMarkup.addRow(
 				Arrays.stream(LocaleType.values())
 						.map(localeType -> new InlineKeyboardButton(
-								bot.getI18nMessage(from, "button.command.my_settings.language.type." + localeType.name().toLowerCase()))
+								bot.getI18nMessage(from, "button.command.my_settings.language.type." + localeType.name().toLowerCase(Locale.ENGLISH)))
 								.callbackData("/my_settings language " + localeType))
 						.toArray(InlineKeyboardButton[]::new)
 		);

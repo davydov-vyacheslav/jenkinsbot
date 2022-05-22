@@ -48,17 +48,17 @@ class StatusBuildCommand implements BuildSubCommand {
 		JenkinsBuildDetails currentBuildDetails = jenkinsProcessor.getCurrentBuildJenkinsBuildDetails(repository.getJenkinsInfo());
 
 		// TODO: make build info name as link to Jenkins job
-		String resultMessage = bot.getI18nMessage(from, "message.command.build.status.repo_ok", new Object[]{repository.getRepoName(),
+		StringBuilder resultMessageBuilder = new StringBuilder(bot.getI18nMessage(from, "message.command.build.status.repo_ok", new Object[]{repository.getRepoName(),
 				bot.getI18nMessage(from, currentBuildDetails.getBuildStatus().getMessageKey()),
-				currentBuildDetails.getRunTestsCount()});
+				currentBuildDetails.getRunTestsCount()}));
 
 		if (currentBuildDetails.getBuildStatus() == BuildStatus.IN_PROGRESS) {
 			JenkinsBuildDetails lastBuildDetails = jenkinsProcessor.getPreviousBuildJenkinsBuildDetails(repository.getJenkinsInfo());
-			resultMessage += bot.getI18nMessage(from, "message.command.build.status.repo.suffix.approx", new Object[] {	lastBuildDetails.getRunTestsCount() });
+			resultMessageBuilder.append(bot.getI18nMessage(from, "message.command.build.status.repo.suffix.approx", new Object[] {	lastBuildDetails.getRunTestsCount() }));
 		}
 
 		if (currentBuildDetails.getFailedTests().isEmpty()) {
-			resultMessage += bot.getI18nMessage(from, "message.command.build.status.repo.suffix.no_fails");
+			resultMessageBuilder.append(bot.getI18nMessage(from, "message.command.build.status.repo.suffix.no_fails"));
 		} else {
 			String failedTestsOutputWithLinks = currentBuildDetails.getFailedTests().stream()
 					.limit(FAILED_TESTS_COUNT)
@@ -67,14 +67,14 @@ class StatusBuildCommand implements BuildSubCommand {
 							jenkinsProcessor.getTestDetailsUrl(repository.getJenkinsInfo(), testName)))
 					.collect(Collectors.joining());
 
-			resultMessage += bot.getI18nMessage(from, "message.command.build.status.repo.suffix.fails", new Object[] {
+			resultMessageBuilder.append(bot.getI18nMessage(from, "message.command.build.status.repo.suffix.fails", new Object[] {
 					Integer.min(currentBuildDetails.getFailedTests().size(), FAILED_TESTS_COUNT),
 					currentBuildDetails.getFailedTests().size(),
 					failedTestsOutputWithLinks
-			});
+			}));
 		}
 
-		bot.execute(new SendMessage(chat.id(), resultMessage).parseMode(ParseMode.Markdown));
+		bot.execute(new SendMessage(chat.id(), resultMessageBuilder.toString()).parseMode(ParseMode.Markdown));
 	}
 
 	@Override

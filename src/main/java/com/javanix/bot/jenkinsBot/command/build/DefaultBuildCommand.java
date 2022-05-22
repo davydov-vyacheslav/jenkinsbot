@@ -73,18 +73,18 @@ class DefaultBuildCommand implements BuildSubCommand {
 		InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 		for (StatusCheckDto availableRepository : availableRepositories) {
 			BuildInfoDto buildInfoDto = availableRepository.buildInfoDto;
-			String repoName = (buildInfoDto.isPublic() ? ICON_PUBLIC : ICON_PRIVATE);
+			StringBuilder repoNameBuilder = new StringBuilder(buildInfoDto.isPublic() ? ICON_PUBLIC : ICON_PRIVATE);
 			if (!buildInfoDto.getCreatorId().equals(from.id())) {
-				repoName += ICON_REFERENCE;
+				repoNameBuilder.append(ICON_REFERENCE);
 			}
-			repoName += bot.getI18nMessage(from, availableRepository.healthStatus.getMessageKey()) + " ";
-			repoName += buildInfoDto.getName();
+			repoNameBuilder.append(bot.getI18nMessage(from, availableRepository.healthStatus.getMessageKey())).append(" ");
+			repoNameBuilder.append(buildInfoDto.getName());
 			if (availableRepository.healthStatus == BuildStatus.IN_PROGRESS) {
-				repoName += String.format(" (%d/%d)", availableRepository.failedTestsCount, availableRepository.executedTestsCount);
+				repoNameBuilder.append(String.format(" (%d/%d)", availableRepository.failedTestsCount, availableRepository.executedTestsCount));
 			}
 
 			inlineKeyboardMarkup.addRow(
-					new InlineKeyboardButton(repoName).callbackData("/build status " + buildInfoDto.getName())
+					new InlineKeyboardButton(repoNameBuilder.toString()).callbackData("/build status " + buildInfoDto.getName())
 			);
 		}
 		inlineKeyboardMarkup.addRow(

@@ -21,6 +21,7 @@ jobs:
         with:
           sourcePath: 'src'
           rulesets: '${{ github.workspace }}/src/main/resources/pmd/jenkinsbot.xml'
+# FIXME: only if there are changes (otherwise error of missing sarif file)
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v2
         with:
