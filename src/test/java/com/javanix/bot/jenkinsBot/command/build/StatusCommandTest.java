@@ -105,7 +105,7 @@ public class StatusCommandTest extends AbstractCommandTestCase {
 		BuildInfoDto buildInfoEntity1 = getBuildInfoEntity1();
 		Mockito.when(buildInfoService.getOwnedOrReferencedEntities(EntityService.DEFAULT_CREATOR_ID)).then(invocation -> Stream.of(buildInfoEntity1));
 
-		Mockito.when(jenkinsProcessor.getPreviousBuildJenkinsBuildDetails(buildInfoEntity1.getJenkinsInfo())).thenReturn(
+		Mockito.when(jenkinsProcessor.getPreviousBuildJenkinsBuildDetails(any())).thenReturn(
 				JenkinsBuildDetails.builder()
 						.runTestsCount(999)
 						.build());
