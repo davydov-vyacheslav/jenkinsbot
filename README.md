@@ -42,8 +42,12 @@ list of applicable ones (see `/build`)
 list of applicable ones (see `/build my_list`)
 
 Logic:
-- Job Status logic is based on Jenkins final message: Finished: FAILURE, Finished: UNSTABLE, Finished: ABORTED, Finished: SUCCESS.
-If no such final message - assume that progress is still in progress
+- Job Status logic is based on Jenkins job's `/api/json` endpoints info depedning on values of following properties:
+  - `lastBuild.number` - current build number. If other build number not equals to this, assume build is still in progress
+  - `lastStableBuild.number` - last completed build number with no failed tests (blue color)
+  - `lastFailedBuild.number` - last broken completed build number (red color) 
+  - `lastUnstableBuild.number` - last completed build number with failed tests (yellow color)
+  - `lastUnsuccessfulBuild.number` - last aborted build number
 - Approximate amount of tests is based on amount of tests (test files) processed in previous build
 - Processed (Executed) test: Looking for the line matched regex, defined in `ConsoleOutputConfig.executedTestPattern` of current name (default - 'default') 
 - Failed test: Looking for the line matched regex, defined in `ConsoleOutputConfig.failedTestPattern` of current name (default - 'default')

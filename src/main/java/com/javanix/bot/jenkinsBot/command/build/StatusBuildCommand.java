@@ -47,7 +47,6 @@ class StatusBuildCommand implements BuildSubCommand {
 
 		JenkinsBuildDetails currentBuildDetails = jenkinsProcessor.getCurrentBuildJenkinsBuildDetails(repository.getJenkinsInfo());
 
-		// TODO: make build info name as link to Jenkins job
 		StringBuilder resultMessageBuilder = new StringBuilder(bot.getI18nMessage(from, "message.command.build.status.repo_ok", new Object[]{repository.getRepoName(),
 				bot.getI18nMessage(from, currentBuildDetails.getBuildStatus().getMessageKey()),
 				currentBuildDetails.getRunTestsCount()}));

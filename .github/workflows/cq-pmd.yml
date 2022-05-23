@@ -21,8 +21,13 @@ jobs:
         with:
           sourcePath: 'src'
           rulesets: '${{ github.workspace }}/src/main/resources/pmd/jenkinsbot.xml'
-# FIXME: only if there are changes (otherwise error of missing sarif file)
+      - name: Check file existence
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: "pmd-report.sarif"
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v2
+        if: steps.check_files.outputs.files_exists == 'true'
         with:
           sarif_file: pmd-report.sarif
